@@ -29,7 +29,7 @@ const experiences = [
     ]
   },
   {
-    company: "Previous Organization",
+    company: "Ninth Judah Ventures",
     role: "Account Officer",
     period: "November 2014 - August 2017",
     duration: "3 years",
