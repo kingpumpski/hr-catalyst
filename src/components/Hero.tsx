@@ -9,13 +9,13 @@ const Hero = () => {
       <div className="container max-w-4xl mx-auto text-center relative z-10 animate-fade-in">
         <div className="mb-8">
           <h1 className="text-white mb-4 leading-tight">
-            Professional Human Resource Management
+            Professional Claims & Human Resource Management
           </h1>
           <p className="text-xl md:text-2xl text-white/90 font-light mb-2">
-            Your Name Here
+            Kingsley Junior Norku
           </p>
           <p className="text-lg text-white/80">
-            BSc. Accounting | 5+ Years Experience in HR, Operations & Management
+            BSc. Accounting | 6+ Years Experience in Accounting, HR, Operations & Management
           </p>
         </div>
 
