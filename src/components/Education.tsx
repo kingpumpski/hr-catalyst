@@ -23,12 +23,12 @@ const Education = () => {
                   Bachelor of Science in Accounting
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  University Name
+                  University College of Management Studies
                 </p>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
                     <span className="text-primary font-medium">2017-2018:</span>
-                    <span className="text-muted-foreground">Sports Chairman/Minister</span>
+                    <span className="text-muted-foreground">Sports Committee Chairman/Minister</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="text-primary font-medium">2018-2019:</span>
