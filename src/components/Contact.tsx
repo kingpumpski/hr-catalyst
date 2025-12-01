@@ -22,10 +22,10 @@ const Contact = () => {
               <div>
                 <p className="font-semibold text-foreground mb-1">Email</p>
                 <a 
-                  href="mailto:your.email@example.com" 
+                  href="mailto:kingnorku@gmail.com" 
                   className="text-muted-foreground hover:text-primary transition-smooth"
                 >
-                  your.email@example.com
+                  kimgpumpski@gmail.com | kingnorku@gmail.com
                 </a>
               </div>
             </div>
@@ -37,10 +37,10 @@ const Contact = () => {
               <div>
                 <p className="font-semibold text-foreground mb-1">Phone</p>
                 <a 
-                  href="tel:+1234567890" 
+                  href="tel:+233542069136" 
                   className="text-muted-foreground hover:text-primary transition-smooth"
                 >
-                  +123 456 7890
+                  +233 542 069 136
                 </a>
               </div>
             </div>
