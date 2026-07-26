@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 const sections = [
@@ -54,6 +55,14 @@ const Navbar = () => {
               {s.label}
             </button>
           ))}
+          <Link
+            to="/cv"
+            className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${
+              scrolled ? "text-muted-foreground hover:text-foreground" : "text-primary-foreground/90"
+            }`}
+          >
+            CVs
+          </Link>
         </div>
 
         <Button
@@ -78,6 +87,13 @@ const Navbar = () => {
               {s.label}
             </button>
           ))}
+          <Link
+            to="/cv"
+            onClick={() => setOpen(false)}
+            className="block w-full text-left px-2 py-2 rounded-md text-sm text-foreground hover:bg-muted transition-smooth"
+          >
+            CVs & Cover Letters
+          </Link>
         </div>
       )}
     </header>

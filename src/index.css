@@ -131,7 +131,8 @@ All colors MUST be HSL.
 
 @media print {
   header,
-  button {
+  button,
+  .no-print {
     display: none !important;
   }
 
@@ -142,5 +143,27 @@ All colors MUST be HSL.
 
   body {
     background: #fff;
+  }
+
+  .cv-doc {
+    border: none !important;
+    padding: 0 !important;
+    color: #000 !important;
+    font-size: 11pt;
+  }
+
+  .cv-doc h1,
+  .cv-doc h2,
+  .cv-doc h3 {
+    color: #000 !important;
+  }
+
+  .cv-doc section,
+  .cv-doc li {
+    break-inside: avoid;
+  }
+
+  @page {
+    margin: 16mm;
   }
 }

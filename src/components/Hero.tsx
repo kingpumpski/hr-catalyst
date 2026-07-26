@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Download, Mail } from "lucide-react";
+import { Link } from "react-router-dom";
+import { FileText, Mail } from "lucide-react";
 
 const Hero = () => {
   const scrollTo = (id: string) =>
@@ -32,13 +33,15 @@ const Hero = () => {
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center">
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
+            asChild
             className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-medium transition-smooth"
-            onClick={() => window.print()}
           >
-            <Download className="mr-2 h-5 w-5" />
-            Download CV
+            <Link to="/cv">
+              <FileText className="mr-2 h-5 w-5" />
+              View tailored CVs
+            </Link>
           </Button>
           <Button 
             size="lg" 
