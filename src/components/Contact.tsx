@@ -1,10 +1,10 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, Linkedin, MapPin } from "lucide-react";
+import { Mail, Phone, MessageCircle, MapPin } from "lucide-react";
 
 const Contact = () => {
   return (
-    <section className="py-20 px-6 bg-muted/30">
+    <section id="contact" className="py-20 px-6 bg-muted/30 scroll-mt-20">
       <div className="container max-w-4xl mx-auto">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-foreground mb-4">Let's Connect</h2>
@@ -21,11 +21,11 @@ const Contact = () => {
               </div>
               <div>
                 <p className="font-semibold text-foreground mb-1">Email</p>
-                <a 
-                  href="mailto:kingnorku@gmail.com" 
-                  className="text-muted-foreground hover:text-primary transition-smooth"
+                <a
+                  href="mailto:kingnorku@gmail.com"
+                  className="text-muted-foreground hover:text-primary transition-smooth break-all"
                 >
-                  kimgpumpski@gmail.com | kingnorku@gmail.com
+                  kingnorku@gmail.com
                 </a>
               </div>
             </div>
@@ -47,17 +47,17 @@ const Contact = () => {
 
             <div className="flex items-start gap-4">
               <div className="p-3 rounded-lg bg-primary/10">
-                <Linkedin className="h-6 w-6 text-primary" />
+                <MessageCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <p className="font-semibold text-foreground mb-1">LinkedIn</p>
-                <a 
-                  href="https://linkedin.com/in/yourprofile" 
+                <p className="font-semibold text-foreground mb-1">WhatsApp</p>
+                <a
+                  href="https://wa.me/233542069136"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-primary transition-smooth"
                 >
-                  linkedin.com/in/yourprofile
+                  Chat on WhatsApp
                 </a>
               </div>
             </div>
@@ -68,7 +68,7 @@ const Contact = () => {
               </div>
               <div>
                 <p className="font-semibold text-foreground mb-1">Location</p>
-                <p className="text-muted-foreground">Your City, Country</p>
+                <p className="text-muted-foreground">Accra, Ghana</p>
               </div>
             </div>
           </div>
@@ -77,11 +77,12 @@ const Contact = () => {
             <p className="text-muted-foreground mb-6">
               Available for full-time opportunities and professional consultations
             </p>
-            <Button 
+            <Button
               size="lg"
-              className="gradient-primary text-white shadow-medium hover:opacity-90 transition-smooth"
+              asChild
+              className="gradient-primary text-primary-foreground shadow-medium hover:opacity-90 transition-smooth"
             >
-              Schedule a Meeting
+              <a href="mailto:kingnorku@gmail.com?subject=Meeting%20request">Schedule a Meeting</a>
             </Button>
           </div>
         </Card>
