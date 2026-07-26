@@ -3,7 +3,7 @@ import { GraduationCap, Award } from "lucide-react";
 
 const Education = () => {
   return (
-    <section className="py-20 px-6">
+    <section id="education" className="py-20 px-6 scroll-mt-20">
       <div className="container max-w-6xl mx-auto">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-foreground mb-4">Education & Leadership</h2>
