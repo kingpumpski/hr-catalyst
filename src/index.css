@@ -128,3 +128,19 @@ All colors MUST be HSL.
     transition: var(--transition-smooth);
   }
 }
+
+@media print {
+  header,
+  button {
+    display: none !important;
+  }
+
+  section {
+    padding: 1rem 0 !important;
+    break-inside: avoid;
+  }
+
+  body {
+    background: #fff;
+  }
+}
