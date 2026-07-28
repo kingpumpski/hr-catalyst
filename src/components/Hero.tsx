@@ -16,20 +16,25 @@ const Hero = () => {
       <div className="container max-w-4xl mx-auto text-center relative z-10 animate-fade-in">
         <div className="mb-8">
           <h1 className="text-white mb-4 leading-tight">
-            Professional Claims & Human Resource Management
+            Operations & Management, Professional Claims & Human Resource Management
           </h1>
           <p className="text-xl md:text-2xl text-white/90 font-light mb-2">
             Kingsley Junior Norku
           </p>
           <p className="text-lg text-white/80">
-            BSc. Accounting | 6+ Years Experience in Accounting, HR, Operations & Management
+            BSc. Accounting | 6+ Years of Progressive Experience in Operations & Management, Claims Management, Accounting, Leadership, and HR.
           </p>
         </div>
 
         <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-          Versatile professional with comprehensive experience in executive assistance, 
+          {/* Versatile professional with comprehensive experience in executive assistance, 
           claims management, IT operations, and staff development. Proven track record 
-          in recruitment, team leadership, and organizational efficiency.
+          in recruitment, team leadership, and organizational efficiency. */}
+          Operations and healthcare management professional with over six years of progressive experience coordinating business operations, 
+          supporting executive leadership, managing financial and administrative processes, improving operational workflows, and implementing technology solutions within healthcare environments.
+          Experienced in working across finance, insurance, clinical, administrative, and technology functions to improve operational performance, 
+          strengthen accountability, and support organizational growth. Known for taking ownership of complex problems, maintaining high standards of professionalism, 
+          and ensuring that critical initiatives move from planning through execution.
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center">
@@ -40,7 +45,8 @@ const Hero = () => {
           >
             <Link to="/cv">
               <FileText className="mr-2 h-5 w-5" />
-              View tailored CVs
+              {/* View tailored CVs */}
+              Resumes / CVs
             </Link>
           </Button>
           <Button 
