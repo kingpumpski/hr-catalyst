@@ -14,66 +14,84 @@ const skillCategories = [
     title: "HR & People Management",
     icon: Users,
     skills: [
-      "Recruitment & Selection",
-      "Staff Development",
-      "Performance Management",
-      "Employee Relations",
-      "Training Coordination"
+      "• Claims Management",
+      "• Recruitment & Selection",
+      "• Staff Development",
+      "• Performance Management",
+      "• Employee Relations",
+      "• Training Coordination"
     ]
   },
   {
     title: "Operations & Administration",
     icon: Briefcase,
     skills: [
-      "Executive Assistance",
-      "Claims Management",
-      "Process Optimization",
-      "Project Coordination",
-      "Stakeholder Management"
+      "• Executive Assistance",
+      "• Claims Management",
+      "• Healthcare Operations",
+      "• Health Insurance Operations",
+      "• Process Improvement",
+      "• Business Process Optimization",
+      "• Project Coordination",
+      "• Performance Reporting",
+      "• KPI Tracking",
+      "• Administrative Operations",
+      "• Process Optimization",
+      "• Project Coordination",
+      "• Stakeholder Management"
     ]
   },
   {
     title: "Technical Skills",
     icon: Laptop,
     skills: [
-      "Microsoft Office Suite (Expert)",
-      "ERPNext Systems",
-      "IT Support & Management",
-      "Computer Programming",
-      "Database Management"
+      "• IT Support & Management",
+      "• AI Productivity Tools",
+      "• Microsoft 365",
+      "• Advanced Microsoft Excel",
+      "• Google Workspace",
+      "• ERPNext Systems",
+      "• Digital Transformation",
+      "• Computer Programming",
+      "• Database Management"
     ]
   },
   {
     title: "Financial & Accounting",
     icon: TrendingUp,
     skills: [
-      "Financial Reporting",
-      "Account Management",
-      "Budget Planning",
-      "Financial Analysis",
-      "Reconciliation"
+      "• Financial Reporting",
+      "• Account Management",
+      "• Budget Planning",
+      "• Financial Analysis",
+      "• Reconciliation"
     ]
   },
   {
     title: "Leadership & Teamwork",
     icon: Target,
     skills: [
-      "Team Leadership",
-      "Conflict Resolution",
-      "Decision Making",
-      "Strategic Planning",
-      "Cross-functional Collaboration"
+      "• Team Leadership",
+      "• Business Operations",
+      "• Operational Excellence",
+      "• Executive Support",
+      "• Strategic Planning",
+      "• Internal Controls",
+      "• Conflict Resolution",
+      "• Decision Making",
+      "• Strategic Planning",
+      "• Cross-functional Collaboration"
     ]
   },
   {
     title: "Additional Competencies",
     icon: FileText,
     skills: [
-      "Report Writing",
-      "Documentation",
-      "Research & Analysis",
-      "Communication",
-      "Problem Solving"
+      "• Report Writing",
+      "• Documentation Management",
+      "• Research & Analysis",
+      "• Communication",
+      "• Problem Solving"
     ]
   }
 ];
@@ -85,7 +103,7 @@ const Skills = () => {
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-foreground mb-4">Core Competencies</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Comprehensive skill set spanning HR, operations, technology, and leadership
+            Comprehensive skill set spanning Leadership, HR, operations & administration, and technology
           </p>
         </div>
 
