@@ -10,7 +10,11 @@ const Experience = () => {
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-foreground mb-4">Professional Experience</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            13+ years across healthcare claims, finance, operations and logistics
+            {/* 13+ years across healthcare claims, finance, operations and logistics */}
+            Operations, healthcare administration, and finance professional with over six years of progressive experience leading operational coordination, claims management, financial administration, executive support, and IT-enabled process improvement within fast-paced healthcare environments.
+            Experienced in coordinating cross-functional teams, improving operational workflows, supporting executive decision-making, managing administrative and financial processes, and implementing technology solutions that improve efficiency and service delivery. Recognized for taking ownership of complex operational challenges, maintaining high standards of accuracy, and delivering reliable results under pressure.
+            Combines analytical thinking with strong organizational skills and a growing expertise in artificial intelligence, automation, and software technology. Passionate about building scalable operational systems, improving business processes, and enabling high-performing teams through structured execution and continuous improvement.
+            Seeking to contribute these strengths in an Operations Lead / Chief of Staff role where operational excellence, strategic execution, and AI-enabled productivity are central to organizational success.
           </p>
         </div>
 
