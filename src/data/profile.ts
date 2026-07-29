@@ -23,6 +23,7 @@ export const profile = {
   email: "kingnorku@gmail.com",
   phone: "+233 542 069 136",
   // whatsapp: "https://wa.me/233542069136",
+  linkedin: "http://www.linkedin.com/in/kingsleynorku",
   whatsapp: "https://wa.me/233208791163",
 };
 
