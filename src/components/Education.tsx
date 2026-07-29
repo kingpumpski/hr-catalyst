@@ -78,14 +78,14 @@ const Education = () => {
                   <li className="flex items-start gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-white flex-shrink-0" />
                     <span className="text-sm">
-                      <strong>Most Promising Sports Personality</strong> — 2015 Sports Entertainment
+                      <strong>Most Promising Sports Personality</strong> — 2015 Sports & Entertainment
                       Awards Night (SRC)
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-white flex-shrink-0" />
                     <span className="text-sm">
-                      <strong>Best Midfielder</strong> — 2015 Sports Entertainment Awards Night (SRC)
+                      <strong>Best Midfielder</strong> — 2015 Sports & Entertainment Awards Night (SRC)
                     </span>
                   </li>
                 </ul>

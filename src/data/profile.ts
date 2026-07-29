@@ -49,20 +49,20 @@ export const companies: Company[] = [
           // "Prepare operational reports and management insights to support decision-making.",
           // "Provide IT support for hospital systems, users, and operational technologies.",
           // "Support process improvement initiatives that strengthen service delivery and operational effectiveness.",
-          // "Contribute to digital transformation initiatives by aligning healthcare operations with technology solutions.",
+          // "Contribute to digital transformation initiatives by aligning healthcare operations with technology solutions."
           
-          "• Coordinate daily operational activities involving multiple departments to ensure timely execution of business priorities."
-          "• Support leadership by preparing operational reports and monitoring departmental performance."
-          "• Improve internal workflows that strengthen claims processing and organizational efficiency."
-          "• Collaborate with insurers, healthcare providers, finance teams, and administrative staff to resolve operational issues."
-          "• Provide IT support that enables uninterrupted business operations and improves staff productivity."
-          "• Maintain confidential operational and financial information with professionalism and discretion."
-          "• Support implementation of technology solutions that improve organizational effectiveness."
+          "• Coordinate daily operational activities involving multiple departments to ensure timely execution of business priorities.",
+          "• Support leadership by preparing operational reports and monitoring departmental performance.",
+          "• Improve internal workflows that strengthen claims processing and organizational efficiency.",
+          "• Collaborate with insurers, healthcare providers, finance teams, and administrative staff to resolve operational issues.",
+          "• Provide IT support that enables uninterrupted business operations and improves staff productivity.",
+          "• Maintain confidential operational and financial information with professionalism and discretion.",
+          "• Support implementation of technology solutions that improve organizational effectiveness.",
           "• Take ownership of operational challenges and drive practical solutions from identification through resolution."
         ],
         skills: [
           "Claims Management",
-          "Claims Adjudication"
+          "Claims Adjudication",
           "Healthcare Operations",
           "Health Insurance",
           "Leadership",
@@ -92,10 +92,10 @@ export const companies: Company[] = [
           // "Supported internal controls and audit preparation.",
           // "Worked closely with management to improve financial processes.",
           
-          "• Processed daily accounting transactions accurately."
-          "• Assisted with monthly financial reporting."
-          "• Supported reconciliation of financial records."
-          "• Improved accuracy of financial documentation."
+          "• Processed daily accounting transactions accurately.",
+          "• Assisted with monthly financial reporting.",
+          "• Supported reconciliation of financial records.",
+          "• Improved accuracy of financial documentation.",
           "• Assisted audit preparation and compliance activities."
         ],
         skills: ["Accounting", "Finance", "Financial Reporting", "Internal Controls", "Microsoft 365"],
@@ -116,10 +116,10 @@ export const companies: Company[] = [
           // "Reduced claim processing delays through improved workflow coordination.",
           // "Assisted with claims reconciliation and reporting.",
 
-          "• Managed end-to-end claims processing."
-          "• Reviewed documentation for accuracy and compliance."
-          "• Coordinated with insurance companies regarding claims submissions."
-          "• Supported reporting and operational analysis."
+          "• Managed end-to-end claims processing.",
+          "• Reviewed documentation for accuracy and compliance.",
+          "• Coordinated with insurance companies regarding claims submissions.",
+          "• Supported reporting and operational analysis.",
           "• Assisted with continuous improvement of claims workflows."
         ],
         skills: [
@@ -154,9 +154,9 @@ export const companies: Company[] = [
           // "Prepared financial reports for management.",
           // "Supported budgeting and internal control processes.",
 
-          "• Maintained financial records."
-          "• Processed accounting transactions."
-          "• Assisted preparation of management reports."
+          "• Maintained financial records.",
+          "• Processed accounting transactions.",
+          "• Assisted preparation of management reports.",
           "• Supported internal financial controls."
         ],
         skills: [
@@ -182,10 +182,10 @@ export const companies: Company[] = [
           // "Coordinated stock movement and documentation.",
           // "Assisted procurement and distribution activities.",
 
-          "• Coordinated inventory movement."
-          "• Improved stock organization."          
-          "• Supported operational efficiency through accurate record keeping."
-          "• Maintained inventory records and stock movement documentation."
+          "• Coordinated inventory movement.",
+          "• Improved stock organization.",
+          "• Supported operational efficiency through accurate record keeping.",
+          "• Maintained inventory records and stock movement documentation.",
           "• Supported procurement activities."
         ],
         skills: ["Inventory Management", "Warehouse Operations", "Stock Control", "Safety"],
@@ -244,18 +244,38 @@ export const companies: Company[] = [
           "Time Management",
         ],
       },
+    ],
+  },
+];
+
+export type LeadershipEntry = {
+  company: string;
+  title: string;
+  location: string;
+  totalPeriod: string;
+  roles: Role[];
+  employmentType: string;
+  period: string;
+  duration: string;
+  summary: string;
+  contributions: string[];
+  skills: string[];
+};
+
+      export const leadership: LeadershipEntry[] = [
       {
         title: "Financial Secretary",
         employmentType: "Voluntary",
         location: "Prampram, Greater-Accra Region, Ghana",
         period: "November 2018 - July 2019",
         duration: "8 mos",
+        summary: "Managed financial records and supported transparent financial administration for district activities while assisting in budget preparation and expenditure tracking.",
         contributions: [
-          "Managed financial records and supported transparent financial administration for district activities."
-          "Assisted in budget preparation and expenditure tracking for programmes and events."
-          "Maintained accurate financial documentation and accountability records."
-          "Collaborated with district executives to support operational planning and successful programme execution."
-          "Strengthened governance through effective record management and financial reporting.",
+          "Managed financial records and supported transparent financial administration for district activities.",
+          "Assisted in budget preparation and expenditure tracking for programmes and events.",
+          "Maintained accurate financial documentation and accountability records.",
+          "Collaborated with district executives to support operational planning and successful programme execution.",
+          "Strengthened governance through effective record management and financial reporting."
         ],
         skills: [
           "• Financial Administration",
@@ -263,8 +283,11 @@ export const companies: Company[] = [
           "• Record Keeping",
           "• Reporting",
           "• Team Collaboration",
-          "• Planning".
+          "• Planning"
         ],
+        company: "",
+        totalPeriod: "",
+        roles: []
       },
       {
         title: "Sports Committee Chairperson | Minister",
@@ -272,12 +295,13 @@ export const companies: Company[] = [
         location: "Prampram, Greater-Accra Region, Ghana",
         period: "November 2018 - July 2019",
         duration: "8 mos",
+        summary: "Led the Sports Committee in planning and coordinating sporting activities and student engagement initiatives while collaborating with student leaders and institutional stakeholders to promote participation and enhance the student experience.",
         contributions: [
-          "Led the Sports Committee in planning and coordinating sporting activities and student engagement initiatives."
-          "Worked with student leaders and institutional stakeholders to organise events and promote student participation."
-          "Coordinated committee meetings, delegated responsibilities, and monitored execution of planned activities."
-          "Supported budgeting and logistical planning for sports programmes."
-          "Developed leadership, communication, conflict resolution, and organisational skills while representing student interests.",
+          "• Led the Sports Committee in planning and coordinating sporting activities and student engagement initiatives.",
+          "• Worked with student leaders and institutional stakeholders to organise events and promote student participation.",
+          "• Coordinated committee meetings, delegated responsibilities, and monitored execution of planned activities.",
+          "• Supported budgeting and logistical planning for sports programmes.",
+          "• Developed leadership, communication, conflict resolution, and organisational skills while representing student interests.",
         ],
         skills: [
           "• Leadership",
@@ -285,12 +309,13 @@ export const companies: Company[] = [
           "• Stakeholder Engagement",
           "• Team Leadership",
           "• Project Coordination",
-          "• Communication".
+          "• Communication"
         ],
+        company: "",
+        totalPeriod: "",
+        roles: []
       },
-    ],
-  },
-];
+    ];
 
 export type EducationEntry = {
   school: string;

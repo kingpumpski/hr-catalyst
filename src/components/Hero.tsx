@@ -19,7 +19,7 @@ const Hero = () => {
             Operations & Management, Professional Claims & Human Resource Management
           </h1>
           <p className="text-xl md:text-2xl text-white/90 font-light mb-2">
-            Kingsley Junior Norku
+            Kingsley Norku
           </p>
           <p className="text-lg text-white/80">
             BSc. Accounting | 6+ Years of Progressive Experience in Operations & Management, Claims Management, Accounting, Leadership, and HR.
