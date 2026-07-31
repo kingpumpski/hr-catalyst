@@ -1,6 +1,12 @@
-@tailwind base;
+/* stylelint-disable at-rule-no-unknown */
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
+
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+/* stylelint-enable at-rule-no-unknown */
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
@@ -83,27 +89,54 @@ All colors MUST be HSL.
 
 @layer base {
   * {
-    @apply border-border;
+    /* @apply border-border; */
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    /* @apply bg-background text-foreground font-sans antialiased; */
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+    font-weight: 600;
+    letter-spacing: -0.025em;
   }
 
   h1 {
-    @apply text-4xl md:text-5xl;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
   }
 
   h2 {
-    @apply text-3xl md:text-4xl;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
   }
 
   h3 {
-    @apply text-2xl md:text-3xl;
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    h1 {
+      font-size: 3rem;
+      line-height: 1;
+    }
+
+    h2 {
+      font-size: 2.25rem;
+      line-height: 2.5rem;
+    }
+
+    h3 {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+    }
   }
 }
 
@@ -142,7 +175,8 @@ All colors MUST be HSL.
   }
 
   body {
-    background: #fff;
+    /* background: #fff; */
+    background: #b1e0fc;
   }
 
   .cv-doc {

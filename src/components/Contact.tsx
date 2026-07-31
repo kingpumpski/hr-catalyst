@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, MessageCircle, MapPin } from "lucide-react";
+import { Mail, Phone, MessageCircle, MapPin, GlobeIcon } from "lucide-react";
 
 const Contact = () => {
   return (
@@ -40,8 +40,11 @@ const Contact = () => {
                   href="tel:+233542069136" 
                   className="text-muted-foreground hover:text-primary transition-smooth"
                 >
-                  +233 542 069 136
-                </a>
+                  +233 542 069 136 |
+                </a><a href="tel:+233542069136" 
+                  className="text-muted-foreground hover:text-primary transition-smooth"
+                >
+                  | +233 208 791 163</a>
               </div>
             </div>
 
@@ -52,12 +55,55 @@ const Contact = () => {
               <div>
                 <p className="font-semibold text-foreground mb-1">WhatsApp</p>
                 <a
+                  href="https://wa.me/233208791163"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-smooth"
+                >
+                  Chat on WhatsApp
+                </a>
+                {/* <a
                   href="https://wa.me/233542069136"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-muted-foreground hover:text-primary transition-smooth"
                 >
                   Chat on WhatsApp
+                </a> */}
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-lg bg-primary/10">
+                <MessageCircle className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground mb-1">LinkedIn</p>
+                <a
+                  href="https://www.linkedin.com/in/kingsleynorku"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-smooth"
+                >
+                  Connect on LinkedIn
+                </a>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-lg bg-primary/10">
+                <GlobeIcon className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground mb-1">Website</p>
+                <a
+                  // href="https://www.kingsleynorku.com"
+                  href="http://192.168.0.185:8080/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-smooth"
+                >
+                  Visit My Website
                 </a>
               </div>
             </div>
@@ -68,7 +114,8 @@ const Contact = () => {
               </div>
               <div>
                 <p className="font-semibold text-foreground mb-1">Location</p>
-                <p className="text-muted-foreground">Accra, Ghana</p>
+                {/* <p className="text-muted-foreground">Accra, Ghana</p> */}
+                <p className="text-muted-foreground">Prampram, Greater-Accra, Ghana</p>
               </div>
             </div>
           </div>

@@ -15,10 +15,12 @@ const CvLibrary = () => {
           </Link>
         </Button>
 
-        <h1 className="text-foreground mb-3">Tailored CVs & Cover Letters</h1>
+        <h1 className="text-foreground mb-3">CVs & Cover Letters</h1>
+        {/* <h1 className="text-foreground mb-3">Tailored CVs & Cover Letters</h1> */}
         <p className="text-muted-foreground text-lg mb-10 max-w-2xl">
-          ATS-optimised, single-column documents tailored to each career track. Open a version to
-          read, print or save it as PDF.
+          All my professional CV and cover letter versions, tailored to each career track. <br />
+          {/* ATS-optimised, single-column documents tailored to each career track. <br /> */}
+          Open a version to read, print or save it as PDF.
         </p>
 
         <div className="grid md:grid-cols-2 gap-6">
