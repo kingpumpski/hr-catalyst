@@ -20,7 +20,7 @@ const Hero = () => {
             Operations & Management, Professional Claims & Human Resource Management
           </h1>
           <p className="text-xl md:text-2xl text-white/90 font-light mb-2">
-            Kingsley Norku
+            Kingsley J. Norku
           </p>
           <p className="text-lg text-white/80">
             BSc. Accounting | 6+ Years of Progressive Experience in Operations & Management, Claims Management, Accounting, Leadership, and HR.
@@ -46,7 +46,7 @@ const Hero = () => {
             onClick={() => scrollTo("contact")}
           >
             <Mail className="mr-2 h-5 w-5" />
-            Connect withm e
+            Connect with me
             {/* Get in Touch */}
           </Button>
         </div>
