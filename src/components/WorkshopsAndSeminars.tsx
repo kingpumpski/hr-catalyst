@@ -33,22 +33,26 @@ const WorkshopsAndSeminars = () => {
 
               <p className="text-sm text-foreground/90 mb-4">{item.summary}</p>
 
-              <ul className="space-y-2 mb-4">
-                {item.highlights.map((highlight) => (
-                  <li key={highlight} className="flex items-start gap-3 text-muted-foreground">
-                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
-                    <span className="text-sm">{highlight}</span>
-                  </li>
-                ))}
-              </ul>
+              {item.highlights && item.highlights.length > 0 ? (
+                <ul className="space-y-2 mb-4">
+                  {item.highlights.map((highlight) => (
+                    <li key={highlight} className="flex items-start gap-3 text-muted-foreground">
+                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
+                      <span className="text-sm">{highlight}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
 
-              <div className="flex flex-wrap gap-2">
-                {item.skills.map((skill) => (
-                  <Badge key={skill} variant="secondary" className="text-xs">
-                    {skill}
-                  </Badge>
-                ))}
-              </div>
+              {item.skills && item.skills.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {item.skills.map((skill) => (
+                    <Badge key={skill} variant="secondary" className="text-xs">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              ) : null}
             </Card>
           ))}
         </div>
