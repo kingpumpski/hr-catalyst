@@ -169,6 +169,10 @@ All colors MUST be HSL.
     display: none !important;
   }
 
+  .cv-doc {
+    display: block !important;
+  }
+
   section {
     padding: 1rem 0 !important;
     break-inside: avoid;

@@ -1,16 +1,40 @@
 import { companies, education, profile } from "@/data/profile";
 import type { CvVersion } from "@/data/cvVersions";
+import { useMemo } from "react";
+import { loadDocumentSettings } from "@/lib/documentSettings";
 
 /** ATS-friendly single-column document: plain semantic text, no columns, no graphics. */
 const CvDocument = ({ version }: { version: CvVersion }) => {
+  const settings = useMemo(() => loadDocumentSettings(), []);
+  const contactItems = [
+    { label: "Email", value: profile.email },
+    { label: "Phone", value: profile.phone },
+    { label: "WhatsApp", value: profile.whatsapp },
+    { label: "LinkedIn", value: profile.linkedin },
+  ].filter((item) => {
+    if (item.label === "Email" || item.label === "Phone") return settings.showContactDetails;
+    if (item.label === "WhatsApp") return settings.includeWhatsApp && settings.showContactDetails;
+    if (item.label === "LinkedIn") return settings.includeLinkedIn && settings.showContactDetails;
+    return Boolean(item.value);
+  });
+
   return (
     <article className="cv-doc bg-card text-card-foreground rounded-lg border border-border p-8 md:p-12 leading-relaxed">
       <header className="mb-6">
         <h1 className="text-3xl font-bold text-foreground">{profile.name}</h1>
         <p className="text-lg text-foreground/90">{version.title}</p>
-        <p className="text-sm text-muted-foreground mt-2">
-          {profile.location} · {profile.phone} · {profile.email}
-        </p>
+        <p className="text-sm text-muted-foreground mt-2">{profile.headline}</p>
+        <div className="mt-3 space-y-1 text-sm text-foreground/90">
+          {settings.showLocation && <p>{profile.address}</p>}
+          {settings.showLocation && <p>GPS / location: {profile.gpsAddress}</p>}
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {contactItems.map((item) => (
+              <span key={item.label}>
+                <span className="font-semibold">{item.label}:</span> {item.value}
+              </span>
+            ))}
+          </div>
+        </div>
       </header>
 
       <section className="mb-6">
@@ -92,7 +116,7 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
           Additional Information
         </h2>
         <p className="text-sm text-foreground/90">
-          Languages: English (fluent). Availability: immediate. References available on request.
+          Languages: {profile.languages.join(", ")}.{settings.showAvailability ? ` Availability: ${profile.availability}.` : ""}{settings.showReferences ? ` References: ${profile.references}.` : ""}
         </p>
       </section>
     </article>

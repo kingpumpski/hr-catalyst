@@ -26,7 +26,11 @@ const Navbar = () => {
 
   const go = (id: string) => {
     setOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = document.getElementById(id);
+    if (!target) return;
+    const headerOffset = 84;
+    const elementPosition = target.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: elementPosition - headerOffset, behavior: "smooth" });
   };
 
   return (
@@ -63,7 +67,7 @@ const Navbar = () => {
               scrolled ? "text-muted-foreground hover:text-foreground" : "text-primary-foreground/90"
             }`}
           >
-            CVs
+            Recruiter docs
           </Link>
         </div>
 
@@ -94,7 +98,7 @@ const Navbar = () => {
             onClick={() => setOpen(false)}
             className="block w-full text-left px-2 py-2 rounded-md text-sm text-foreground hover:bg-muted transition-smooth"
           >
-            CVs & Cover Letters
+            Recruiter documents
           </Link>
         </div>
       )}

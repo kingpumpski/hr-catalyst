@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 const Index = lazy(() => import("./pages/Index"));
 const CvLibrary = lazy(() => import("./pages/CvLibrary"));
 const CvVersionPage = lazy(() => import("./pages/CvVersion"));
+const ShareDocumentPage = lazy(() => import("./pages/ShareDocument"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/cv" element={<CvLibrary />} />
             <Route path="/cv/:slug" element={<CvVersionPage />} />
+            <Route path="/share/:documentType/:slug" element={<ShareDocumentPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

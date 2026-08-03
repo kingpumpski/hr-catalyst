@@ -20,11 +20,15 @@ export const profile = {
   name: "Kingsley Junior Norku",
   headline: "Claims Manager & IT Support | Healthcare Operations | BSc. Accounting",
   location: "Accra, Ghana",
+  address: "Accra, Greater Accra Region, Ghana",
+  gpsAddress: "Accra, Ghana",
   email: "kingnorku@gmail.com",
   phone: "+233 542 069 136",
-  // whatsapp: "https://wa.me/233542069136",
-  linkedin: "http://www.linkedin.com/in/kingsleynorku",
   whatsapp: "https://wa.me/233208791163",
+  linkedin: "http://www.linkedin.com/in/kingsleynorku",
+  availability: "Immediate",
+  languages: ["English (Fluent)", "Twi (Conversational)"],
+  references: "Available on request",
 };
 
 export const companies: Company[] = [
@@ -330,18 +334,18 @@ export const workshopsAndSeminars: WorkshopEntry[] = [
     ],
     skills: ["Healthcare Administration", "Claims Operations", "Compliance", "Operational Excellence"],
   },
-  {
-    title: "Leadership and Team Coordination Workshop",
-    organization: "Community and Volunteer Development Programme",
-    period: "2018 - 2019",
-    location: "Prampram, Greater Accra Region, Ghana",
-    summary: "Participated in leadership-focused training that strengthened communication, coordination, planning, and team engagement capabilities.",
-    highlights: [
-      "Developed practical skills in organizing community activities and managing stakeholder expectations.",
-      "Strengthened confidence in team coordination, administration, and service delivery.",
-    ],
-    skills: ["Leadership", "Stakeholder Engagement", "Event Coordination", "Communication"],
-  },
+  // {
+  //   title: "Leadership and Team Coordination Workshop",
+  //   organization: "Community and Volunteer Development Programme",
+  //   period: "2018 - 2019",
+  //   location: "Prampram, Greater Accra Region, Ghana",
+  //   summary: "Participated in leadership-focused training that strengthened communication, coordination, planning, and team engagement capabilities.",
+  //   highlights: [
+  //     "Developed practical skills in organizing community activities and managing stakeholder expectations.",
+  //     "Strengthened confidence in team coordination, administration, and service delivery.",
+  //   ],
+  //   skills: ["Leadership", "Stakeholder Engagement", "Event Coordination", "Communication"],
+  // },
 ];
 
 export type EducationEntry = {

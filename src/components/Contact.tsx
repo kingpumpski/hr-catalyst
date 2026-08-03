@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, MessageCircle, MapPin, GlobeIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Contact = () => {
   return (
@@ -36,15 +37,15 @@ const Contact = () => {
               </div>
               <div>
                 <p className="font-semibold text-foreground mb-1">Phone</p>
-                <a 
-                  href="tel:+233542069136" 
-                  className="text-muted-foreground hover:text-primary transition-smooth"
-                >
-                  +233 542 069 136 |
-                </a><a href="tel:+233542069136" 
-                  className="text-muted-foreground hover:text-primary transition-smooth"
-                >
-                  | +233 208 791 163</a>
+                <div className="flex flex-wrap gap-2 text-muted-foreground">
+                  <a href="tel:+233542069136" className="hover:text-primary transition-smooth">
+                    +233 542 069 136
+                  </a>
+                  <span>|</span>
+                  <a href="tel:+233208791163" className="hover:text-primary transition-smooth">
+                    +233 208 791 163
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -96,15 +97,9 @@ const Contact = () => {
               </div>
               <div>
                 <p className="font-semibold text-foreground mb-1">Website</p>
-                <a
-                  // href="https://www.kingsleynorku.com"
-                  href="http://192.168.0.185:8080/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-primary transition-smooth"
-                >
-                  Visit My Website
-                </a>
+                <Link to="/cv" className="text-muted-foreground hover:text-primary transition-smooth">
+                  View CVs and cover letters
+                </Link>
               </div>
             </div>
 

@@ -328,6 +328,94 @@ export const cvVersions: CvVersion[] = [
         "I would welcome the chance to bring this breadth of operational experience to your organisation.",
     },
   },
+  {
+    slug: "pharmacy-healthcare-support",
+    title: "Healthcare Support & Pharmacy Operations",
+    targetRoles: "Pharmacy Assistant • Healthcare Support Officer • Patient Services Support",
+    summary:
+      "Healthcare-focused professional with strong exposure to patient-facing operations, documentation, inventory control, and service support in clinical and administrative settings. Brings reliability, professionalism, and a strong learning mindset to support safe and efficient care delivery.",
+    coreSkills: [
+      "Healthcare Support",
+      "Patient Service",
+      "Inventory Control",
+      "Documentation",
+      "Clinical Support",
+      "Compliance Awareness",
+      "Team Collaboration",
+      "Administrative Support",
+      "Problem Solving",
+      "Communication",
+    ],
+    highlights: [
+      "Supported healthcare delivery through strong administrative coordination and patient-focused service.",
+      "Contributed to orderly documentation, stock awareness, and day-to-day operational support.",
+      "Built practical experience in healthcare environments with an emphasis on accuracy, professionalism and teamwork.",
+      "Adaptable to fast-paced clinical and non-clinical settings with a strong sense of responsibility.",
+    ],
+    keywords: [
+      "healthcare support",
+      "pharmacy support",
+      "patient services",
+      "clinical operations",
+      "inventory control",
+      "administrative support",
+    ],
+    coverLetter: {
+      opening:
+        "I am applying for the healthcare support or pharmacy operations role. My experience in clinical and administrative environments has strengthened my ability to contribute effectively to safe, organised and patient-focused service delivery.",
+      body: [
+        "Through my work in healthcare settings I have developed a strong appreciation for accuracy, discipline and teamwork. I understand the importance of clear documentation, dependable support and responsiveness in day-to-day operations.",
+        "I bring a calm, professional approach to fast-paced environments and I am comfortable supporting both patients and internal teams with care and efficiency.",
+        "I would welcome the chance to contribute my experience, adaptability and commitment to service in your organisation.",
+      ],
+      closing:
+        "I would be pleased to discuss how my healthcare experience and support skills can contribute to your team.",
+    },
+  },
+  {
+    slug: "business-operations-client-service",
+    title: "Business Operations & Client Service",
+    targetRoles: "Operations Assistant • Client Service Officer • Business Support Officer",
+    summary:
+      "Business-oriented professional with experience in operations, finance support, customer-facing coordination, and organisational administration. Strong track record of keeping processes organised, supporting teams, and delivering reliable service in dynamic environments.",
+    coreSkills: [
+      "Client Service",
+      "Operations Support",
+      "Administrative Coordination",
+      "Reporting",
+      "Customer Relations",
+      "Process Documentation",
+      "Team Support",
+      "Problem Solving",
+      "Time Management",
+      "Microsoft Office",
+    ],
+    highlights: [
+      "Supported day-to-day business operations through careful documentation, coordination and follow-through.",
+      "Built strong customer-facing experience while balancing internal administrative responsibilities.",
+      "Adapted quickly to operational and service demands in busy workplace environments.",
+      "Known for reliability, professionalism and a commitment to helping teams deliver consistently.",
+    ],
+    keywords: [
+      "business operations",
+      "client service",
+      "administrative support",
+      "operations assistant",
+      "customer relations",
+      "team support",
+    ],
+    coverLetter: {
+      opening:
+        "I am writing to express my interest in the business operations or client service role. My background combines operational support, administration and service delivery in fast-paced environments.",
+      body: [
+        "I have built experience in supporting day-to-day operations, maintaining clear records, coordinating work effectively and helping teams stay organised. I understand the importance of reliability and responsiveness in customer-facing and internal support work.",
+        "My experience has strengthened my ability to communicate professionally, manage priorities and contribute positively to business performance.",
+        "I would welcome the opportunity to bring these strengths to your organisation.",
+      ],
+      closing:
+        "I would be pleased to discuss how I can support your team and contribute to strong business operations.",
+    },
+  },
 ];
 
 export const getCvVersion = (slug?: string) => cvVersions.find((v) => v.slug === slug);

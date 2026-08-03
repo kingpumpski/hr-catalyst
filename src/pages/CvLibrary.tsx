@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileText } from "lucide-react";
 import { cvVersions } from "@/data/cvVersions";
+import { getShareLink } from "@/lib/shareLinks";
 
 const CvLibrary = () => {
   return (
@@ -43,9 +44,20 @@ const CvLibrary = () => {
                   </Badge>
                 ))}
               </div>
-              <Button asChild className="w-full">
-                <Link to={`/cv/${v.slug}`}>View CV & cover letter</Link>
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button asChild className="flex-1">
+                  <Link to={`/cv/${v.slug}`}>Open full version</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to={getShareLink(v.slug, "cv")}>Share CV</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to={getShareLink(v.slug, "resume")}>Share Resume</Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to={getShareLink(v.slug, "letter")}>Share Letter</Link>
+                </Button>
+              </div>
             </Card>
           ))}
         </div>

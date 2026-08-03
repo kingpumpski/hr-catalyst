@@ -3,8 +3,13 @@ import { Link } from "react-router-dom";
 import { FileText, Mail } from "lucide-react";
 
 const Hero = () => {
-  const scrollTo = (id: string) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scrollTo = (id: string) => {
+    const target = document.getElementById(id);
+    if (!target) return;
+    const headerOffset = 84;
+    const elementPosition = target.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: elementPosition - headerOffset, behavior: "smooth" });
+  };
 
   return (
     <section
@@ -35,8 +40,7 @@ const Hero = () => {
           >
             <Link to="/cv">
               <FileText className="mr-2 h-5 w-5" />
-              {/* View tailored CVs */}
-              Resumes / CVs
+              View recruiter documents
             </Link>
           </Button>
           <Button 
@@ -47,7 +51,6 @@ const Hero = () => {
           >
             <Mail className="mr-2 h-5 w-5" />
             Connect with me
-            {/* Get in Touch */}
           </Button>
         </div>
       </div>
