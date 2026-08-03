@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 
 const sections = [
   { id: "experience", label: "Experience" },
+  { id: "leadership", label: "Leadership" },
+  { id: "workshops", label: "Workshops" },
   { id: "skills", label: "Skills" },
   { id: "education", label: "Education" },
   { id: "interests", label: "Interests" },

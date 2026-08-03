@@ -51,14 +51,14 @@ export const companies: Company[] = [
           // "Support process improvement initiatives that strengthen service delivery and operational effectiveness.",
           // "Contribute to digital transformation initiatives by aligning healthcare operations with technology solutions."
           
-          "• Coordinate daily operational activities involving multiple departments to ensure timely execution of business priorities.",
-          "• Support leadership by preparing operational reports and monitoring departmental performance.",
-          "• Improve internal workflows that strengthen claims processing and organizational efficiency.",
-          "• Collaborate with insurers, healthcare providers, finance teams, and administrative staff to resolve operational issues.",
-          "• Provide IT support that enables uninterrupted business operations and improves staff productivity.",
-          "• Maintain confidential operational and financial information with professionalism and discretion.",
-          "• Support implementation of technology solutions that improve organizational effectiveness.",
-          "• Take ownership of operational challenges and drive practical solutions from identification through resolution."
+          "Coordinate daily operational activities involving multiple departments to ensure timely execution of business priorities.",
+          "Support leadership by preparing operational reports and monitoring departmental performance.",
+          "Improve internal workflows that strengthen claims processing and organizational efficiency.",
+          "Collaborate with insurers, healthcare providers, finance teams, and administrative staff to resolve operational issues.",
+          "Provide IT support that enables uninterrupted business operations and improves staff productivity.",
+          "Maintain confidential operational and financial information with professionalism and discretion.",
+          "Support implementation of technology solutions that improve organizational effectiveness.",
+          "Take ownership of operational challenges and drive practical solutions from identification through resolution."
         ],
         skills: [
           "Claims Management",
@@ -92,11 +92,11 @@ export const companies: Company[] = [
           // "Supported internal controls and audit preparation.",
           // "Worked closely with management to improve financial processes.",
           
-          "• Processed daily accounting transactions accurately.",
-          "• Assisted with monthly financial reporting.",
-          "• Supported reconciliation of financial records.",
-          "• Improved accuracy of financial documentation.",
-          "• Assisted audit preparation and compliance activities."
+          "Processed daily accounting transactions accurately.",
+          "Assisted with monthly financial reporting.",
+          "Supported reconciliation of financial records.",
+          "Improved accuracy of financial documentation.",
+          "Assisted audit preparation and compliance activities."
         ],
         skills: ["Accounting", "Finance", "Financial Reporting", "Internal Controls", "Microsoft 365"],
       },
@@ -116,11 +116,11 @@ export const companies: Company[] = [
           // "Reduced claim processing delays through improved workflow coordination.",
           // "Assisted with claims reconciliation and reporting.",
 
-          "• Managed end-to-end claims processing.",
-          "• Reviewed documentation for accuracy and compliance.",
-          "• Coordinated with insurance companies regarding claims submissions.",
-          "• Supported reporting and operational analysis.",
-          "• Assisted with continuous improvement of claims workflows."
+          "Managed end-to-end claims processing.",
+          "Reviewed documentation for accuracy and compliance.",
+          "Coordinated with insurance companies regarding claims submissions.",
+          "Supported reporting and operational analysis.",
+          "Assisted with continuous improvement of claims workflows."
         ],
         skills: [
           "Health Insurance",
@@ -154,10 +154,10 @@ export const companies: Company[] = [
           // "Prepared financial reports for management.",
           // "Supported budgeting and internal control processes.",
 
-          "• Maintained financial records.",
-          "• Processed accounting transactions.",
-          "• Assisted preparation of management reports.",
-          "• Supported internal financial controls."
+          "Maintained financial records.",
+          "Processed accounting transactions.",
+          "Assisted preparation of management reports.",
+          "Supported internal financial controls."
         ],
         skills: [
           "Accounting",
@@ -182,11 +182,11 @@ export const companies: Company[] = [
           // "Coordinated stock movement and documentation.",
           // "Assisted procurement and distribution activities.",
 
-          "• Coordinated inventory movement.",
-          "• Improved stock organization.",
-          "• Supported operational efficiency through accurate record keeping.",
-          "• Maintained inventory records and stock movement documentation.",
-          "• Supported procurement activities."
+          "Coordinated inventory movement.",
+          "Improved stock organization.",
+          "Supported operational efficiency through accurate record keeping.",
+          "Maintained inventory records and stock movement documentation.",
+          "Supported procurement activities."
         ],
         skills: ["Inventory Management", "Warehouse Operations", "Stock Control", "Safety"],
       },
@@ -262,60 +262,111 @@ export type LeadershipEntry = {
   skills: string[];
 };
 
-      export const leadership: LeadershipEntry[] = [
-      {
-        title: "Financial Secretary",
-        employmentType: "Voluntary",
-        location: "Prampram, Greater-Accra Region, Ghana",
-        period: "November 2018 - July 2019",
-        duration: "8 mos",
-        summary: "Managed financial records and supported transparent financial administration for district activities while assisting in budget preparation and expenditure tracking.",
-        contributions: [
-          "Managed financial records and supported transparent financial administration for district activities.",
-          "Assisted in budget preparation and expenditure tracking for programmes and events.",
-          "Maintained accurate financial documentation and accountability records.",
-          "Collaborated with district executives to support operational planning and successful programme execution.",
-          "Strengthened governance through effective record management and financial reporting."
-        ],
-        skills: [
-          "• Financial Administration",
-          "• Budget Management",
-          "• Record Keeping",
-          "• Reporting",
-          "• Team Collaboration",
-          "• Planning"
-        ],
-        company: "",
-        totalPeriod: "",
-        roles: []
-      },
-      {
-        title: "Sports Committee Chairperson | Minister",
-        employmentType: "Voluntery",
-        location: "Prampram, Greater-Accra Region, Ghana",
-        period: "November 2018 - July 2019",
-        duration: "8 mos",
-        summary: "Led the Sports Committee in planning and coordinating sporting activities and student engagement initiatives while collaborating with student leaders and institutional stakeholders to promote participation and enhance the student experience.",
-        contributions: [
-          "• Led the Sports Committee in planning and coordinating sporting activities and student engagement initiatives.",
-          "• Worked with student leaders and institutional stakeholders to organise events and promote student participation.",
-          "• Coordinated committee meetings, delegated responsibilities, and monitored execution of planned activities.",
-          "• Supported budgeting and logistical planning for sports programmes.",
-          "• Developed leadership, communication, conflict resolution, and organisational skills while representing student interests.",
-        ],
-        skills: [
-          "• Leadership",
-          "• Event Management",
-          "• Stakeholder Engagement",
-          "• Team Leadership",
-          "• Project Coordination",
-          "• Communication"
-        ],
-        company: "",
-        totalPeriod: "",
-        roles: []
-      },
-    ];
+export const leadership: LeadershipEntry[] = [
+  {
+    // company: "Volunteer Leadership Role",
+    company: "National Service Personel Association (NSPA) - Prampram District",
+    title: "Financial Secretary",
+    employmentType: "Volunteer",
+    location: "Ningo-Prampram, Greater Accra Region, Ghana",
+    period: "September 2018 - July 2019",
+    duration: "8 mos",
+    totalPeriod: "November 2018 - July 2019",
+    summary: "Managed financial records and supported transparent financial administration for district activities while assisting in budget preparation and expenditure tracking.",
+    contributions: [
+      "Managed financial records and supported transparent financial administration for district activities.",
+      "Assisted in budget preparation and expenditure tracking for programmes and events.",
+      "Maintained accurate financial documentation and accountability records.",
+      "Collaborated with district executives to support operational planning and successful programme execution.",
+      "Strengthened governance through effective record management and financial reporting.",
+    ],
+    skills: [
+      "Financial Administration",
+      "Budget Management",
+      "Record Keeping",
+      "Reporting",
+      "Team Collaboration",
+      "Planning",
+    ],
+    roles: [],
+  },
+  {
+    // company: "Student and Community Leadership",
+    company: "Student Representative Council (SRC) - University College of Management Studies (UCOMS)",
+    title: "Sports Committee Chairperson | Minister",
+    employmentType: "Volunteer",
+    location: "Adjecent SCC traffic light Weija, Greater Accra Region, Ghana",
+    period: "August 2017 - July 2018",
+    duration: "8 mos",
+    totalPeriod: "August 2017 - July 2018",
+    summary: "Led the Sports Committee in planning and coordinating sporting activities and student engagement initiatives while collaborating with student leaders and institutional stakeholders to promote participation and enhance the student experience.",
+    contributions: [
+      "Led the Sports Committee in planning and coordinating sporting activities and student engagement initiatives.",
+      "Worked with student leaders and institutional stakeholders to organise events and promote student participation.",
+      "Coordinated committee meetings, delegated responsibilities, and monitored execution of planned activities.",
+      "Supported budgeting and logistical planning for sports programmes.",
+      "Developed leadership, communication, conflict resolution, and organisational skills while representing student interests.",
+    ],
+    skills: [
+      "Leadership",
+      "Event Management",
+      "Stakeholder Engagement",
+      "Team Leadership",
+      "Project Coordination",
+      "Communication",
+    ],
+    roles: [],
+  },
+];
+
+export type WorkshopEntry = {
+  title: string;
+  organization: string;
+  period: string;
+  location: string;
+  summary: string;
+  highlights: string[];
+  skills: string[];
+};
+
+export const workshopsAndSeminars: WorkshopEntry[] = [
+  {
+    title: "Professional Development in AI and Digital Productivity",
+    organization: "Self-directed learning and professional growth",
+    period: "2024 - Present",
+    location: "Accra, Ghana",
+    summary: "Continued professional development in AI-enabled productivity, workflow automation, and digital tools relevant to administrative and operations leadership.",
+    highlights: [
+      "Explored practical applications of AI tools for reporting, document review, and workflow automation.",
+      "Strengthened digital literacy and process improvement capability for modern office environments.",
+    ],
+    skills: ["AI Productivity Tools", "Workflow Automation", "Process Improvement", "Digital Literacy"],
+  },
+  {
+    title: "Healthcare Operations and Claims Administration Seminars",
+    organization: "Industry learning and professional development",
+    period: "2023",
+    location: "Accra, Ghana",
+    summary: "Engaged in seminars focused on claims administration, healthcare compliance, and operational best practices.",
+    highlights: [
+      "Built deeper knowledge of healthcare administration workflows and service delivery standards.",
+      "Improved understanding of claims-related coordination, documentation, and operational accountability.",
+    ],
+    skills: ["Healthcare Administration", "Claims Operations", "Compliance", "Operational Excellence"],
+  },
+  {
+    title: "Leadership and Team Coordination Workshops",
+    organization: "Community and volunteer development",
+    period: "2018 - 2019",
+    location: "Prampram, Greater Accra Region, Ghana",
+    summary: "Participated in leadership-focused workshops and informal training that strengthened coordination, communication, and event planning capabilities.",
+    highlights: [
+      "Developed practical skills in planning community programmes and managing stakeholder expectations.",
+      "Strengthened confidence in team coordination, administration, and service delivery.",
+    ],
+    skills: ["Leadership", "Stakeholder Engagement", "Event Coordination", "Communication"],
+  },
+];
 
 export type EducationEntry = {
   school: string;
