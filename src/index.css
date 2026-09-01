@@ -2,352 +2,80 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-/*
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities"; */
 /* stylelint-enable at-rule-no-unknown */
 
-/* Design-system tokens. */
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
-    --primary: 210 75% 40%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 30% 92%;
-    --secondary-foreground: 215 25% 15%;
-    --muted: 210 30% 94%;
-    --muted-foreground: 210 15% 45%;
-    --accent: 25 85% 55%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 210 75% 40%;
-    --radius: 0.75rem;
+    --background: 210 20% 98%; --foreground: 215 25% 15%; --card: 0 0% 100%; --card-foreground: 215 25% 15%;
+    --popover: 0 0% 100%; --popover-foreground: 215 25% 15%; --primary: 210 75% 40%; --primary-foreground: 0 0% 100%;
+    --secondary: 210 30% 92%; --secondary-foreground: 215 25% 15%; --muted: 210 30% 94%; --muted-foreground: 210 15% 45%;
+    --accent: 25 85% 55%; --accent-foreground: 0 0% 100%; --destructive: 0 84.2% 60.2%; --destructive-foreground: 0 0% 100%;
+    --border: 210 20% 88%; --input: 210 20% 88%; --ring: 210 75% 40%; --radius: 0.75rem;
     --gradient-primary: linear-gradient(135deg, hsl(210 75% 40%), hsl(210 75% 55%));
     --gradient-accent: linear-gradient(135deg, hsl(25 85% 55%), hsl(25 85% 65%));
-    --shadow-soft: 0 2px 8px -2px hsl(210 30% 20% / 0.08);
-    --shadow-medium: 0 4px 16px -4px hsl(210 30% 20% / 0.12);
+    --shadow-soft: 0 2px 8px -2px hsl(210 30% 20% / 0.08); --shadow-medium: 0 4px 16px -4px hsl(210 30% 20% / 0.12);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-
-  .dark {
-    --background: 215 30% 12%;
-    --foreground: 210 20% 98%;
-    --card: 215 28% 16%;
-    --card-foreground: 210 20% 98%;
-    --popover: 215 28% 16%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 210 75% 55%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 215 25% 22%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 25% 20%;
-    --muted-foreground: 215 15% 65%;
-    --accent: 25 85% 60%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 50%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 215 25% 24%;
-    --input: 215 25% 24%;
-    --ring: 210 75% 55%;
-  }
-}
-
-@layer base {
+  .dark { --background: 215 30% 12%; --foreground: 210 20% 98%; --card: 215 28% 16%; --card-foreground: 210 20% 98%; --popover: 215 28% 16%; --popover-foreground: 210 20% 98%; --primary: 210 75% 55%; --primary-foreground: 0 0% 100%; --secondary: 215 25% 22%; --secondary-foreground: 210 20% 98%; --muted: 215 25% 20%; --muted-foreground: 215 15% 65%; --accent: 25 85% 60%; --accent-foreground: 0 0% 100%; --destructive: 0 62.8% 50%; --destructive-foreground: 0 0% 100%; --border: 215 25% 24%; --input: 215 25% 24%; --ring: 210 75% 55%; }
   * { border-color: hsl(var(--border)); }
-
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
-    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-weight: 600;
-    letter-spacing: -0.025em;
-  }
-
-  h1 { font-size: 2.25rem; line-height: 2.5rem; }
-  h2 { font-size: 1.875rem; line-height: 2.25rem; }
-  h3 { font-size: 1.5rem; line-height: 2rem; }
-
-  @media (min-width: 768px) {
-    h1 { font-size: 3rem; line-height: 1; }
-    h2 { font-size: 2.25rem; line-height: 2.5rem; }
-    h3 { font-size: 1.875rem; line-height: 2rem; }
-  }
+  body { background-color: hsl(var(--background)); color: hsl(var(--foreground)); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.025em; }
+  h1 { font-size: 2.25rem; line-height: 2.5rem; } h2 { font-size: 1.875rem; line-height: 2.25rem; } h3 { font-size: 1.5rem; line-height: 2rem; }
+  @media (min-width: 768px) { h1 { font-size: 3rem; line-height: 1; } h2 { font-size: 2.25rem; line-height: 2.5rem; } h3 { font-size: 1.875rem; line-height: 2rem; } }
 }
 
 @layer utilities {
-  .gradient-primary { background: var(--gradient-primary); }
-  .gradient-accent { background: var(--gradient-accent); }
-  .shadow-soft { box-shadow: var(--shadow-soft); }
-  .shadow-medium { box-shadow: var(--shadow-medium); }
-  .transition-smooth { transition: var(--transition-smooth); }
+  .gradient-primary { background: var(--gradient-primary); } .gradient-accent { background: var(--gradient-accent); }
+  .shadow-soft { box-shadow: var(--shadow-soft); } .shadow-medium { box-shadow: var(--shadow-medium); } .transition-smooth { transition: var(--transition-smooth); }
 }
 
-/*
- * Canonical ATS-first CV document system.
- *
- * The CV is intentionally a single semantic reading column. Visual alignment
- * is achieved without tables, sidebars, cards, icons, graphics or multi-column
- * content so the browser preview and exported PDF retain a predictable text
- * order for ATS parsing.
- */
-.cv-doc {
-  width: 100%;
-  max-width: 210mm;
-  min-height: 297mm;
-  margin: 0 auto;
-  padding: 16mm;
-  background: #fff;
-  color: #000;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 10.5pt;
-  line-height: 1.42;
-  text-align: left;
+/* Landing-page motion: purposeful, short and always disabled for reduced-motion users. */
+@keyframes profile-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes profile-glow { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
+@keyframes profile-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+.hero-profile-card { animation: profile-float 6s ease-in-out infinite; }
+.hero-glow { animation: profile-glow 7s ease-in-out infinite; }
+.hero-stagger > * { animation: profile-rise 0.6s ease-out both; }
+.hero-stagger > *:nth-child(2) { animation-delay: 80ms; } .hero-stagger > *:nth-child(3) { animation-delay: 160ms; } .hero-stagger > *:nth-child(4) { animation-delay: 240ms; } .hero-stagger > *:nth-child(5) { animation-delay: 320ms; }
+
+/* Alternate recruiter-oriented public presentation theme. */
+html[data-presentation-theme="professional"] {
+  --professional-radius: 0.45rem;
 }
+html[data-presentation-theme="professional"] body { background-color: hsl(210 20% 96%); }
+html[data-presentation-theme="professional"] section:not(#hero) { border-bottom: 1px solid hsl(210 20% 90%); }
+html[data-presentation-theme="professional"] .rounded-3xl,
+html[data-presentation-theme="professional"] .rounded-2xl,
+html[data-presentation-theme="professional"] .rounded-xl,
+html[data-presentation-theme="professional"] .rounded-lg { border-radius: var(--professional-radius); }
+html[data-presentation-theme="professional"] .shadow-medium { box-shadow: 0 10px 30px -18px hsl(210 30% 20% / 0.28); }
+html[data-presentation-theme="professional"] #hero { background: hsl(210 25% 97%); color: hsl(215 25% 15%); }
+html[data-presentation-theme="professional"] #hero > .gradient-primary { opacity: 0.96; }
+html[data-presentation-theme="professional"] .hero-profile-card { animation-duration: 8s; }
 
-.cv-doc .cv-header {
-  margin-bottom: 14pt;
-  padding-bottom: 9pt;
-  border-bottom: 1.5px solid #000;
-  text-align: center;
-}
-
-.cv-doc h1 {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 22pt;
-  line-height: 1.08;
-  font-weight: 700;
-  letter-spacing: 0;
-  text-align: center;
-}
-
-.cv-doc .cv-target-role {
-  margin-top: 3pt;
-  font-size: 11pt;
-  line-height: 1.25;
-  font-weight: 700;
-  text-align: center;
-}
-
-.cv-doc .cv-headline {
-  margin-top: 2pt;
-  font-size: 9.5pt;
-  line-height: 1.35;
-  font-weight: 500;
-  text-align: center;
-}
-
-.cv-doc .cv-contact {
-  margin-top: 7pt;
-  font-size: 8.75pt;
-  line-height: 1.4;
-  text-align: center;
-}
-
-.cv-doc .cv-contact span {
-  display: inline;
-}
-
-.cv-doc .cv-contact span + span::before {
-  content: " | ";
-}
-
-.cv-doc section {
-  margin: 0 0 12pt;
-}
-
-.cv-doc h2 {
-  margin: 0 0 5pt;
-  padding-bottom: 2pt;
-  border-bottom: 1px solid #000;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 10.5pt;
-  line-height: 1.2;
-  font-weight: 700;
-  letter-spacing: 0.035em;
-}
-
-.cv-doc h3 {
-  margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 10.5pt;
-  line-height: 1.25;
-  font-weight: 700;
-  letter-spacing: 0;
-}
-
-.cv-doc p {
-  margin: 0;
-}
-
-.cv-doc ul {
-  margin: 3pt 0 0;
-  padding-left: 16pt;
-}
-
-.cv-doc li {
-  margin: 0 0 2pt;
-  padding-left: 1pt;
-}
-
-.cv-doc .cv-compact-list {
-  margin-top: 0;
-}
-
-.cv-doc .cv-compact-list li {
-  margin-bottom: 1.5pt;
-}
-
-.cv-doc .cv-company {
-  margin-top: 1pt;
-  font-size: 10pt;
-  line-height: 1.3;
-  font-weight: 600;
-}
-
-.cv-doc .cv-meta {
-  margin-top: 1pt;
-  margin-bottom: 2pt;
-  font-size: 8.75pt;
-  line-height: 1.3;
-}
-
-.cv-doc .cv-meta-right {
-  text-align: right;
-}
-
-.cv-doc .cv-entry {
-  margin-bottom: 8pt;
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
-
-.cv-doc .cv-entry:last-child {
-  margin-bottom: 0;
-}
-
-@media (max-width: 767px) {
-  .cv-doc {
-    min-height: auto;
-    padding: 1.25rem;
-    font-size: 10pt;
-  }
-
-  .cv-doc h1 {
-    font-size: 20pt;
-  }
-
-  .cv-doc .cv-contact span {
-    display: block;
-  }
-
-  .cv-doc .cv-contact span + span::before {
-    content: "";
-  }
-
-  .cv-doc .cv-meta-right {
-    text-align: left;
-  }
-}
-
+/* Canonical ATS-first CV document system. */
+.cv-doc { width: 100%; max-width: 210mm; min-height: 297mm; margin: 0 auto; padding: 16mm; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; line-height: 1.42; text-align: left; }
+.cv-doc .cv-header { margin-bottom: 14pt; padding-bottom: 9pt; border-bottom: 1.5px solid #000; text-align: center; }
+.cv-doc h1 { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 22pt; line-height: 1.08; font-weight: 700; letter-spacing: 0; text-align: center; }
+.cv-doc .cv-target-role { margin-top: 3pt; font-size: 11pt; line-height: 1.25; font-weight: 700; text-align: center; }
+.cv-doc .cv-headline { margin-top: 2pt; font-size: 9.5pt; line-height: 1.35; font-weight: 500; text-align: center; }
+.cv-doc .cv-contact { margin-top: 7pt; font-size: 8.75pt; line-height: 1.4; text-align: center; }
+.cv-doc .cv-contact span { display: inline; } .cv-doc .cv-contact span + span::before { content: " | "; }
+.cv-doc section { margin: 0 0 12pt; } .cv-doc h2 { margin: 0 0 5pt; padding-bottom: 2pt; border-bottom: 1px solid #000; font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; line-height: 1.2; font-weight: 700; letter-spacing: 0.035em; }
+.cv-doc h3 { margin: 0; font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; line-height: 1.25; font-weight: 700; letter-spacing: 0; }
+.cv-doc p { margin: 0; } .cv-doc ul { margin: 3pt 0 0; padding-left: 16pt; } .cv-doc li { margin: 0 0 2pt; padding-left: 1pt; }
+.cv-doc .cv-compact-list { margin-top: 0; } .cv-doc .cv-compact-list li { margin-bottom: 1.5pt; }
+.cv-doc .cv-company { margin-top: 1pt; font-size: 10pt; line-height: 1.3; font-weight: 600; } .cv-doc .cv-meta { margin-top: 1pt; margin-bottom: 2pt; font-size: 8.75pt; line-height: 1.3; } .cv-doc .cv-meta-right { text-align: right; }
+.cv-doc .cv-entry { margin-bottom: 8pt; break-inside: avoid; page-break-inside: avoid; } .cv-doc .cv-entry:last-child { margin-bottom: 0; }
+@media (max-width: 767px) { .cv-doc { min-height: auto; padding: 1.25rem; font-size: 10pt; } .cv-doc h1 { font-size: 20pt; } .cv-doc .cv-contact span { display: block; } .cv-doc .cv-contact span + span::before { content: ""; } .cv-doc .cv-meta-right { text-align: left; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; } }
 @media print {
-  @page {
-    size: A4;
-    margin: 12mm;
-  }
-
-  html,
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #fff !important;
-  }
-
-  body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .no-print {
-    display: none !important;
-  }
-
-  main {
-    margin: 0 !important;
-    padding: 0 !important;
-    max-width: none !important;
-  }
-
-  .cv-doc {
-    display: block !important;
-    width: auto !important;
-    max-width: none !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    box-shadow: none !important;
-    background: #fff !important;
-    color: #000 !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 10.5pt !important;
-    line-height: 1.42 !important;
-  }
-
-  .cv-doc h1,
-  .cv-doc h2,
-  .cv-doc h3,
-  .cv-doc p,
-  .cv-doc li,
-  .cv-doc span,
-  .cv-doc strong {
-    color: #000 !important;
-  }
-
-  .cv-doc .cv-header {
-    margin-bottom: 12pt !important;
-    text-align: center !important;
-  }
-
-  .cv-doc h1,
-  .cv-doc .cv-target-role,
-  .cv-doc .cv-headline,
-  .cv-doc .cv-contact {
-    text-align: center !important;
-  }
-
-  .cv-doc section {
-    break-inside: auto;
-    page-break-inside: auto;
-  }
-
-  .cv-doc .cv-entry {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  .cv-doc h2,
-  .cv-doc h3 {
-    break-after: avoid;
-    page-break-after: avoid;
-  }
-
-  .cv-doc a {
-    color: #000 !important;
-    text-decoration: none !important;
-  }
+  @page { size: A4; margin: 12mm; }
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .no-print { display: none !important; } main { margin: 0 !important; padding: 0 !important; max-width: none !important; }
+  .cv-doc { display: block !important; width: auto !important; max-width: none !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; background: #fff !important; color: #000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 10.5pt !important; line-height: 1.42 !important; }
+  .cv-doc h1, .cv-doc h2, .cv-doc h3, .cv-doc p, .cv-doc li, .cv-doc span, .cv-doc strong { color: #000 !important; }
+  .cv-doc .cv-header { margin-bottom: 12pt !important; text-align: center !important; } .cv-doc h1, .cv-doc .cv-target-role, .cv-doc .cv-headline, .cv-doc .cv-contact { text-align: center !important; }
+  .cv-doc section { break-inside: auto; page-break-inside: auto; } .cv-doc .cv-entry { break-inside: avoid; page-break-inside: avoid; } .cv-doc h2, .cv-doc h3 { break-after: avoid; page-break-after: avoid; }
+  .cv-doc a { color: #000 !important; text-decoration: none !important; }
 }
