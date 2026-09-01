@@ -25,13 +25,11 @@ const toggleItems = [
 ] as const;
 
 const DocumentSettingsPanel = ({ onChange }: DocumentSettingsPanelProps) => {
-  const [settings, setSettings] = useState<DocumentSettings>(DEFAULT_DOCUMENT_SETTINGS);
+  const [settings, setSettings] = useState<DocumentSettings>(() => loadDocumentSettings());
 
   useEffect(() => {
-    const loaded = loadDocumentSettings();
-    setSettings(loaded);
-    onChange?.(loaded);
-  }, [onChange]);
+    onChange?.(settings);
+  }, [onChange, settings]);
 
   const updateSetting = (key: keyof DocumentSettings, value: boolean) => {
     const next = { ...settings, [key]: value };
