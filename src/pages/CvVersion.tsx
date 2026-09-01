@@ -21,6 +21,15 @@ const CvVersionPage = () => {
 
   if (!version) return <NotFound />;
 
+  const handlePrint = () => {
+    const previousTitle = document.title;
+    document.title = `Kingsley Junior Norku - ${version.title} - CV`;
+    window.print();
+    window.setTimeout(() => {
+      document.title = previousTitle;
+    }, 1000);
+  };
+
   return (
     <main className="min-h-screen py-12 px-6">
       <div className="container max-w-3xl mx-auto">
@@ -36,10 +45,12 @@ const CvVersionPage = () => {
               <h1 className="text-3xl font-semibold text-foreground">{version.title}</h1>
               <p className="text-sm text-muted-foreground">{version.targetRoles}</p>
             </div>
-            <Button onClick={() => window.print()}>
-              <Printer className="mr-2 h-4 w-4" />
-              Print / Save as PDF
-            </Button>
+            {tab === "cv" && (
+              <Button onClick={handlePrint}>
+                <Printer className="mr-2 h-4 w-4" />
+                Download / Save CV as PDF
+              </Button>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4">
