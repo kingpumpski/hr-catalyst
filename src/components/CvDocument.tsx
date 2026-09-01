@@ -6,10 +6,10 @@ import { loadDocumentSettings } from "@/lib/documentSettings";
 /**
  * Canonical ATS-first CV renderer.
  *
- * This component intentionally uses a single semantic document flow:
- * no tables, no multi-column layout, no icons, no photos, no decorative
- * graphics, and no recruiter-facing UI inside the printable document.
- * The same markup is used for the browser preview and browser PDF export.
+ * The printable document deliberately follows a conventional single-column
+ * resume structure: semantic headings, predictable reading order, centered
+ * identity block, plain text contact details, reverse-chronological experience,
+ * and independent Additional Information and References sections.
  */
 const CvDocument = ({ version }: { version: CvVersion }) => {
   const settings = useMemo(() => loadDocumentSettings(), []);
@@ -18,19 +18,14 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
     { label: "Phone", value: profile.phone },
     { label: "LinkedIn", value: profile.linkedin },
   ].filter((item) => {
-    if (item.label === "Email" || item.label === "Phone") return settings.showContactDetails;
-    if (item.label === "LinkedIn") return settings.includeLinkedIn && settings.showContactDetails;
+    if (item.label === "Email" || item.label === "Phone") {
+      return settings.showContactDetails;
+    }
+    if (item.label === "LinkedIn") {
+      return settings.includeLinkedIn && settings.showContactDetails;
+    }
     return Boolean(item.value);
   });
-
-  const handlePrint = () => {
-    const previousTitle = document.title;
-    document.title = `${profile.name} - ${version.title} - CV`;
-    window.print();
-    window.setTimeout(() => {
-      document.title = previousTitle;
-    }, 1000);
-  };
 
   return (
     <article className="cv-doc" aria-label={`${profile.name} CV - ${version.title}`}>
@@ -64,25 +59,23 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
 
       <section>
         <h2>PROFESSIONAL EXPERIENCE</h2>
-        <div>
-          {companies.map((company) =>
-            company.roles.map((role) => (
-              <article key={company.company + role.title + role.period} className="cv-entry">
-                <h3>{role.title}</h3>
-                <p className="cv-company">{company.company}</p>
-                <p className="cv-meta">
-                  {role.period} | {role.employmentType} | {role.location}
-                </p>
-                <p>{role.summary}</p>
-                <ul>
-                  {role.contributions.map((contribution) => (
-                    <li key={contribution}>{contribution}</li>
-                  ))}
-                </ul>
-              </article>
-            ))
-          )}
-        </div>
+        {companies.map((company) =>
+          company.roles.map((role) => (
+            <article key={company.company + role.title + role.period} className="cv-entry">
+              <h3>{role.title}</h3>
+              <p className="cv-company">{company.company}</p>
+              <p className="cv-meta cv-meta-right">
+                {role.period} | {role.employmentType} | {role.location}
+              </p>
+              <p>{role.summary}</p>
+              <ul>
+                {role.contributions.map((contribution) => (
+                  <li key={contribution}>{contribution}</li>
+                ))}
+              </ul>
+            </article>
+          ))
+        )}
       </section>
 
       <section>
@@ -101,7 +94,7 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
             <article key={`${entry.company}-${entry.title}`} className="cv-entry">
               <h3>{entry.title}</h3>
               <p className="cv-company">{entry.company}</p>
-              <p className="cv-meta">
+              <p className="cv-meta cv-meta-right">
                 {entry.period} | {entry.employmentType} | {entry.location}
               </p>
               <ul>
@@ -120,7 +113,7 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
           <article key={entry.school} className="cv-entry">
             <h3>{entry.qualification}</h3>
             <p className="cv-company">{entry.school}</p>
-            <p className="cv-meta">{entry.period} | {entry.location}</p>
+            <p className="cv-meta cv-meta-right">{entry.period} | {entry.location}</p>
           </article>
         ))}
       </section>
@@ -130,15 +123,15 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
         <p>
           <strong>Languages:</strong> {profile.languages.join(", ")}
           {settings.showAvailability ? ` | Availability: ${profile.availability}` : ""}
-          {settings.showReferences ? ` | References: ${profile.references}` : ""}
         </p>
       </section>
 
-      <div className="no-print cv-actions">
-        <button type="button" onClick={handlePrint}>
-          Download / Save as PDF
-        </button>
-      </div>
+      {settings.showReferences && (
+        <section>
+          <h2>REFERENCES</h2>
+          <p>{profile.references}</p>
+        </section>
+      )}
     </article>
   );
 };
