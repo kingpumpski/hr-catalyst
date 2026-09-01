@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import RecruiterSnapshot from "@/components/RecruiterSnapshot";
 import Experience from "@/components/Experience";
 import Education from "@/components/Education";
 import Leadership from "@/components/Leadership";
@@ -31,6 +32,7 @@ const Index = () => {
     <main className="min-h-screen">
       <Navbar />
       <Hero />
+      <RecruiterSnapshot />
       {showOwnerControls && (
         <section className="px-6 py-12 bg-background">
           <div className="container max-w-5xl mx-auto">
