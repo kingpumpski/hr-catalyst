@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FileText } from "lucide-react";
-import { cvVersions } from "@/data/cvVersions";
+import { cvCatalog } from "@/data/cvCatalog";
 import { getShareLink } from "@/lib/shareLinks";
 
 const CvLibrary = () => {
@@ -25,7 +25,7 @@ const CvLibrary = () => {
         </p>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {cvVersions.map((v) => (
+          {cvCatalog.map((v) => (
             <Card key={v.slug} className="p-6 shadow-soft hover:shadow-medium transition-smooth">
               <div className="flex items-start gap-3 mb-3">
                 <div className="p-2 rounded-lg bg-primary/10">
