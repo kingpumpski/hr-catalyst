@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Copy, LockKeyhole, Plus, Save, ShieldCheck, Trash2, UnlockKeyhole } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -26,17 +26,13 @@ const emptyReferee = (): Referee => ({
 });
 
 const RefereeVault = () => {
-  const [hasVault, setHasVault] = useState(false);
+  const [hasVault, setHasVault] = useState(() => hasRefereeVault());
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referees, setReferees] = useState<Referee[]>([]);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    setHasVault(hasRefereeVault());
-  }, []);
 
   const resetFeedback = () => {
     setMessage("");
