@@ -2,10 +2,10 @@ import { cvVersions, type CvVersion } from "@/data/cvVersions";
 
 const vehicleAccountingSpecialist: CvVersion = {
   slug: "vehicle-accounting-specialist",
-  title: "Vehicle Accounting Specialist",
+  title: "Vehicle Accounting Specialist — Keda Ghana",
   targetRoles: "Vehicle Accounting Specialist • Transport Accounts Officer • Finance & Reconciliation Officer",
   summary:
-    "BSc Accounting professional with experience in financial reconciliation, records management, reporting, claims finance, operational coordination and logistics-related documentation. Brings strong attention to detail, Microsoft Excel capability, integrity and cross-functional experience suited to transport and vehicle accounting environments.",
+    "BSc Accounting professional with experience in financial reconciliation, accounting records, management reporting, claims finance, operational coordination and logistics documentation. Brings strong Excel capability, attention to detail, integrity and cross-functional experience that transfers well to vehicle and transport accounting operations.",
   coreSkills: [
     "Financial Reconciliation",
     "Payment & Records Administration",
@@ -20,7 +20,7 @@ const vehicleAccountingSpecialist: CvVersion = {
   ],
   highlights: [
     "Prepare reconciliation reports and operational performance summaries while maintaining accurate and confidential financial and claims records.",
-    "Coordinate with external insurers and internal finance, administrative and operational teams to resolve discrepancies and support timely settlements.",
+    "Coordinate with external insurers and internal finance, administrative and operational teams to investigate discrepancies and support timely settlements.",
     "Bring earlier warehouse and logistics experience involving consignment breakdowns, waybills, delivery releases, delivery itineraries and operational reporting.",
     "Applied financial accountability experience through budgeting, financial reporting and account reconciliation responsibilities in a leadership role.",
     "Reduced claim rejection rates by 30% through stronger documentation and pre-submission validation, demonstrating accuracy and control discipline.",
