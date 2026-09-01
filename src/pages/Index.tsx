@@ -11,6 +11,7 @@ import Interests from "@/components/Interests";
 import Contact from "@/components/Contact";
 import LazySection from "@/components/LazySection";
 import DocumentSettingsPanel from "@/components/DocumentSettingsPanel";
+import PresentationThemeToggle from "@/components/PresentationThemeToggle";
 import { Button } from "@/components/ui/button";
 import type { DocumentSettings } from "@/lib/documentSettings";
 import { LockKeyhole } from "lucide-react";
@@ -33,6 +34,12 @@ const Index = () => {
       {showOwnerControls && (
         <section className="px-6 py-12 bg-background">
           <div className="container max-w-5xl mx-auto">
+            <div className="mb-6 rounded-lg border border-border bg-card p-4 shadow-soft">
+              <PresentationThemeToggle />
+              <p className="mt-2 text-xs text-muted-foreground">
+                Presentation theme changes affect the public landing-page experience only; recruiter document formatting remains ATS-first.
+              </p>
+            </div>
             <DocumentSettingsPanel onChange={setDocumentSettings} />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-dashed border-border bg-muted/20 p-4">
               <div className="text-sm text-muted-foreground">
@@ -52,35 +59,20 @@ const Index = () => {
       <Experience />
       <Leadership />
       <WorkshopsAndSeminars />
-
       <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" />}>
-          <LazySkills />
-        </Suspense>
+        <Suspense fallback={<div className="min-h-[260px]" />}><LazySkills /></Suspense>
       </LazySection>
-
       <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" />}>
-          <LazyEducation />
-        </Suspense>
+        <Suspense fallback={<div className="min-h-[260px]" />}><LazyEducation /></Suspense>
       </LazySection>
-
       <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" />}>
-          <LazyInterests />
-        </Suspense>
+        <Suspense fallback={<div className="min-h-[260px]" />}><LazyInterests /></Suspense>
       </LazySection>
-
       <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" />}>
-          <LazyContact />
-        </Suspense>
+        <Suspense fallback={<div className="min-h-[260px]" />}><LazyContact /></Suspense>
       </LazySection>
-
       <footer className="bg-primary text-primary-foreground py-8 px-6 text-center">
-        <p className="text-sm">
-          © {new Date().getFullYear()} Kingsley Junior Norku. All rights reserved.
-        </p>
+        <p className="text-sm">© {new Date().getFullYear()} Kingsley Junior Norku. All rights reserved.</p>
       </footer>
     </main>
   );
