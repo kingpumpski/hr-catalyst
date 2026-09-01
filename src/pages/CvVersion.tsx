@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Printer } from "lucide-react";
-import { getCvVersion } from "@/data/cvVersions";
+import { getCvVersionFromCatalog } from "@/data/cvCatalog";
 import CvDocument from "@/components/CvDocument";
 import ResumeDocument from "@/components/ResumeDocument";
 import CoverLetterDocument from "@/components/CoverLetterDocument";
@@ -13,7 +13,7 @@ import NotFound from "./NotFound";
 
 const CvVersionPage = () => {
   const { slug } = useParams();
-  const version = getCvVersion(slug);
+  const version = getCvVersionFromCatalog(slug);
   const [tab, setTab] = useState<"cv" | "resume" | "letter">("cv");
   const [recipientName, setRecipientName] = useState("Hiring Manager");
   const [companyName, setCompanyName] = useState("");
