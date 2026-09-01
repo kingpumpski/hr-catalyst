@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Experience from "@/components/Experience";
@@ -10,7 +11,9 @@ import Interests from "@/components/Interests";
 import Contact from "@/components/Contact";
 import LazySection from "@/components/LazySection";
 import DocumentSettingsPanel from "@/components/DocumentSettingsPanel";
+import { Button } from "@/components/ui/button";
 import type { DocumentSettings } from "@/lib/documentSettings";
+import { LockKeyhole } from "lucide-react";
 
 const LazySkills = lazy(() => import("@/components/Skills"));
 const LazyEducation = lazy(() => import("@/components/Education"));
@@ -34,10 +37,17 @@ const Index = () => {
         <section className="px-6 py-12 bg-background">
           <div className="container max-w-5xl mx-auto">
             <DocumentSettingsPanel onChange={setDocumentSettings} />
-            <div className="mt-4 rounded-lg border border-dashed border-border bg-muted/20 p-4 text-sm text-muted-foreground">
-              {documentSettings?.resumeMode
-                ? "Resume-style layout is enabled for your document output."
-                : "CV-style layout is enabled for your document output."}
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-dashed border-border bg-muted/20 p-4">
+              <div className="text-sm text-muted-foreground">
+                {documentSettings?.resumeMode
+                  ? "Resume-style layout is enabled for your document output."
+                  : "CV-style layout is enabled for your document output."}
+              </div>
+              <Button variant="outline" asChild>
+                <Link to="/owner/referees">
+                  <LockKeyhole className="mr-2 h-4 w-4" /> Private referee vault
+                </Link>
+              </Button>
             </div>
           </div>
         </section>
@@ -47,25 +57,25 @@ const Index = () => {
       <WorkshopsAndSeminars />
 
       <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" /> }>
+        <Suspense fallback={<div className="min-h-[260px]" />}>
           <LazySkills />
         </Suspense>
       </LazySection>
 
       <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" /> }>
+        <Suspense fallback={<div className="min-h-[260px]" />}>
           <LazyEducation />
         </Suspense>
       </LazySection>
 
       <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" /> }>
+        <Suspense fallback={<div className="min-h-[260px]" />}>
           <LazyInterests />
         </Suspense>
       </LazySection>
 
       <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" /> }>
+        <Suspense fallback={<div className="min-h-[260px]" />}>
           <LazyContact />
         </Suspense>
       </LazySection>
