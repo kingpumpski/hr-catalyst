@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -22,12 +22,9 @@ const LazyContact = lazy(() => import("@/components/Contact"));
 
 const Index = () => {
   const [documentSettings, setDocumentSettings] = useState<DocumentSettings | null>(null);
-  const [showOwnerControls, setShowOwnerControls] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setShowOwnerControls(params.get("mode") === "owner");
-  }, []);
+  const [showOwnerControls] = useState(
+    () => new URLSearchParams(window.location.search).get("mode") === "owner",
+  );
 
   return (
     <main className="min-h-screen">
