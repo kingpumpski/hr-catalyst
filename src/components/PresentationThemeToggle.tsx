@@ -3,12 +3,16 @@ import { presentationThemes } from "@/data/siteConfig";
 import { Button } from "@/components/ui/button";
 import { usePresentationTheme } from "@/components/PresentationThemeProvider";
 
-const PresentationThemeToggle = () => {
+type PresentationThemeToggleProps = {
+  compact?: boolean;
+};
+
+const PresentationThemeToggle = ({ compact = false }: PresentationThemeToggleProps) => {
   const { theme, setTheme } = usePresentationTheme();
 
   return (
     <div className="flex flex-wrap items-center gap-2" aria-label="Presentation mode">
-      <span className="mr-1 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <span className={compact ? "sr-only" : "mr-1 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"}>
         <Palette className="h-4 w-4" aria-hidden="true" /> Presentation
       </span>
       {presentationThemes.map((option) => (
@@ -18,6 +22,7 @@ const PresentationThemeToggle = () => {
           size="sm"
           variant={theme === option.id ? "default" : "outline"}
           title={option.description}
+          aria-label={`${option.name} presentation`}
           aria-pressed={theme === option.id}
           onClick={() => setTheme(option.id)}
         >
