@@ -6,12 +6,12 @@ export type SocialLink = {
 
 /**
  * Public profile configuration.
- * Replace the placeholder URLs as accounts are confirmed. Empty URLs are
- * intentionally ignored by the social-links UI.
+ * Empty URLs are intentionally ignored by the social-links UI until accounts
+ * are confirmed and ready to publish.
  */
 export const socialLinks: SocialLink[] = [
   { label: "LinkedIn", handle: "@kingsleynorku", url: "https://www.linkedin.com/in/kingsleynorku" },
-  { label: "GitHub", handle: "@kingpumpski", url: "" },
+  { label: "GitHub", handle: "@kingpumpski", url: "https://github.com/kingpumpski" },
   { label: "X", handle: "@yourhandle", url: "" },
   { label: "Facebook", handle: "@yourhandle", url: "" },
   { label: "Instagram", handle: "@yourhandle", url: "" },
