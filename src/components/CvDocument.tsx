@@ -7,10 +7,11 @@ import { loadDocumentSettings } from "@/lib/documentSettings";
 /**
  * Canonical ATS-first CV/resume renderer.
  *
- * This is intentionally a plain, single-column document matching the
- * approved reference CV: centered identity block, uppercase ruled sections,
- * conventional reverse-chronological experience, compact skills, achievements,
- * leadership, education, strengths, languages and references.
+ * The downloadable document follows the approved ATS reference format:
+ * centered identity/contact block, professional summary first, ruled
+ * uppercase sections, conventional reverse-chronological experience,
+ * two-column bulleted technical skills, achievements, leadership,
+ * professional strengths, languages and references.
  */
 const CvDocument = ({ version }: { version: CvVersion }) => {
   const settings = useMemo(() => loadDocumentSettings(), []);
@@ -40,6 +41,11 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
   ];
 
   const technicalSkills = Array.from(new Set(version.coreSkills));
+  const splitIndex = Math.ceil(technicalSkills.length / 2);
+  const technicalSkillColumns = [
+    technicalSkills.slice(0, splitIndex),
+    technicalSkills.slice(splitIndex),
+  ].filter((column) => column.length > 0);
 
   return (
     <article className="cv-doc" aria-label={`${profile.name} CV - ${version.title}`}>
@@ -104,9 +110,13 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
 
       <section>
         <h2>TECHNICAL SKILLS</h2>
-        <div className="cv-skill-grid">
-          {technicalSkills.map((skill) => (
-            <span key={skill}>{skill}</span>
+        <div className="cv-skill-grid" role="list">
+          {technicalSkillColumns.map((column, columnIndex) => (
+            <ul key={`skills-${columnIndex}`}>
+              {column.map((skill) => (
+                <li key={skill}>{skill}</li>
+              ))}
+            </ul>
           ))}
         </div>
       </section>
