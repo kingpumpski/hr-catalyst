@@ -16,7 +16,7 @@
     --shadow-soft: 0 2px 8px -2px hsl(210 30% 20% / 0.08); --shadow-medium: 0 4px 16px -4px hsl(210 30% 20% / 0.12);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .dark { --background: 215 30% 12%; --foreground: 210 20% 98%; --card: 215 28% 16%; --card-foreground: 210 20% 98%; --popover: 215 28% 16%; --popover-foreground: 210 20% 98%; --muted: 215 25% 20%; --muted-foreground: 215 15% 65%; --accent: 25 85% 60%; --accent-foreground: 0 0% 100%; --destructive: 0 62.8% 50%; --destructive-foreground: 0 0% 100%; --border: 215 25% 24%; --input: 215 25% 24%; --ring: 210 75% 55%; }
+  .dark { --background: 215 30% 12%; --foreground: 210 20% 98%; --card: 215 28% 16%; --card-foreground: 210 20% 98%; --popover: 215 28% 16%; --popover-foreground: 215 20% 98%; --muted: 215 25% 20%; --muted-foreground: 215 15% 65%; --accent: 25 85% 60%; --accent-foreground: 0 0% 100%; --destructive: 0 62.8% 50%; --destructive-foreground: 0 0% 100%; --border: 215 25% 24%; --input: 215 25% 24%; --ring: 210 75% 55%; }
   * { border-color: hsl(var(--border)); }
   body { background-color: hsl(var(--background)); color: hsl(var(--foreground)); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
   h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.025em; }
@@ -29,7 +29,6 @@
   .shadow-soft { box-shadow: var(--shadow-soft); } .shadow-medium { box-shadow: var(--shadow-medium); } .transition-smooth { transition: var(--transition-smooth); }
 }
 
-/* Landing-page motion: purposeful, short and always disabled for reduced-motion users. */
 @keyframes profile-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 @keyframes profile-glow { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
 @keyframes profile-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
@@ -39,7 +38,6 @@
 .hero-stagger > * { animation: profile-rise 0.6s ease-out both; }
 .hero-stagger > *:nth-child(2) { animation-delay: 80ms; } .hero-stagger > *:nth-child(3) { animation-delay: 160ms; } .hero-stagger > *:nth-child(4) { animation-delay: 240ms; } .hero-stagger > *:nth-child(5) { animation-delay: 320ms; }
 
-/* Recruiter snapshot: compact, scan-friendly proof points directly below the hero. */
 .recruiter-snapshot { background: hsl(var(--background)); }
 .recruiter-snapshot__grid { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: 0; overflow: hidden; border: 1px solid hsl(var(--border)); border-radius: 0.75rem; background: hsl(var(--card)); box-shadow: var(--shadow-soft); }
 .recruiter-snapshot__item { display: flex; gap: 0.85rem; padding: 1.15rem 1.25rem; transition: var(--transition-smooth); }
@@ -48,43 +46,35 @@
 @media (min-width: 640px) { .recruiter-snapshot__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .recruiter-snapshot__item:nth-child(2) { border-top: 0; border-left: 1px solid hsl(var(--border)); } .recruiter-snapshot__item:nth-child(3), .recruiter-snapshot__item:nth-child(4) { border-top: 1px solid hsl(var(--border)); } .recruiter-snapshot__item:nth-child(4) { border-left: 1px solid hsl(var(--border)); } }
 @media (min-width: 1024px) { .recruiter-snapshot__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .recruiter-snapshot__item + .recruiter-snapshot__item { border-top: 0; border-left: 1px solid hsl(var(--border)); } }
 
-/* Alternate recruiter-oriented public presentation theme. */
+/* Professional Network mode: intentionally distinct navy/teal/slate visual system. */
 html[data-presentation-theme="professional"] {
-  --professional-radius: 0.45rem;
+  --professional-background: 216 28% 94%; --professional-surface: 0 0% 100%; --professional-ink: 220 32% 17%;
+  --professional-navy: 220 55% 24%; --professional-teal: 174 62% 34%; --professional-gold: 42 76% 49%;
+  --professional-line: 216 20% 84%; --professional-soft: 174 35% 94%; --professional-radius: 0.65rem;
 }
-html[data-presentation-theme="professional"] body { background-color: hsl(210 20% 95%); }
-html[data-presentation-theme="professional"] main { background: hsl(210 20% 95%); }
-html[data-presentation-theme="professional"] section[id] { border-bottom: 1px solid hsl(210 20% 88%); }
-html[data-presentation-theme="professional"] section[id]:not(#hero) { background: transparent; }
-html[data-presentation-theme="professional"] section[id] > .container { max-width: 72rem; }
-html[data-presentation-theme="professional"] .rounded-3xl,
-html[data-presentation-theme="professional"] .rounded-2xl,
-html[data-presentation-theme="professional"] .rounded-xl,
-html[data-presentation-theme="professional"] .rounded-lg { border-radius: var(--professional-radius); }
-html[data-presentation-theme="professional"] .shadow-medium { box-shadow: 0 10px 30px -18px hsl(210 30% 20% / 0.28); }
-html[data-presentation-theme="professional"] #hero { background: hsl(210 25% 97%); color: hsl(215 25% 15%); }
-html[data-presentation-theme="professional"] #hero > .gradient-primary { opacity: 0.96; }
-html[data-presentation-theme="professional"] .hero-profile-card { animation-duration: 8s; border-radius: 0.5rem; }
-html[data-presentation-theme="professional"] .recruiter-snapshot { padding-top: 0; padding-bottom: 0; }
-html[data-presentation-theme="professional"] .recruiter-snapshot__grid { border-radius: 0.45rem; box-shadow: none; }
-html[data-presentation-theme="professional"] .recruiter-snapshot__item { min-height: 7.5rem; align-items: flex-start; padding: 1.35rem; }
-html[data-presentation-theme="professional"] #experience .container,
-html[data-presentation-theme="professional"] #leadership .container,
-html[data-presentation-theme="professional"] #workshops .container,
-html[data-presentation-theme="professional"] #skills .container,
-html[data-presentation-theme="professional"] #education .container,
-html[data-presentation-theme="professional"] #interests .container,
-html[data-presentation-theme="professional"] #contact .container { padding-top: 0.5rem; }
-html[data-presentation-theme="professional"] #experience .container > div:first-child,
-html[data-presentation-theme="professional"] #leadership .container > div:first-child,
-html[data-presentation-theme="professional"] #workshops .container > div:first-child { text-align: left; margin-bottom: 2rem; }
-html[data-presentation-theme="professional"] #experience .container > div:first-child p,
-html[data-presentation-theme="professional"] #leadership .container > div:first-child p,
-html[data-presentation-theme="professional"] #workshops .container > div:first-child p { max-width: 52rem; margin-left: 0; }
-html[data-presentation-theme="professional"] #experience .container > div:nth-child(2) > div,
-html[data-presentation-theme="professional"] #leadership .container > div:nth-child(2) > div,
-html[data-presentation-theme="professional"] #workshops .container > div:nth-child(2) > div { box-shadow: none; border: 1px solid hsl(210 20% 86%); }
-html[data-presentation-theme="professional"] .section-reveal { animation: section-rise 0.55s ease-out both; }
+html[data-presentation-theme="professional"] body { background: hsl(var(--professional-background)); color: hsl(var(--professional-ink)); }
+html[data-presentation-theme="professional"] main { background: hsl(var(--professional-background)); }
+html[data-presentation-theme="professional"] .professional-network { background: hsl(var(--professional-background)); }
+html[data-presentation-theme="professional"] .professional-profile-shell { background: linear-gradient(180deg, hsl(var(--professional-navy)), hsl(220 50% 30%)); }
+html[data-presentation-theme="professional"] .professional-profile-card { background: hsl(var(--professional-surface)); border-color: hsl(var(--professional-line)); color: hsl(var(--professional-ink)); }
+html[data-presentation-theme="professional"] .professional-avatar { background: hsl(var(--professional-teal)); color: white; }
+html[data-presentation-theme="professional"] .professional-status { background: hsl(var(--professional-soft)); color: hsl(var(--professional-teal)); }
+html[data-presentation-theme="professional"] .professional-primary-action { background: hsl(var(--professional-teal)); color: white; box-shadow: 0 8px 20px -12px hsl(var(--professional-teal) / .7); }
+html[data-presentation-theme="professional"] .professional-primary-action:hover { background: hsl(174 62% 29%); }
+html[data-presentation-theme="professional"] .professional-secondary-action { border-color: hsl(var(--professional-line)); background: hsl(var(--professional-surface)); color: hsl(var(--professional-navy)); }
+html[data-presentation-theme="professional"] .professional-secondary-action:hover { background: hsl(var(--professional-soft)); }
+html[data-presentation-theme="professional"] .professional-side-card { background: hsl(var(--professional-surface)); border-color: hsl(var(--professional-line)); }
+html[data-presentation-theme="professional"] .professional-cta { background: hsl(var(--professional-navy)); color: white; border-color: hsl(var(--professional-navy)); }
+html[data-presentation-theme="professional"] .professional-footer { background: hsl(220 55% 18%); color: hsl(216 20% 88%); }
+html[data-presentation-theme="professional"] .professional-network .recruiter-snapshot { padding-top: 0; padding-bottom: 2rem; background: transparent; }
+html[data-presentation-theme="professional"] .professional-network .recruiter-snapshot__grid { border-radius: var(--professional-radius); border-color: hsl(var(--professional-line)); box-shadow: 0 10px 28px -22px hsl(var(--professional-navy) / .5); }
+html[data-presentation-theme="professional"] .professional-network .recruiter-snapshot__item:hover { background: hsl(var(--professional-soft)); }
+html[data-presentation-theme="professional"] .professional-network .professional-side-card > section,
+html[data-presentation-theme="professional"] .professional-network .professional-side-card section { background: transparent; }
+html[data-presentation-theme="professional"] .professional-network .rounded-3xl,
+html[data-presentation-theme="professional"] .professional-network .rounded-2xl,
+html[data-presentation-theme="professional"] .professional-network .rounded-xl { border-radius: var(--professional-radius); }
+html[data-presentation-theme="professional"] .professional-network .shadow-medium { box-shadow: 0 14px 34px -22px hsl(var(--professional-navy) / .55); }
 
 /* Canonical ATS-first CV document system. */
 .cv-doc { width: 100%; max-width: 210mm; min-height: 297mm; margin: 0 auto; padding: 16mm; background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; line-height: 1.42; text-align: left; }
