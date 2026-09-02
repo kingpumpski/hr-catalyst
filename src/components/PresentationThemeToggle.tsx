@@ -9,20 +9,22 @@ type PresentationThemeToggleProps = {
 
 const PresentationThemeToggle = ({ compact = false }: PresentationThemeToggleProps) => {
   const { theme, setTheme } = usePresentationTheme();
+  const activeTheme = presentationThemes.find((option) => option.id === theme);
 
   return (
     <div
       className={compact
-        ? "inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-border/80 bg-background/95 p-1 text-foreground shadow-soft backdrop-blur-md"
+        ? "inline-flex max-w-full items-center gap-1 rounded-lg border border-border/80 bg-background/95 p-1 text-foreground shadow-soft backdrop-blur-md"
         : "flex flex-wrap items-center gap-2"
       }
       aria-label="Presentation mode"
     >
       <span className={compact
-        ? "sr-only"
+        ? "inline-flex items-center gap-1.5 px-2 text-xs font-semibold text-foreground"
         : "mr-1 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
       }>
-        <Palette className="h-4 w-4" aria-hidden="true" /> Presentation
+        <Palette className="h-4 w-4" aria-hidden="true" />
+        <span>{compact ? activeTheme?.name ?? "Presentation" : "Presentation"}</span>
       </span>
       {presentationThemes.map((option) => (
         <Button
