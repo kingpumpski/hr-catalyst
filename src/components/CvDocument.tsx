@@ -4,25 +4,34 @@ import type { CvVersion } from "@/data/cvVersions";
 import { useMemo } from "react";
 import { loadDocumentSettings } from "@/lib/documentSettings";
 
+const atsDocumentProfile = {
+  name: "Kingsley Junior Norku",
+  address: "Tema, Greater Accra, Ghana",
+  phone: "0542069136",
+  email: "kingpumpski@gmail.com",
+  linkedin: "linkedin.com/in/kingsley-junior-norku-a74407124",
+  languages: ["English", "Fante", "Twi"],
+  references: "References available upon request",
+};
+
 /**
  * Canonical ATS-first CV/resume renderer.
  *
- * The downloadable document follows the approved ATS reference format:
- * centered identity/contact block, professional summary first, ruled
- * uppercase sections, conventional reverse-chronological experience,
- * two-column bulleted technical skills, achievements, leadership,
- * professional strengths, languages and references.
+ * Every downloadable CV and resume uses the approved ATS reference structure:
+ * centered identity/contact block, professional summary, ruled uppercase
+ * sections, conventional experience entries, two-column bulleted technical
+ * skills, achievements, leadership, professional strengths, languages and
+ * references.
  */
 const CvDocument = ({ version }: { version: CvVersion }) => {
   const settings = useMemo(() => loadDocumentSettings(), []);
   const contactItems = [
-    { label: "Email", value: profile.email },
-    { label: "Phone", value: profile.phone },
-    { label: "LinkedIn", value: profile.linkedin },
+    { label: "Phone", value: atsDocumentProfile.phone },
+    { label: "Email", value: atsDocumentProfile.email },
+    { label: "LinkedIn", value: atsDocumentProfile.linkedin },
   ].filter((item) => {
-    if (item.label === "Email" || item.label === "Phone") return settings.showContactDetails;
-    if (item.label === "LinkedIn") return settings.includeLinkedIn && settings.showContactDetails;
-    return Boolean(item.value);
+    if (item.label === "Phone" || item.label === "Email") return settings.showContactDetails;
+    return settings.includeLinkedIn && settings.showContactDetails;
   });
 
   const strengths = [
@@ -48,11 +57,11 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
   ].filter((column) => column.length > 0);
 
   return (
-    <article className="cv-doc" aria-label={`${profile.name} CV - ${version.title}`}>
+    <article className="cv-doc" aria-label={`${atsDocumentProfile.name} CV - ${version.title}`}>
       <header className="cv-header">
-        <h1>{profile.name}</h1>
+        <h1>{atsDocumentProfile.name}</h1>
         <div className="cv-contact" aria-label="Contact information">
-          {settings.showLocation && <span>{profile.address}</span>}
+          {settings.showLocation && <span>{atsDocumentProfile.address}</span>}
           {contactItems.map((item) => (
             <span key={item.label}>{item.value}</span>
           ))}
@@ -160,13 +169,13 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
 
       <section>
         <h2>LANGUAGES</h2>
-        <p>{profile.languages.join(" | ")}</p>
+        <p>{atsDocumentProfile.languages.join(" | ")}</p>
       </section>
 
       {settings.showReferences && (
         <section>
           <h2>REFERENCES</h2>
-          <p>{profile.references}</p>
+          <p>{atsDocumentProfile.references}</p>
         </section>
       )}
     </article>
