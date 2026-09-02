@@ -11,10 +11,18 @@ import ResumeDocument from "@/components/ResumeDocument";
 import CoverLetterDocument from "@/components/CoverLetterDocument";
 import NotFound from "./NotFound";
 
+type DocumentTab = "cv" | "resume" | "letter";
+
+const documentLabels: Record<DocumentTab, string> = {
+  cv: "CV",
+  resume: "Resume",
+  letter: "Cover Letter",
+};
+
 const CvVersionPage = () => {
   const { slug } = useParams();
   const version = getCvVersionFromCatalog(slug);
-  const [tab, setTab] = useState<"cv" | "resume" | "letter">("cv");
+  const [tab, setTab] = useState<DocumentTab>("cv");
   const [recipientName, setRecipientName] = useState("Hiring Manager");
   const [companyName, setCompanyName] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
@@ -23,7 +31,7 @@ const CvVersionPage = () => {
 
   const handlePrint = () => {
     const previousTitle = document.title;
-    document.title = `Kingsley Junior Norku - ${version.title} - CV`;
+    document.title = `Kingsley Junior Norku - ${version.title} - ${documentLabels[tab]}`;
     window.print();
     window.setTimeout(() => {
       document.title = previousTitle;
@@ -45,23 +53,33 @@ const CvVersionPage = () => {
               <h1 className="text-3xl font-semibold text-foreground">{version.title}</h1>
               <p className="text-sm text-muted-foreground">{version.targetRoles}</p>
             </div>
-            {tab === "cv" && (
-              <Button onClick={handlePrint}>
-                <Printer className="mr-2 h-4 w-4" />
-                Download / Save CV as PDF
-              </Button>
-            )}
+            <Button onClick={handlePrint}>
+              <Printer className="mr-2 h-4 w-4" />
+              Download / Save {documentLabels[tab]} as PDF
+            </Button>
           </div>
 
-          <div className="flex flex-wrap gap-2 mb-4">
-            <Button variant={tab === "cv" ? "default" : "outline"} onClick={() => setTab("cv")}>
+          <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Career document type">
+            <Button
+              variant={tab === "cv" ? "default" : "outline"}
+              role="tab"
+              aria-selected={tab === "cv"}
+              onClick={() => setTab("cv")}
+            >
               CV
             </Button>
-            <Button variant={tab === "resume" ? "default" : "outline"} onClick={() => setTab("resume")}>
+            <Button
+              variant={tab === "resume" ? "default" : "outline"}
+              role="tab"
+              aria-selected={tab === "resume"}
+              onClick={() => setTab("resume")}
+            >
               Resume
             </Button>
             <Button
               variant={tab === "letter" ? "default" : "outline"}
+              role="tab"
+              aria-selected={tab === "letter"}
               onClick={() => setTab("letter")}
             >
               Cover letter
@@ -84,16 +102,18 @@ const CvVersionPage = () => {
               </p>
               <div className="grid md:grid-cols-2 gap-3 mt-4">
                 <div>
-                  <label className="text-sm text-foreground mb-1 block">Recipient name</label>
+                  <label className="text-sm text-foreground mb-1 block" htmlFor="recipient-name">Recipient name</label>
                   <Input
+                    id="recipient-name"
                     value={recipientName}
                     onChange={(e) => setRecipientName(e.target.value)}
                     placeholder="Hiring Manager"
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-foreground mb-1 block">Company name</label>
+                  <label className="text-sm text-foreground mb-1 block" htmlFor="company-name">Company name</label>
                   <Input
+                    id="company-name"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder="Company name"
@@ -101,8 +121,9 @@ const CvVersionPage = () => {
                 </div>
               </div>
               <div className="mt-3">
-                <label className="text-sm text-foreground mb-1 block">Company address</label>
+                <label className="text-sm text-foreground mb-1 block" htmlFor="company-address">Company address</label>
                 <Textarea
+                  id="company-address"
                   value={companyAddress}
                   onChange={(e) => setCompanyAddress(e.target.value)}
                   placeholder="Company address"
