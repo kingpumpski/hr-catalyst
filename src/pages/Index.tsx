@@ -61,16 +61,16 @@ const Index = () => {
       <Experience />
       <Leadership />
       <WorkshopsAndSeminars />
-      <LazySection>
+      <LazySection navId="skills">
         <Suspense fallback={<div className="min-h-[260px]" />}><LazySkills /></Suspense>
       </LazySection>
-      <LazySection>
+      <LazySection navId="education">
         <Suspense fallback={<div className="min-h-[260px]" />}><LazyEducation /></Suspense>
       </LazySection>
-      <LazySection>
+      <LazySection navId="interests">
         <Suspense fallback={<div className="min-h-[260px]" />}><LazyInterests /></Suspense>
       </LazySection>
-      <LazySection>
+      <LazySection navId="contact">
         <Suspense fallback={<div className="min-h-[260px]" />}><LazyContact /></Suspense>
       </LazySection>
       <footer className="bg-primary text-primary-foreground py-8 px-6 text-center">
