@@ -1,5 +1,5 @@
 import "@/cv-print.css";
-import { companies, education, leadership, profile } from "@/data/profile";
+import { companies, education, leadership } from "@/data/profile";
 import type { CvVersion } from "@/data/cvVersions";
 import { useMemo } from "react";
 import { loadDocumentSettings } from "@/lib/documentSettings";
