@@ -7,9 +7,9 @@ const PresentationThemeToggle = () => {
   const { theme, setTheme } = usePresentationTheme();
 
   return (
-    <div className="flex flex-wrap items-center gap-2" aria-label="Presentation theme">
+    <div className="flex flex-wrap items-center gap-2" aria-label="Presentation mode">
       <span className="mr-1 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        <Palette className="h-4 w-4" aria-hidden="true" /> Theme
+        <Palette className="h-4 w-4" aria-hidden="true" /> Presentation
       </span>
       {presentationThemes.map((option) => (
         <Button
