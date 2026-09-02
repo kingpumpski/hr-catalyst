@@ -22,17 +22,23 @@ export default defineConfig(({ mode }) => ({
     cssCodeSplit: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ["react", "react-dom", "react-router-dom"],
-        },
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
 
-          if (id.includes("@radix-ui")) return "radix-vendor";
-          if (id.includes("lucide-react")) return "icons-vendor";
-          if (id.includes("framer-motion")) return "motion-vendor";
-          if (id.includes("next-themes")) return "theme-vendor";
-          if (id.includes("sonner")) return "toast-vendor";
+          if (
+            id.includes("/node_modules/react/") ||
+            id.includes("/node_modules/react-dom/") ||
+            id.includes("/node_modules/react-router/") ||
+            id.includes("/node_modules/react-router-dom/")
+          ) {
+            return "vendor";
+          }
+
+          if (id.includes("/node_modules/@radix-ui/")) return "radix-vendor";
+          if (id.includes("/node_modules/lucide-react/")) return "icons-vendor";
+          if (id.includes("/node_modules/framer-motion/")) return "motion-vendor";
+          if (id.includes("/node_modules/next-themes/")) return "theme-vendor";
+          if (id.includes("/node_modules/sonner/")) return "toast-vendor";
         },
       },
     },
