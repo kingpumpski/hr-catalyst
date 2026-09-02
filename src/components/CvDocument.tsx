@@ -1,3 +1,4 @@
+import "@/cv-print.css";
 import { companies, education, leadership, profile } from "@/data/profile";
 import type { CvVersion } from "@/data/cvVersions";
 import { useMemo } from "react";
@@ -66,11 +67,13 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
               <span className="cv-meta">{entry.location}</span>
             </div>
             <div className="cv-entry-line cv-entry-subline">
-              <p className="cv-italic">{entry.qualification}{entry.field ? ` — ${entry.field}` : ""}</p>
+              <p className="cv-italic">
+                {entry.qualification}{entry.field ? ` — ${entry.field}` : ""}
+              </p>
               <span className="cv-meta">{entry.period}</span>
             </div>
             {entry.coursework && entry.coursework.length > 0 && (
-              <p className="cv-coursework">Relevant areas include {entry.coursework.join(", ") }.</p>
+              <p className="cv-coursework">Relevant areas include {entry.coursework.join(", ")}.</p>
             )}
           </article>
         ))}
