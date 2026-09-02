@@ -1,20 +1,10 @@
-import { useEffect, useState } from "react";
 import { Check, Palette } from "lucide-react";
-import { presentationThemes, type PresentationTheme } from "@/data/siteConfig";
+import { presentationThemes } from "@/data/siteConfig";
 import { Button } from "@/components/ui/button";
-
-const STORAGE_KEY = "hr-catalyst:presentation-theme";
+import { usePresentationTheme } from "@/components/PresentationThemeProvider";
 
 const PresentationThemeToggle = () => {
-  const [theme, setTheme] = useState<PresentationTheme>(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    return saved === "professional" ? "professional" : "executive";
-  });
-
-  useEffect(() => {
-    document.documentElement.dataset.presentationTheme = theme;
-    window.localStorage.setItem(STORAGE_KEY, theme);
-  }, [theme]);
+  const { theme, setTheme } = usePresentationTheme();
 
   return (
     <div className="flex flex-wrap items-center gap-2" aria-label="Presentation theme">
