@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import PresentationThemeToggle from "@/components/PresentationThemeToggle";
 
 const sections = [
   { id: "experience", label: "Experience" },
@@ -130,12 +129,10 @@ const Navbar = () => {
             </button>
           ))}
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${linkClass}`}>Recruiter docs</Link>
-          <PresentationThemeToggle />
         </div>
 
         <div className="hidden md:flex lg:hidden items-center gap-2">
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md ${linkClass}`}>CV</Link>
-          <PresentationThemeToggle />
           <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} className={scrolled ? "text-foreground" : "text-primary-foreground hover:bg-white/20"} onClick={() => setOpen((v) => !v)}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -152,7 +149,6 @@ const Navbar = () => {
             <button type="button" key={s.id} onClick={() => go(s.id)} className={`block w-full text-left px-2 py-2 rounded-md text-sm hover:bg-muted transition-smooth ${activeSection === s.id ? "bg-muted font-semibold text-foreground" : "text-foreground"}`} aria-current={activeSection === s.id ? "location" : undefined}>{s.label}</button>
           ))}
           <Link to="/cv" onClick={() => setOpen(false)} className="block w-full text-left px-2 py-2 rounded-md text-sm text-foreground hover:bg-muted transition-smooth">Recruiter documents</Link>
-          <div className="border-t border-border pt-3"><PresentationThemeToggle /></div>
         </div>
       )}
     </header>
