@@ -33,22 +33,31 @@
 
 .presentation-theme-floating {
   position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  z-index: 60;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 9999;
+  display: block;
+  min-width: 17rem;
   max-width: calc(100vw - 2rem);
-  padding: 0.4rem;
-  border: 1px solid hsl(var(--border) / 0.9);
-  border-radius: 0.85rem;
-  background: hsl(var(--card) / 0.94);
-  box-shadow: 0 12px 30px -18px hsl(215 30% 15% / 0.45);
-  backdrop-filter: blur(12px);
+  padding: 0.55rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.9rem;
+  background: hsl(var(--card) / 0.98);
+  color: hsl(var(--card-foreground));
+  box-shadow: 0 16px 40px -18px hsl(215 30% 15% / 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  pointer-events: auto;
 }
-.presentation-theme-floating [aria-label="Presentation theme"] > span { display: none; }
-.presentation-theme-floating button { min-height: 2.25rem; }
+.presentation-theme-floating > div { width: 100%; }
+.presentation-theme-floating [aria-label="Presentation mode"] { display: grid; grid-template-columns: auto 1fr 1fr; align-items: center; gap: 0.4rem; width: 100%; }
+.presentation-theme-floating [aria-label="Presentation mode"] > span { display: inline-flex; white-space: nowrap; }
+.presentation-theme-floating button { min-height: 2.4rem; width: 100%; font-size: 0.75rem; font-weight: 600; }
+.presentation-theme-floating::before { content: "Choose presentation"; display: block; margin: 0 0 0.35rem 0.15rem; color: hsl(var(--muted-foreground)); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 @media (max-width: 639px) {
-  .presentation-theme-floating { right: 0.75rem; bottom: 0.75rem; }
-  .presentation-theme-floating button { padding-inline: 0.65rem; font-size: 0.7rem; }
+  .presentation-theme-floating { right: max(0.65rem, env(safe-area-inset-right)); bottom: max(0.65rem, env(safe-area-inset-bottom)); min-width: min(17rem, calc(100vw - 1.3rem)); }
+  .presentation-theme-floating [aria-label="Presentation mode"] { grid-template-columns: 1fr 1fr; }
+  .presentation-theme-floating [aria-label="Presentation mode"] > span { grid-column: 1 / -1; }
 }
 
 @keyframes profile-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
@@ -117,7 +126,7 @@ html[data-presentation-theme="professional"] .professional-network .shadow-mediu
   .no-print { display: none !important; } main { margin: 0 !important; padding: 0 !important; max-width: none !important; }
   .cv-doc { display: block !important; width: auto !important; max-width: none !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; background: #fff !important; color: #000 !important; font-family: Arial, Helvetica, sans-serif !important; font-size: 10.5pt !important; line-height: 1.42 !important; }
   .cv-doc h1, .cv-doc h2, .cv-doc h3, .cv-doc p, .cv-doc li, .cv-doc span, .cv-doc strong { color: #000 !important; }
-  .cv-doc .cv-header { margin-bottom: 12pt !important; text-align: center !important; } .cv-doc h1, .cv-doc .cv-target-role, .cv-doc .cv-headline, .cv-doc .cv-contact { text-align: center !important; }
-  .cv-doc section { break-inside: auto; page-break-inside: auto; } .cv-doc .cv-entry { break-inside: avoid; page-break-inside: avoid; } .cv-doc h2, .cv-doc h3 { break-after: avoid; page-break-after: avoid; }
-  .cv-doc a { color: #000 !important; text-decoration: none !important; }
+  .cv-doc .cv-header { margin-bottom: 10pt !important; padding-bottom: 6pt !important; }
+  .cv-doc section { margin-bottom: 8pt !important; }
+  .cv-doc .cv-entry { margin-bottom: 5pt !important; }
 }
