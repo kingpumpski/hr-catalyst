@@ -9,6 +9,7 @@ const CvLibrary = lazy(() => import("./pages/CvLibrary"));
 const CvVersionPage = lazy(() => import("./pages/CvVersion"));
 const ShareDocumentPage = lazy(() => import("./pages/ShareDocument"));
 const RefereeVault = lazy(() => import("./pages/RefereeVault"));
+const Settings = lazy(() => import("./pages/Settings"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const App = () => (
@@ -23,6 +24,7 @@ const App = () => (
             <Route path="/cv/:slug" element={<CvVersionPage />} />
             <Route path="/share/:documentType/:slug" element={<ShareDocumentPage />} />
             <Route path="/owner/referees" element={<RefereeVault />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
