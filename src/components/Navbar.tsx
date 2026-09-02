@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, Settings2, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import PresentationThemeToggle from "@/components/PresentationThemeToggle";
 
 const sections = [
   { id: "experience", label: "Experience" },
@@ -20,6 +19,7 @@ const Navbar = () => {
   const [activeSection, setActiveSection] = useState<string>("");
   const location = useLocation();
   const navigate = useNavigate();
+  const isOwnerMode = new URLSearchParams(location.search).get("mode") === "owner";
 
   useEffect(() => {
     let frame = 0;
@@ -143,13 +143,28 @@ const Navbar = () => {
             </button>
           ))}
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${linkClass}`}>Recruiter docs</Link>
-          <div className={`ml-2 border-l pl-3 ${scrolled ? "border-border" : "border-primary-foreground/30"}`}>
-            <PresentationThemeToggle compact />
-          </div>
+          {isOwnerMode && (
+            <Link
+              to="/settings?mode=owner"
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm transition-smooth hover:bg-foreground/10 ${linkClass}`}
+            >
+              <Settings2 className="h-4 w-4" aria-hidden="true" />
+              Settings
+            </Link>
+          )}
         </div>
 
         <div className="hidden lg:flex xl:hidden items-center gap-2">
-          <PresentationThemeToggle compact />
+          {isOwnerMode && (
+            <Link
+              to="/settings?mode=owner"
+              aria-label="Open settings"
+              className={`inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm ${linkClass}`}
+            >
+              <Settings2 className="h-4 w-4" aria-hidden="true" />
+              Settings
+            </Link>
+          )}
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md ${linkClass}`}>CV</Link>
           <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} className={scrolled ? "text-foreground" : "text-primary-foreground hover:bg-white/20"} onClick={() => setOpen((v) => !v)}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -165,9 +180,16 @@ const Navbar = () => {
 
       {open && (
         <div className="lg:hidden bg-background/95 backdrop-blur-md border-t border-border px-6 py-3 space-y-2">
-          <div className="rounded-xl border border-border bg-card p-3">
-            <PresentationThemeToggle />
-          </div>
+          {isOwnerMode && (
+            <Link
+              to="/settings?mode=owner"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-smooth"
+            >
+              <Settings2 className="h-4 w-4" aria-hidden="true" />
+              Settings
+            </Link>
+          )}
           {sections.map((s) => (
             <button type="button" key={s.id} onClick={() => go(s.id)} className={`block w-full text-left px-2 py-2 rounded-md text-sm hover:bg-muted transition-smooth ${activeSection === s.id ? "bg-muted font-semibold text-foreground" : "text-foreground"}`} aria-current={activeSection === s.id ? "location" : undefined}>{s.label}</button>
           ))}
