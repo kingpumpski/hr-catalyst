@@ -3,6 +3,7 @@ import { ArrowRight, BriefcaseBusiness, FileText, Globe2, Mail, MapPin } from "l
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import RecruiterSnapshot from "@/components/RecruiterSnapshot";
+import ProfessionalProfileSections from "@/components/ProfessionalProfileSections";
 import Experience from "@/components/Experience";
 import Education from "@/components/Education";
 import Leadership from "@/components/Leadership";
@@ -39,6 +40,7 @@ const ProfessionalNetworkLayout = ({ ownerControls }: ProfessionalNetworkLayoutP
     </section>
     {ownerControls}
     <div className="container mx-auto max-w-6xl px-6 pb-8"><RecruiterSnapshot /></div>
+    <ProfessionalProfileSections />
     <section className="container mx-auto grid max-w-6xl gap-8 px-6 pb-20 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,.8fr)]">
       <div className="space-y-8"><Experience /><Leadership /><WorkshopsAndSeminars /></div>
       <aside className="space-y-8 lg:sticky lg:top-24 lg:self-start">
