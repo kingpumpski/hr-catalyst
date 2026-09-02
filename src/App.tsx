@@ -1,9 +1,8 @@
 import { lazy, Suspense } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PresentationThemeProvider } from "@/components/PresentationThemeProvider";
+import DeferredNotifications from "@/components/DeferredNotifications";
 
 const Index = lazy(() => import("./pages/Index"));
 const CvLibrary = lazy(() => import("./pages/CvLibrary"));
@@ -14,8 +13,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const App = () => (
   <TooltipProvider>
-    <Toaster />
-    <Sonner />
+    <DeferredNotifications />
     <BrowserRouter>
       <PresentationThemeProvider>
         <Suspense fallback={<div className="min-h-screen bg-background" />}>
