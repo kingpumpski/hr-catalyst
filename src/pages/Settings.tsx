@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import DocumentSettingsPanel from "@/components/DocumentSettingsPanel";
 import PresentationThemeToggle from "@/components/PresentationThemeToggle";
 import SocialProfileSettings from "@/components/SocialProfileSettings";
-import ButtonLink from "@/components/ButtonLink";
 
 const Settings = () => {
   const isOwnerMode = new URLSearchParams(window.location.search).get("mode") === "owner";
@@ -23,6 +22,6 @@ const Settings = () => {
   </main>;
 };
 
-const _unusedTypeGuard = (_value: ReactNode) => null;
+const ButtonLink = ({ to, label, icon }: { to: string; label: string; icon: ReactNode }) => <Link to={to} className="mt-6 inline-flex items-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-smooth hover:opacity-90">{icon}{label}</Link>;
 
 export default Settings;
