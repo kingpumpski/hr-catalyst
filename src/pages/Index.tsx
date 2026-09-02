@@ -26,8 +26,34 @@ const Index = () => {
   );
   const { theme } = usePresentationTheme();
 
+  const ownerControls = showOwnerControls ? (
+    <section className="px-6 py-10 bg-background">
+      <div className="container max-w-5xl mx-auto">
+        <div className="mb-6 rounded-lg border border-border bg-card p-4 shadow-soft">
+          <PresentationThemeToggle />
+          <p className="mt-2 text-xs text-muted-foreground">
+            Choose the public presentation style. Recruiter documents remain ATS-first in every mode.
+          </p>
+        </div>
+        <DocumentSettingsPanel onChange={setDocumentSettings} />
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-dashed border-border bg-muted/20 p-4">
+          <div className="text-sm text-muted-foreground">
+            {documentSettings?.resumeMode
+              ? "Resume-style layout is enabled for your document output."
+              : "CV-style layout is enabled for your document output."}
+          </div>
+          <Button variant="outline" asChild>
+            <Link to="/owner/referees">
+              <LockKeyhole className="mr-2 h-4 w-4" /> Private referee vault
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  ) : null;
+
   if (theme === "professional") {
-    return <ProfessionalNetworkLayout />;
+    return <ProfessionalNetworkLayout ownerControls={ownerControls} />;
   }
 
   return (
@@ -35,31 +61,7 @@ const Index = () => {
       <Navbar />
       <Hero />
       <RecruiterSnapshot />
-      {showOwnerControls && (
-        <section className="px-6 py-12 bg-background">
-          <div className="container max-w-5xl mx-auto">
-            <div className="mb-6 rounded-lg border border-border bg-card p-4 shadow-soft">
-              <PresentationThemeToggle />
-              <p className="mt-2 text-xs text-muted-foreground">
-                Choose the public presentation style. Recruiter documents remain ATS-first in every mode.
-              </p>
-            </div>
-            <DocumentSettingsPanel onChange={setDocumentSettings} />
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-dashed border-border bg-muted/20 p-4">
-              <div className="text-sm text-muted-foreground">
-                {documentSettings?.resumeMode
-                  ? "Resume-style layout is enabled for your document output."
-                  : "CV-style layout is enabled for your document output."}
-              </div>
-              <Button variant="outline" asChild>
-                <Link to="/owner/referees">
-                  <LockKeyhole className="mr-2 h-4 w-4" /> Private referee vault
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-      )}
+      {ownerControls}
       <Experience />
       <Leadership />
       <WorkshopsAndSeminars />
