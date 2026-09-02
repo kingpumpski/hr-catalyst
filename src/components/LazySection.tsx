@@ -3,9 +3,14 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 type LazySectionProps = {
   children: ReactNode;
   fallback?: ReactNode;
+  navId?: string;
 };
 
-const LazySection = ({ children, fallback = <div className="min-h-[220px]" /> }: LazySectionProps) => {
+const LazySection = ({
+  children,
+  fallback = <div className="min-h-[220px]" />,
+  navId,
+}: LazySectionProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [hasTriggered, setHasTriggered] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
@@ -31,7 +36,7 @@ const LazySection = ({ children, fallback = <div className="min-h-[220px]" /> }:
       {
         rootMargin: "200px 0px",
         threshold: 0.1,
-      }
+      },
     );
 
     observer.observe(element);
@@ -39,7 +44,11 @@ const LazySection = ({ children, fallback = <div className="min-h-[220px]" /> }:
     return () => observer.disconnect();
   }, [hasTriggered]);
 
-  return <div ref={ref}>{isVisible ? children : fallback}</div>;
+  return (
+    <div ref={ref} data-nav-section={navId}>
+      {isVisible ? children : fallback}
+    </div>
+  );
 };
 
 export default LazySection;
