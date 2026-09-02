@@ -11,8 +11,17 @@ const PresentationThemeToggle = ({ compact = false }: PresentationThemeTogglePro
   const { theme, setTheme } = usePresentationTheme();
 
   return (
-    <div className="flex flex-wrap items-center gap-2" aria-label="Presentation mode">
-      <span className={compact ? "sr-only" : "mr-1 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"}>
+    <div
+      className={compact
+        ? "inline-flex max-w-full flex-wrap items-center gap-1 rounded-lg border border-border/80 bg-background/95 p-1 text-foreground shadow-soft backdrop-blur-md"
+        : "flex flex-wrap items-center gap-2"
+      }
+      aria-label="Presentation mode"
+    >
+      <span className={compact
+        ? "sr-only"
+        : "mr-1 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+      }>
         <Palette className="h-4 w-4" aria-hidden="true" /> Presentation
       </span>
       {presentationThemes.map((option) => (
@@ -25,6 +34,7 @@ const PresentationThemeToggle = ({ compact = false }: PresentationThemeTogglePro
           aria-label={`${option.name} presentation`}
           aria-pressed={theme === option.id}
           onClick={() => setTheme(option.id)}
+          className={compact ? "text-xs" : undefined}
         >
           {theme === option.id && <Check className="mr-1 h-3.5 w-3.5" aria-hidden="true" />}
           {option.name}
