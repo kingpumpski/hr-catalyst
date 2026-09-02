@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import PresentationThemeToggle from "@/components/PresentationThemeToggle";
 
 const sections = [
   { id: "experience", label: "Experience" },
@@ -122,29 +123,38 @@ const Navbar = () => {
           Kingsley J. Norku
         </button>
 
-        <div className="hidden lg:flex items-center gap-1">
+        <div className="hidden xl:flex items-center gap-1">
           {sections.map((s) => (
             <button type="button" key={s.id} onClick={() => go(s.id)} className={sectionButtonClass(s.id)} aria-current={activeSection === s.id ? "location" : undefined}>
               {s.label}
             </button>
           ))}
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${linkClass}`}>Recruiter docs</Link>
+          <div className={`ml-2 border-l pl-3 ${scrolled ? "border-border" : "border-primary-foreground/30"}`}>
+            <PresentationThemeToggle compact />
+          </div>
         </div>
 
-        <div className="hidden md:flex lg:hidden items-center gap-2">
+        <div className="hidden lg:flex xl:hidden items-center gap-2">
+          <PresentationThemeToggle compact />
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md ${linkClass}`}>CV</Link>
           <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} className={scrolled ? "text-foreground" : "text-primary-foreground hover:bg-white/20"} onClick={() => setOpen((v) => !v)}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
 
-        <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} className={`md:hidden lg:hidden ${scrolled ? "text-foreground" : "text-primary-foreground hover:bg-white/20"}`} onClick={() => setOpen((v) => !v)}>
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+        <div className="flex lg:hidden items-center gap-2">
+          <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} className={scrolled ? "text-foreground" : "text-primary-foreground hover:bg-white/20"} onClick={() => setOpen((v) => !v)}>
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </nav>
 
       {open && (
         <div className="lg:hidden bg-background/95 backdrop-blur-md border-t border-border px-6 py-3 space-y-2">
+          <div className="rounded-xl border border-border bg-card p-3">
+            <PresentationThemeToggle />
+          </div>
           {sections.map((s) => (
             <button type="button" key={s.id} onClick={() => go(s.id)} className={`block w-full text-left px-2 py-2 rounded-md text-sm hover:bg-muted transition-smooth ${activeSection === s.id ? "bg-muted font-semibold text-foreground" : "text-foreground"}`} aria-current={activeSection === s.id ? "location" : undefined}>{s.label}</button>
           ))}
