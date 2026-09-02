@@ -1,10 +1,8 @@
-import { lazy, Suspense } from "react";
+import type { ReactNode } from "react";
 import { ArrowLeft, FileText, LockKeyhole, Palette, Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import DocumentSettingsPanel from "@/components/DocumentSettingsPanel";
 import PresentationThemeToggle from "@/components/PresentationThemeToggle";
-
-const RefereeVault = lazy(() => import("@/pages/RefereeVault"));
 
 const Settings = () => {
   const isOwnerMode = new URLSearchParams(window.location.search).get("mode") === "owner";
@@ -106,7 +104,7 @@ const Settings = () => {
   );
 };
 
-const ButtonLink = ({ to, label, icon }: { to: string; label: string; icon: React.ReactNode }) => (
+const ButtonLink = ({ to, label, icon }: { to: string; label: string; icon: ReactNode }) => (
   <Link
     to={to}
     className="mt-6 inline-flex items-center rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-smooth hover:opacity-90"
