@@ -2,7 +2,6 @@ import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { PresentationThemeProvider } from "@/components/PresentationThemeProvider";
 
@@ -13,36 +12,25 @@ const ShareDocumentPage = lazy(() => import("./pages/ShareDocument"));
 const RefereeVault = lazy(() => import("./pages/RefereeVault"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: false,
-    },
-  },
-});
-
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <PresentationThemeProvider>
-          <Suspense fallback={<div className="min-h-screen bg-background" />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/cv" element={<CvLibrary />} />
-              <Route path="/cv/:slug" element={<CvVersionPage />} />
-              <Route path="/share/:documentType/:slug" element={<ShareDocumentPage />} />
-              <Route path="/owner/referees" element={<RefereeVault />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </PresentationThemeProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <TooltipProvider>
+    <Toaster />
+    <Sonner />
+    <BrowserRouter>
+      <PresentationThemeProvider>
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/cv" element={<CvLibrary />} />
+            <Route path="/cv/:slug" element={<CvVersionPage />} />
+            <Route path="/share/:documentType/:slug" element={<ShareDocumentPage />} />
+            <Route path="/owner/referees" element={<RefereeVault />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </PresentationThemeProvider>
+    </BrowserRouter>
+  </TooltipProvider>
 );
 
 export default App;
