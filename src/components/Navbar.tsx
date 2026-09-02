@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import PresentationThemeToggle from "@/components/PresentationThemeToggle";
 
@@ -17,6 +17,8 @@ const sections = [
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -25,13 +27,51 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (location.pathname !== "/" || !location.hash) return;
+
+    const id = decodeURIComponent(location.hash.slice(1));
+    const timer = window.setTimeout(() => {
+      const target = document.getElementById(id) ??
+        document.querySelector<HTMLElement>(`[data-nav-section="${id}"]`);
+      if (!target) return;
+
+      const headerOffset = 84;
+      const elementPosition = target.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top: Math.max(0, elementPosition - headerOffset), behavior: "smooth" });
+    }, 50);
+
+    return () => window.clearTimeout(timer);
+  }, [location.pathname, location.hash]);
+
   const go = (id: string) => {
     setOpen(false);
-    const target = document.getElementById(id);
+
+    if (location.pathname !== "/") {
+      navigate(`/#${id}`);
+      return;
+    }
+
+    const target = document.getElementById(id) ??
+      document.querySelector<HTMLElement>(`[data-nav-section="${id}"]`);
     if (!target) return;
+
     const headerOffset = 84;
     const elementPosition = target.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top: elementPosition - headerOffset, behavior: "smooth" });
+    window.scrollTo({ top: Math.max(0, elementPosition - headerOffset), behavior: "smooth" });
+
+    if (window.history.replaceState) {
+      window.history.replaceState(null, "", `/#${id}`);
+    }
+  };
+
+  const goHome = () => {
+    setOpen(false);
+    if (location.pathname === "/") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    navigate("/");
   };
 
   const linkClass = scrolled
@@ -40,14 +80,14 @@ const Navbar = () => {
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${scrolled ? "bg-background/90 backdrop-blur-md shadow-soft" : "bg-transparent"}`}>
-      <nav className="container max-w-6xl mx-auto flex items-center justify-between gap-4 px-6 py-4">
-        <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className={`font-semibold tracking-tight transition-smooth ${scrolled ? "text-foreground" : "text-primary-foreground"}`}>
+      <nav className="container max-w-6xl mx-auto flex items-center justify-between gap-4 px-6 py-4" aria-label="Primary navigation">
+        <button type="button" onClick={goHome} className={`font-semibold tracking-tight transition-smooth ${scrolled ? "text-foreground" : "text-primary-foreground"}`}>
           Kingsley J. Norku
         </button>
 
         <div className="hidden lg:flex items-center gap-1">
           {sections.map((s) => (
-            <button key={s.id} onClick={() => go(s.id)} className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${linkClass}`}>
+            <button type="button" key={s.id} onClick={() => go(s.id)} className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${linkClass}`}>
               {s.label}
             </button>
           ))}
@@ -68,7 +108,7 @@ const Navbar = () => {
       {open && (
         <div className="md:hidden bg-background/95 backdrop-blur-md border-t border-border px-6 py-3 space-y-2">
           {sections.map((s) => (
-            <button key={s.id} onClick={() => go(s.id)} className="block w-full text-left px-2 py-2 rounded-md text-sm text-foreground hover:bg-muted transition-smooth">{s.label}</button>
+            <button type="button" key={s.id} onClick={() => go(s.id)} className="block w-full text-left px-2 py-2 rounded-md text-sm text-foreground hover:bg-muted transition-smooth">{s.label}</button>
           ))}
           <Link to="/cv" onClick={() => setOpen(false)} className="block w-full text-left px-2 py-2 rounded-md text-sm text-foreground hover:bg-muted transition-smooth">Recruiter documents</Link>
           <div className="border-t border-border pt-3"><PresentationThemeToggle /></div>
