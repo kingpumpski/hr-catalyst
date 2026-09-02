@@ -45,7 +45,7 @@ const LazySection = ({
   }, [hasTriggered]);
 
   return (
-    <div ref={ref} data-nav-section={navId}>
+    <div ref={ref} data-nav-section={navId} className="below-fold-section">
       {isVisible ? children : fallback}
     </div>
   );
