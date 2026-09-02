@@ -2,7 +2,6 @@ import { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import PresentationThemeFloatingControl from "@/components/PresentationThemeFloatingControl";
 import LazySection from "@/components/LazySection";
 import PresentationThemeToggle from "@/components/PresentationThemeToggle";
 import { Button } from "@/components/ui/button";
@@ -60,37 +59,31 @@ const Index = () => {
 
   if (theme === "professional") {
     return (
-      <>
-        <PresentationThemeFloatingControl />
-        <Suspense fallback={<SectionFallback />}>
-          <ProfessionalNetworkLayout ownerControls={ownerControls} />
-        </Suspense>
-      </>
+      <Suspense fallback={<SectionFallback />}>
+        <ProfessionalNetworkLayout ownerControls={ownerControls} />
+      </Suspense>
     );
   }
 
   return (
-    <>
-      <PresentationThemeFloatingControl />
-      <main className="min-h-screen">
-        <Navbar />
-        <Hero />
-        <Suspense fallback={<SectionFallback />}>
-          <RecruiterSnapshot />
-        </Suspense>
-        {ownerControls}
-        <LazySection navId="experience"><Suspense fallback={<SectionFallback />}><Experience /></Suspense></LazySection>
-        <LazySection navId="leadership"><Suspense fallback={<SectionFallback />}><Leadership /></Suspense></LazySection>
-        <LazySection navId="workshops"><Suspense fallback={<SectionFallback />}><WorkshopsAndSeminars /></Suspense></LazySection>
-        <LazySection navId="skills"><Suspense fallback={<SectionFallback />}><Skills /></Suspense></LazySection>
-        <LazySection navId="education"><Suspense fallback={<SectionFallback />}><Education /></Suspense></LazySection>
-        <LazySection navId="interests"><Suspense fallback={<SectionFallback />}><Interests /></Suspense></LazySection>
-        <LazySection navId="contact"><Suspense fallback={<SectionFallback />}><Contact /></Suspense></LazySection>
-        <footer className="bg-primary text-primary-foreground py-8 px-6 text-center">
-          <p className="text-sm">© {new Date().getFullYear()} Kingsley Junior Norku. All rights reserved.</p>
-        </footer>
-      </main>
-    </>
+    <main className="min-h-screen">
+      <Navbar />
+      <Hero />
+      <Suspense fallback={<SectionFallback />}>
+        <RecruiterSnapshot />
+      </Suspense>
+      {ownerControls}
+      <LazySection navId="experience"><Suspense fallback={<SectionFallback />}><Experience /></Suspense></LazySection>
+      <LazySection navId="leadership"><Suspense fallback={<SectionFallback />}><Leadership /></Suspense></LazySection>
+      <LazySection navId="workshops"><Suspense fallback={<SectionFallback />}><WorkshopsAndSeminars /></Suspense></LazySection>
+      <LazySection navId="skills"><Suspense fallback={<SectionFallback />}><Skills /></Suspense></LazySection>
+      <LazySection navId="education"><Suspense fallback={<SectionFallback />}><Education /></Suspense></LazySection>
+      <LazySection navId="interests"><Suspense fallback={<SectionFallback />}><Interests /></Suspense></LazySection>
+      <LazySection navId="contact"><Suspense fallback={<SectionFallback />}><Contact /></Suspense></LazySection>
+      <footer className="bg-primary text-primary-foreground py-8 px-6 text-center">
+        <p className="text-sm">© {new Date().getFullYear()} Kingsley Junior Norku. All rights reserved.</p>
+      </footer>
+    </main>
   );
 };
 
