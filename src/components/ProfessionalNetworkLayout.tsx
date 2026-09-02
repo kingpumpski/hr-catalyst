@@ -33,7 +33,7 @@ const ProfessionalNetworkLayout = ({ ownerControls }: ProfessionalNetworkLayoutP
             </div>
             <div className="flex flex-wrap gap-3 lg:max-w-[210px] lg:justify-end"><Link to="/cv" className="professional-primary-action inline-flex items-center rounded-xl px-4 py-2.5 text-sm font-semibold transition-smooth hover:-translate-y-0.5"><FileText className="mr-2 h-4 w-4" /> Recruiter documents <ArrowRight className="ml-2 h-4 w-4" /></Link><a href="#contact" className="professional-secondary-action inline-flex items-center rounded-xl border px-4 py-2.5 text-sm font-semibold transition-smooth hover:-translate-y-0.5"><Mail className="mr-2 h-4 w-4" /> Contact</a></div>
           </div>
-          <div className="mt-7 border-t pt-5"><SocialLinks /></div>
+          <div className="mt-7 border-t pt-5"><SocialLinks variant="profile" /></div>
         </div>
       </div>
     </section>
