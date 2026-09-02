@@ -1,7 +1,7 @@
 /* Canonical ATS CV / resume export styling.
  * Mirrors the approved reference document: plain white A4 page, serif body,
- * centered identity block, ruled uppercase sections, right-aligned metadata,
- * compact bullets and no decorative UI elements in print.
+ * centered identity block, inline contact details, ruled uppercase sections,
+ * right-aligned metadata, compact bullets and no decorative UI elements in print.
  */
 .cv-doc {
   width: 100%;
@@ -35,6 +35,10 @@
 }
 
 .cv-doc .cv-contact {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   margin-top: 5pt;
   font-size: 9pt;
   line-height: 1.35;
@@ -43,10 +47,12 @@
 
 .cv-doc .cv-contact span {
   display: inline;
+  white-space: nowrap;
 }
 
 .cv-doc .cv-contact span + span::before {
   content: " | ";
+  white-space: pre;
 }
 
 .cv-doc section {
@@ -137,16 +143,19 @@
 }
 
 .cv-doc .cv-skill-grid {
-  display: block;
-  line-height: 1.35;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 24pt;
+  line-height: 1.3;
 }
 
-.cv-doc .cv-skill-grid span {
-  display: inline;
+.cv-doc .cv-skill-grid ul {
+  margin: 0;
+  padding-left: 16pt;
 }
 
-.cv-doc .cv-skill-grid span + span::before {
-  content: " | ";
+.cv-doc .cv-skill-grid li {
+  margin-bottom: 1.5pt;
 }
 
 @media print {
@@ -181,6 +190,10 @@
     break-inside: avoid;
     page-break-inside: avoid;
   }
+
+  .cv-doc .cv-contact {
+    display: flex;
+  }
 }
 
 @media (max-width: 767px) {
@@ -194,12 +207,17 @@
     font-size: 20pt;
   }
 
-  .cv-doc .cv-contact span {
+  .cv-doc .cv-contact {
     display: block;
   }
 
+  .cv-doc .cv-contact span {
+    display: inline;
+    white-space: normal;
+  }
+
   .cv-doc .cv-contact span + span::before {
-    content: "";
+    content: " | ";
   }
 
   .cv-doc .cv-entry-line {
@@ -211,5 +229,10 @@
     margin-top: 1pt;
     text-align: left;
     white-space: normal;
+  }
+
+  .cv-doc .cv-skill-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 }
