@@ -25,6 +25,15 @@ export default defineConfig(({ mode }) => ({
         manualChunks: {
           vendor: ["react", "react-dom", "react-router-dom"],
         },
+        manualChunks(id) {
+          if (!id.includes("node_modules")) return;
+
+          if (id.includes("@radix-ui")) return "radix-vendor";
+          if (id.includes("lucide-react")) return "icons-vendor";
+          if (id.includes("framer-motion")) return "motion-vendor";
+          if (id.includes("next-themes")) return "theme-vendor";
+          if (id.includes("sonner")) return "toast-vendor";
+        },
       },
     },
   },
