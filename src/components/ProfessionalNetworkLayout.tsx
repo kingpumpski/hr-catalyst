@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ArrowRight, BriefcaseBusiness, FileText, Globe2, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -11,7 +12,11 @@ import Interests from "@/components/Interests";
 import Contact from "@/components/Contact";
 import SocialLinks from "@/components/SocialLinks";
 
-const ProfessionalNetworkLayout = () => (
+type ProfessionalNetworkLayoutProps = {
+  ownerControls?: ReactNode;
+};
+
+const ProfessionalNetworkLayout = ({ ownerControls }: ProfessionalNetworkLayoutProps) => (
   <main className="professional-network min-h-screen">
     <Navbar />
     <section id="hero" className="professional-profile-shell px-6 pb-10 pt-28 md:pt-32">
@@ -32,6 +37,7 @@ const ProfessionalNetworkLayout = () => (
         </div>
       </div>
     </section>
+    {ownerControls}
     <div className="container mx-auto max-w-6xl px-6 pb-8"><RecruiterSnapshot /></div>
     <section className="container mx-auto grid max-w-6xl gap-8 px-6 pb-20 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,.8fr)]">
       <div className="space-y-8"><Experience /><Leadership /><WorkshopsAndSeminars /></div>
