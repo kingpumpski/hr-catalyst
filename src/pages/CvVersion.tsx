@@ -34,27 +34,39 @@ const CvVersionPage = () => {
   const [companyName, setCompanyName] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
+  const originalTitleRef = useRef(document.title);
+  const restoreTitleTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!version) return;
 
-    const previousTitle = document.title;
     const handleAfterPrint = () => {
-      document.title = previousTitle;
+      if (restoreTitleTimeoutRef.current !== null) {
+        window.clearTimeout(restoreTitleTimeoutRef.current);
+        restoreTitleTimeoutRef.current = null;
+      }
+      document.title = originalTitleRef.current;
     };
 
     window.addEventListener("afterprint", handleAfterPrint);
-    return () => window.removeEventListener("afterprint", handleAfterPrint);
+    return () => {
+      window.removeEventListener("afterprint", handleAfterPrint);
+      if (restoreTitleTimeoutRef.current !== null) {
+        window.clearTimeout(restoreTitleTimeoutRef.current);
+        restoreTitleTimeoutRef.current = null;
+      }
+    };
   }, [version]);
 
   if (!version) return <NotFound />;
 
   const handlePrint = () => {
-    const previousTitle = document.title;
+    originalTitleRef.current = document.title;
     document.title = `Kingsley Junior Norku - ${version.title} - ${documentLabels[tab]}`;
     window.print();
-    window.setTimeout(() => {
-      document.title = previousTitle;
+    restoreTitleTimeoutRef.current = window.setTimeout(() => {
+      document.title = originalTitleRef.current;
+      restoreTitleTimeoutRef.current = null;
     }, 2000);
   };
 
