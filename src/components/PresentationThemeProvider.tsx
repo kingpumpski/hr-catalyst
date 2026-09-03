@@ -27,8 +27,8 @@ export const PresentationThemeProvider = ({ children }: { children: ReactNode })
   return <PresentationThemeContext.Provider value={value}>{children}</PresentationThemeContext.Provider>;
 };
 
-export const usePresentationTheme = () => {
+export function usePresentationTheme() {
   const context = useContext(PresentationThemeContext);
   if (!context) throw new Error("usePresentationTheme must be used within PresentationThemeProvider");
   return context;
-};
+}
