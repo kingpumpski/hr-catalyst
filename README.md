@@ -19,7 +19,7 @@ npm ci
 npm run dev
 ```
 
-The development server is configured for port `8080`.
+The development server is configured for port `8080` and binds to the local loopback interface rather than exposing the development server to the network.
 
 ## Quality checks
 
@@ -31,6 +31,14 @@ npx tsc --noEmit
 npm test
 npm run build
 ```
+
+The CI quality gate also performs a high-severity audit of production/runtime dependencies with `npm audit --omit=dev --audit-level=high`.
+
+## Dependency security
+
+The repository uses npm lockfile pinning and explicit dependency overrides for patched transitive `nanoid` and `postcss` versions. These overrides are intentionally narrow and should be revisited when their upstream dependency chains provide compatible fixes.
+
+Do not use `npm audit fix --force` as a routine maintenance operation. Review the affected dependency chain first, prefer the smallest compatible patch, refresh `package-lock.json`, and run the complete quality suite before merging.
 
 ## Production build
 
@@ -58,6 +66,7 @@ For Cloudflare Workers Builds, configure the project to build the application wi
 - `main` is the stable integration branch.
 - `career-update-vehicle-accounting` is the active development branch for recruiter-focused career platform enhancements.
 - Keep production-facing changes validated by lint, typecheck, tests, and a production build before merging.
+- Keep dependency changes lockfile-synchronized and security-audited before review.
 
 ## Content integrity
 
