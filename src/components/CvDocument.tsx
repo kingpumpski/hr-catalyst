@@ -9,6 +9,7 @@ import { loadDocumentSettings } from "@/lib/documentSettings";
 const CvDocument = ({ version }: { version: CvVersion }) => {
   const settings = useMemo(() => loadDocumentSettings(), []);
   const format = getCvFormatProfile(settings.targetMarket);
+  const showPhoto = settings.includePhoto && Boolean(settings.photoUrl) && format.photoPolicy !== "never";
   const contactItems = [
     { label: "Phone", value: profile.phone },
     { label: "Email", value: profile.email },
@@ -27,13 +28,23 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
   return (
     <article className={`cv-doc cv-paper-${format.paperSize.toLowerCase()} cv-market-${format.market}`} aria-label={`${profile.name} CV - ${version.title}`}>
       <header className="cv-header">
-        <div className="cv-identity">
-          <h1>{profile.name}</h1>
-          <p className="cv-target-title">{version.title}</p>
-          <div className="cv-contact" aria-label="Contact information">
-            {settings.showLocation && <span>{profile.address}</span>}
-            {contactItems.map((item) => <span key={item.label}>{item.value}</span>)}
+        <div className={showPhoto ? "cv-header-with-photo" : undefined}>
+          <div className="cv-identity">
+            <h1>{profile.name}</h1>
+            <p className="cv-target-title">{version.title}</p>
+            <div className="cv-contact" aria-label="Contact information">
+              {settings.showLocation && <span>{profile.address}</span>}
+              {contactItems.map((item) => <span key={item.label}>{item.value}</span>)}
+            </div>
           </div>
+          {showPhoto && (
+            <img
+              className="cv-profile-photo"
+              src={settings.photoUrl}
+              alt={profile.name}
+              loading="lazy"
+            />
+          )}
         </div>
       </header>
 
