@@ -27,8 +27,10 @@ export const PresentationThemeProvider = ({ children }: { children: ReactNode })
   return <PresentationThemeContext.Provider value={value}>{children}</PresentationThemeContext.Provider>;
 };
 
-export function usePresentationTheme() {
+// This hook intentionally lives beside its provider so the public API remains backwards-compatible.
+// eslint-disable-next-line react-refresh/only-export-components
+export const usePresentationTheme = () => {
   const context = useContext(PresentationThemeContext);
   if (!context) throw new Error("usePresentationTheme must be used within PresentationThemeProvider");
   return context;
-}
+};
