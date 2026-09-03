@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,11 +7,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Printer, Mail } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
 import { profile } from "@/data/profile";
-import CvDocument from "@/components/CvDocument";
-import ResumeDocument from "@/components/ResumeDocument";
-import CoverLetterDocument from "@/components/CoverLetterDocument";
 import { getSharePageTitle, isShareDocumentType, normalizeShareDocumentType } from "@/lib/shareLinks";
 import NotFound from "./NotFound";
+
+const CvDocument = lazy(() => import("@/components/CvDocument"));
+const ResumeDocument = lazy(() => import("@/components/ResumeDocument"));
+const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 
 const ShareDocumentPage = () => {
   const { documentType, slug } = useParams<{ documentType?: string; slug?: string }>();
@@ -61,7 +62,9 @@ const ShareDocumentPage = () => {
 
         <div className="mb-6 flex items-center gap-2 no-print"><Button variant="ghost" asChild><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />Back to main profile</Link></Button></div>
 
-        {resolvedType === "resume" ? <ResumeDocument version={version} /> : resolvedType === "letter" ? <CoverLetterDocument version={version} recipientName={recipientName} companyName={companyName || "[Company Name]"} companyAddress={companyAddress || "[Company Address]"} /> : <CvDocument version={version} />}
+        <Suspense fallback={<div className="cv-doc mx-auto min-h-[12rem] animate-pulse rounded-lg bg-muted" aria-label="Loading document" />}>
+          {resolvedType === "resume" ? <ResumeDocument version={version} /> : resolvedType === "letter" ? <CoverLetterDocument version={version} recipientName={recipientName} companyName={companyName || "[Company Name]"} companyAddress={companyAddress || "[Company Address]"} /> : <CvDocument version={version} />}
+        </Suspense>
       </div>
     </main>
   );
