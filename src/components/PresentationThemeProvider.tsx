@@ -12,7 +12,11 @@ const PresentationThemeContext = createContext<PresentationThemeContextValue | n
 
 const readTheme = (): PresentationTheme => {
   if (typeof window === "undefined") return "executive";
-  return window.localStorage.getItem(STORAGE_KEY) === "professional" ? "professional" : "executive";
+  try {
+    return window.localStorage.getItem(STORAGE_KEY) === "professional" ? "professional" : "executive";
+  } catch {
+    return "executive";
+  }
 };
 
 export const PresentationThemeProvider = ({ children }: { children: ReactNode }) => {
@@ -20,7 +24,11 @@ export const PresentationThemeProvider = ({ children }: { children: ReactNode })
 
   useEffect(() => {
     document.documentElement.dataset.presentationTheme = theme;
-    window.localStorage.setItem(STORAGE_KEY, theme);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      // The selected theme remains active for the current session if storage is unavailable.
+    }
   }, [theme]);
 
   const value = useMemo(() => ({ theme, setTheme }), [theme]);
