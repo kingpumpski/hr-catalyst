@@ -20,11 +20,6 @@ const ShareDocumentPage = () => {
   const originalTitleRef = useRef(document.title);
   const restoreTitleTimeoutRef = useRef<number | null>(null);
 
-  if (!isShareDocumentType(documentType)) return <NotFound />;
-
-  const resolvedType = normalizeShareDocumentType(documentType);
-  const version = slug ? getCvVersionFromCatalog(slug) : null;
-
   useEffect(() => {
     return () => {
       if (restoreTitleTimeoutRef.current !== null) {
@@ -32,6 +27,11 @@ const ShareDocumentPage = () => {
       }
     };
   }, []);
+
+  if (!isShareDocumentType(documentType)) return <NotFound />;
+
+  const resolvedType = normalizeShareDocumentType(documentType);
+  const version = slug ? getCvVersionFromCatalog(slug) : null;
 
   if (!version) return <NotFound />;
 
