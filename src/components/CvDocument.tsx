@@ -29,6 +29,7 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
       <header className="cv-header">
         <div className="cv-identity">
           <h1>{profile.name}</h1>
+          <p className="cv-target-title">{version.title}</p>
           <div className="cv-contact" aria-label="Contact information">
             {settings.showLocation && <span>{profile.address}</span>}
             {contactItems.map((item) => <span key={item.label}>{item.value}</span>)}
