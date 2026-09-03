@@ -20,6 +20,7 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isOwnerMode = new URLSearchParams(location.search).get("mode") === "owner";
+  const visibleActiveSection = location.pathname === "/" ? activeSection : "";
 
   useEffect(() => {
     let frame = 0;
@@ -42,10 +43,7 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    if (location.pathname !== "/") {
-      setActiveSection("");
-      return;
-    }
+    if (location.pathname !== "/") return;
 
     const observed = sections
       .map(({ id }) => document.getElementById(id) ?? document.querySelector<HTMLElement>(`[data-nav-section="${id}"]`))
@@ -126,7 +124,7 @@ const Navbar = () => {
 
   const sectionButtonClass = (id: string) =>
     `px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${
-      activeSection === id ? "bg-foreground/10 font-semibold text-foreground" : linkClass
+      visibleActiveSection === id ? "bg-foreground/10 font-semibold text-foreground" : linkClass
     }`;
 
   return (
@@ -138,7 +136,7 @@ const Navbar = () => {
 
         <div className="hidden xl:flex items-center gap-1">
           {sections.map((s) => (
-            <button type="button" key={s.id} onClick={() => go(s.id)} className={sectionButtonClass(s.id)} aria-current={activeSection === s.id ? "location" : undefined}>
+            <button type="button" key={s.id} onClick={() => go(s.id)} className={sectionButtonClass(s.id)} aria-current={visibleActiveSection === s.id ? "location" : undefined}>
               {s.label}
             </button>
           ))}
@@ -191,7 +189,7 @@ const Navbar = () => {
             </Link>
           )}
           {sections.map((s) => (
-            <button type="button" key={s.id} onClick={() => go(s.id)} className={`block w-full text-left px-2 py-2 rounded-md text-sm hover:bg-muted transition-smooth ${activeSection === s.id ? "bg-muted font-semibold text-foreground" : "text-foreground"}`} aria-current={activeSection === s.id ? "location" : undefined}>{s.label}</button>
+            <button type="button" key={s.id} onClick={() => go(s.id)} className={`block w-full text-left px-2 py-2 rounded-md text-sm hover:bg-muted transition-smooth ${visibleActiveSection === s.id ? "bg-muted font-semibold text-foreground" : "text-foreground"}`} aria-current={visibleActiveSection === s.id ? "location" : undefined}>{s.label}</button>
           ))}
           <Link to="/cv" onClick={() => setOpen(false)} className="block w-full text-left px-2 py-2 rounded-md text-sm text-foreground hover:bg-muted transition-smooth">Recruiter documents</Link>
         </div>
