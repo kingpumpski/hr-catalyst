@@ -3,6 +3,28 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, MapPin } from "lucide-react";
 import { companies } from "@/data/profile";
 
+const getRoleDuration = (period: string, fallback: string) => {
+  const match = period.match(/^(\w+) (\d{4}) - (Present|\w+ \d{4})$/);
+  if (!match) return fallback;
+
+  const [, startMonth, startYear, end] = match;
+  const startDate = new Date(Date.UTC(Number(startYear), new Date(`${startMonth} 1, 2000`).getUTCMonth(), 1));
+  const endDate = end === "Present" ? new Date() : new Date(Date.UTC(Number(end.slice(-4)), new Date(`${end.slice(0, -5)} 1, 2000`).getUTCMonth(), 1));
+
+  const months =
+    (endDate.getUTCFullYear() - startDate.getUTCFullYear()) * 12 +
+    (endDate.getUTCMonth() - startDate.getUTCMonth());
+
+  if (months < 0) return fallback;
+
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+
+  if (years === 0) return `${remainingMonths} mos`;
+  if (remainingMonths === 0) return `${years} ${years === 1 ? "yr" : "yrs"}`;
+  return `${years} ${years === 1 ? "yr" : "yrs"} ${remainingMonths} mos`;
+};
+
 const Experience = () => {
   return (
     <section id="experience" className="py-20 px-6 bg-muted/30 scroll-mt-20">
@@ -40,7 +62,7 @@ const Experience = () => {
                     <span className="absolute -left-[6px] mt-2 h-3 w-3 rounded-full bg-primary" />
                     <h4 className="text-lg font-semibold text-foreground">{role.title}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {role.employmentType} · {role.period} · {role.duration}
+                      {role.employmentType} · {role.period} · {getRoleDuration(role.period, role.duration)}
                     </p>
                     <p className="text-sm text-muted-foreground mb-3">{role.location}</p>
                     <p className="text-sm text-foreground/90 mb-3">{role.summary}</p>
