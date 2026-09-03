@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,8 @@ const ResumeDocument = lazy(() => import("@/components/ResumeDocument"));
 const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 
 type DocumentTab = "cv" | "resume" | "letter";
+
+const documentTabs: DocumentTab[] = ["cv", "resume", "letter"];
 
 const documentLabels: Record<DocumentTab, string> = {
   cv: "CV",
@@ -31,6 +33,19 @@ const CvVersionPage = () => {
   const [recipientName, setRecipientName] = useState("Hiring Manager");
   const [companyName, setCompanyName] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
+  const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
+
+  useEffect(() => {
+    if (!version) return;
+
+    const previousTitle = document.title;
+    const handleAfterPrint = () => {
+      document.title = previousTitle;
+    };
+
+    window.addEventListener("afterprint", handleAfterPrint);
+    return () => window.removeEventListener("afterprint", handleAfterPrint);
+  }, [version]);
 
   if (!version) return <NotFound />;
 
@@ -40,7 +55,29 @@ const CvVersionPage = () => {
     window.print();
     window.setTimeout(() => {
       document.title = previousTitle;
-    }, 1000);
+    }, 2000);
+  };
+
+  const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    const currentIndex = documentTabs.indexOf(tab);
+    let nextIndex: number | null = null;
+
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % documentTabs.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + documentTabs.length) % documentTabs.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = documentTabs.length - 1;
+    }
+
+    if (nextIndex === null) return;
+
+    event.preventDefault();
+    const nextTab = documentTabs[nextIndex];
+    setTab(nextTab);
+    tabRefs.current[nextTab]?.focus();
   };
 
   return (
@@ -65,30 +102,24 @@ const CvVersionPage = () => {
           </div>
 
           <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Career document type">
-            <Button
-              variant={tab === "cv" ? "default" : "outline"}
-              role="tab"
-              aria-selected={tab === "cv"}
-              onClick={() => setTab("cv")}
-            >
-              CV
-            </Button>
-            <Button
-              variant={tab === "resume" ? "default" : "outline"}
-              role="tab"
-              aria-selected={tab === "resume"}
-              onClick={() => setTab("resume")}
-            >
-              Resume
-            </Button>
-            <Button
-              variant={tab === "letter" ? "default" : "outline"}
-              role="tab"
-              aria-selected={tab === "letter"}
-              onClick={() => setTab("letter")}
-            >
-              Cover letter
-            </Button>
+            {documentTabs.map((documentTab) => (
+              <Button
+                key={documentTab}
+                ref={(element) => {
+                  tabRefs.current[documentTab] = element;
+                }}
+                variant={tab === documentTab ? "default" : "outline"}
+                id={`document-tab-${documentTab}`}
+                role="tab"
+                aria-selected={tab === documentTab}
+                aria-controls={`document-panel-${documentTab}`}
+                tabIndex={tab === documentTab ? 0 : -1}
+                onClick={() => setTab(documentTab)}
+                onKeyDown={handleTabKeyDown}
+              >
+                {documentLabels[documentTab]}
+              </Button>
+            ))}
           </div>
 
           <div className="flex flex-wrap gap-2 mb-8">
@@ -140,18 +171,25 @@ const CvVersionPage = () => {
         </div>
 
         <Suspense fallback={<DocumentFallback />}>
-          {tab === "cv" ? (
-            <CvDocument version={version} />
-          ) : tab === "resume" ? (
-            <ResumeDocument version={version} />
-          ) : (
-            <CoverLetterDocument
-              version={version}
-              recipientName={recipientName}
-              companyName={companyName || "[Company Name]"}
-              companyAddress={companyAddress || "[Company Address]"}
-            />
-          )}
+          <div
+            id={`document-panel-${tab}`}
+            role="tabpanel"
+            aria-labelledby={`document-tab-${tab}`}
+            tabIndex={-1}
+          >
+            {tab === "cv" ? (
+              <CvDocument version={version} />
+            ) : tab === "resume" ? (
+              <ResumeDocument version={version} />
+            ) : (
+              <CoverLetterDocument
+                version={version}
+                recipientName={recipientName}
+                companyName={companyName || "[Company Name]"}
+                companyAddress={companyAddress || "[Company Address]"}
+              />
+            )}
+          </div>
         </Suspense>
       </div>
     </main>
