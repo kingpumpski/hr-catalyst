@@ -1,15 +1,16 @@
+import { lazy, Suspense, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Printer } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
-import CvDocument from "@/components/CvDocument";
-import ResumeDocument from "@/components/ResumeDocument";
-import CoverLetterDocument from "@/components/CoverLetterDocument";
 import NotFound from "./NotFound";
+
+const CvDocument = lazy(() => import("@/components/CvDocument"));
+const ResumeDocument = lazy(() => import("@/components/ResumeDocument"));
+const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 
 type DocumentTab = "cv" | "resume" | "letter";
 
@@ -18,6 +19,10 @@ const documentLabels: Record<DocumentTab, string> = {
   resume: "Resume",
   letter: "Cover Letter",
 };
+
+const DocumentFallback = () => (
+  <div className="min-h-[60vh] rounded-lg border border-border bg-background" aria-hidden="true" />
+);
 
 const CvVersionPage = () => {
   const { slug } = useParams();
@@ -134,18 +139,20 @@ const CvVersionPage = () => {
           )}
         </div>
 
-        {tab === "cv" ? (
-          <CvDocument version={version} />
-        ) : tab === "resume" ? (
-          <ResumeDocument version={version} />
-        ) : (
-          <CoverLetterDocument
-            version={version}
-            recipientName={recipientName}
-            companyName={companyName || "[Company Name]"}
-            companyAddress={companyAddress || "[Company Address]"}
-          />
-        )}
+        <Suspense fallback={<DocumentFallback />}>
+          {tab === "cv" ? (
+            <CvDocument version={version} />
+          ) : tab === "resume" ? (
+            <ResumeDocument version={version} />
+          ) : (
+            <CoverLetterDocument
+              version={version}
+              recipientName={recipientName}
+              companyName={companyName || "[Company Name]"}
+              companyAddress={companyAddress || "[Company Address]"}
+            />
+          )}
+        </Suspense>
       </div>
     </main>
   );
