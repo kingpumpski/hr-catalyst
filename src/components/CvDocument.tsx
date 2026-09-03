@@ -1,28 +1,18 @@
 import "@/cv-print.css";
-import { companies, leadership } from "@/data/profile";
+import { companies, leadership, profile } from "@/data/profile";
 import { education } from "@/data/education";
 import { getCvFormatProfile } from "@/data/cvFormatProfiles";
 import type { CvVersion } from "@/data/cvVersions";
 import { useMemo } from "react";
 import { loadDocumentSettings } from "@/lib/documentSettings";
 
-const atsDocumentProfile = {
-  name: "Kingsley Junior Norku",
-  address: "Tema, Greater Accra, Ghana",
-  phone: "0542069136",
-  email: "kingpumpski@gmail.com",
-  linkedin: "linkedin.com/in/kingsley-junior-norku-a74407124",
-  languages: ["English", "Fante", "Twi"],
-  references: "References available upon request",
-};
-
 const CvDocument = ({ version }: { version: CvVersion }) => {
   const settings = useMemo(() => loadDocumentSettings(), []);
   const format = getCvFormatProfile(settings.targetMarket);
   const contactItems = [
-    { label: "Phone", value: atsDocumentProfile.phone },
-    { label: "Email", value: atsDocumentProfile.email },
-    { label: "LinkedIn", value: atsDocumentProfile.linkedin },
+    { label: "Phone", value: profile.phone },
+    { label: "Email", value: profile.email },
+    { label: "LinkedIn", value: profile.linkedin.replace(/^https?:\/\//, "") },
   ].filter((item) => {
     if (item.label === "Phone" || item.label === "Email") return settings.showContactDetails;
     return settings.includeLinkedIn && settings.showContactDetails;
@@ -38,12 +28,12 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
   const technicalSkillColumns = [technicalSkills.slice(0, splitIndex), technicalSkills.slice(splitIndex)].filter((column) => column.length > 0);
 
   return (
-    <article className={`cv-doc cv-paper-${format.paperSize.toLowerCase()} cv-market-${format.market}`} aria-label={`${atsDocumentProfile.name} CV - ${version.title}`}>
+    <article className={`cv-doc cv-paper-${format.paperSize.toLowerCase()} cv-market-${format.market}`} aria-label={`${profile.name} CV - ${version.title}`}>
       <header className={`cv-header ${photoEnabled ? "cv-header-with-photo" : ""}`}>
         <div className="cv-identity">
-          <h1>{atsDocumentProfile.name}</h1>
+          <h1>{profile.name}</h1>
           <div className="cv-contact" aria-label="Contact information">
-            {settings.showLocation && <span>{atsDocumentProfile.address}</span>}
+            {settings.showLocation && <span>{profile.address}</span>}
             {contactItems.map((item) => <span key={item.label}>{item.value}</span>)}
           </div>
         </div>
@@ -83,8 +73,8 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
       ))}</section>}
 
       <section><h2>PROFESSIONAL STRENGTHS</h2><p>{strengths.join(" | ")}</p></section>
-      <section><h2>LANGUAGES</h2><p>{atsDocumentProfile.languages.join(" | ")}</p></section>
-      {settings.showReferences && <section><h2>REFERENCES</h2><p>{atsDocumentProfile.references}</p></section>}
+      <section><h2>LANGUAGES</h2><p>{profile.languages.join(" | ")}</p></section>
+      {settings.showReferences && <section><h2>REFERENCES</h2><p>{profile.references}</p></section>}
     </article>
   );
 };
