@@ -27,7 +27,7 @@ Run the same checks used by the repository's GitHub Actions quality workflow:
 
 ```sh
 npm run lint
-npx tsc --noEmit
+npm run typecheck
 npm test
 npm run build
 ```
@@ -37,6 +37,8 @@ The CI quality gate also performs a high-severity audit of production/runtime de
 ## Dependency security
 
 The repository uses npm lockfile pinning and explicit dependency overrides for patched transitive `nanoid` and `postcss` versions. These overrides are intentionally narrow and should be revisited when their upstream dependency chains provide compatible fixes.
+
+Dependency install scripts are governed by an explicit, version-pinned `allowScripts` policy in `package.json`, while `.npmrc` enables strict enforcement so newly introduced install scripts must be reviewed before CI will accept them.
 
 Do not use `npm audit fix --force` as a routine maintenance operation. Review the affected dependency chain first, prefer the smallest compatible patch, refresh `package-lock.json`, and run the complete quality suite before merging.
 
@@ -66,7 +68,7 @@ For Cloudflare Workers Builds, configure the project to build the application wi
 - `main` is the stable integration branch.
 - `career-update-vehicle-accounting` is the active development branch for recruiter-focused career platform enhancements.
 - Keep production-facing changes validated by lint, typecheck, tests, and a production build before merging.
-- Keep dependency changes lockfile-synchronized and security-audited before review.
+- Keep dependency changes lockfile-synchronized, install-script reviewed, and security-audited before review.
 
 ## Content integrity
 
