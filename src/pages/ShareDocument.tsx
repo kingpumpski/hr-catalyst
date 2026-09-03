@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,16 +17,36 @@ const ShareDocumentPage = () => {
   const [recipientName, setRecipientName] = useState("Hiring Manager");
   const [companyName, setCompanyName] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
+  const originalTitleRef = useRef(document.title);
+  const restoreTitleTimeoutRef = useRef<number | null>(null);
 
   if (!isShareDocumentType(documentType)) return <NotFound />;
 
   const resolvedType = normalizeShareDocumentType(documentType);
   const version = slug ? getCvVersionFromCatalog(slug) : null;
 
+  useEffect(() => {
+    return () => {
+      if (restoreTitleTimeoutRef.current !== null) {
+        window.clearTimeout(restoreTitleTimeoutRef.current);
+      }
+    };
+  }, []);
+
   if (!version) return <NotFound />;
 
+  const handlePrint = () => {
+    originalTitleRef.current = document.title;
+    document.title = `Kingsley Junior Norku - ${version.title} - ${getSharePageTitle(resolvedType)}`;
+    window.print();
+    restoreTitleTimeoutRef.current = window.setTimeout(() => {
+      document.title = originalTitleRef.current;
+      restoreTitleTimeoutRef.current = null;
+    }, 2000);
+  };
+
   return (
-    <main className="min-h-screen bg-background px-6 py-8">
+    <main className="cv-document-page min-h-screen bg-background px-6 py-8">
       <div className="container mx-auto max-w-4xl">
         <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -34,7 +54,7 @@ const ShareDocumentPage = () => {
             <h1 className="text-3xl font-semibold text-foreground">{version.title}</h1>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />Download / Print</Button>
+            <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" />Download / Print</Button>
             <Button variant="outline" asChild><a href="mailto:kingpumpski@gmail.com?subject=Recruiter%20document%20request"><Mail className="mr-2 h-4 w-4" />Contact me</a></Button>
           </div>
         </div>
