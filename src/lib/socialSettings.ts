@@ -41,5 +41,10 @@ export const loadSocialSettings = (): ConfiguredSocialLink[] => {
 };
 
 export const saveSocialSettings = (links: ConfiguredSocialLink[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeSocialSettings(links)));
+  } catch {
+    // Storage can be unavailable or quota-limited; keep the in-memory state usable.
+  }
 };
