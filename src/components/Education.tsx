@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GraduationCap, Award, MapPin } from "lucide-react";
-import { education } from "@/data/profile";
+import { education } from "@/data/education";
 
 const Education = () => {
   return (
