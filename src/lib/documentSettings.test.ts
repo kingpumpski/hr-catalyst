@@ -18,4 +18,38 @@ describe("document settings", () => {
       showLocation: true,
     });
   });
+
+  it("preserves supported markets and trims safe photo URLs", () => {
+    const result = normalizeDocumentSettings({
+      targetMarket: "germany",
+      photoUrl: " https://example.com/photo.jpg ",
+      includePhoto: true,
+    });
+
+    expect(result.targetMarket).toBe("germany");
+    expect(result.photoUrl).toBe("https://example.com/photo.jpg");
+    expect(result.includePhoto).toBe(true);
+  });
+
+  it("falls back from unsupported markets", () => {
+    const result = normalizeDocumentSettings({ targetMarket: "unsupported" as never });
+
+    expect(result.targetMarket).toBe(DEFAULT_DOCUMENT_SETTINGS.targetMarket);
+  });
+
+  it("rejects unsafe photo URLs and disables photo inclusion", () => {
+    const result = normalizeDocumentSettings({
+      photoUrl: "javascript:alert(document.domain)",
+      includePhoto: true,
+    });
+
+    expect(result.photoUrl).toBe("");
+    expect(result.includePhoto).toBe(false);
+  });
+
+  it("does not enable photos without a usable photo URL", () => {
+    const result = normalizeDocumentSettings({ includePhoto: true, photoUrl: "" });
+
+    expect(result.includePhoto).toBe(false);
+  });
 });
