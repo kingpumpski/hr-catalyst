@@ -39,6 +39,23 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("/node_modules/framer-motion/")) return "motion-vendor";
           if (id.includes("/node_modules/next-themes/")) return "theme-vendor";
           if (id.includes("/node_modules/sonner/")) return "toast-vendor";
+
+          if (
+            id.includes("/node_modules/react-pdf/") ||
+            id.includes("/node_modules/pdfjs-dist/") ||
+            id.includes("/node_modules/html2canvas/")
+          ) {
+            return "document-export-vendor";
+          }
+
+          if (id.includes("/node_modules/recharts/")) return "charts-vendor";
+          if (
+            id.includes("/node_modules/react-hook-form/") ||
+            id.includes("/node_modules/@hookform/resolvers/") ||
+            id.includes("/node_modules/zod/")
+          ) {
+            return "forms-vendor";
+          }
         },
       },
     },
