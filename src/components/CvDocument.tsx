@@ -17,19 +17,16 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
     if (item.label === "Phone" || item.label === "Email") return settings.showContactDetails;
     return settings.includeLinkedIn && settings.showContactDetails;
   });
-  const photoEnabled = settings.includePhoto && Boolean(settings.photoUrl) && format.photoPolicy !== "never";
 
   const strengths = [
     "Accuracy", "Integrity", "Financial Discipline", "Attention to Detail", "Confidentiality", "Analytical Thinking",
     "Problem Solving", "Operational Coordination", "Documentation", "Team Collaboration", "Time Management", "Continuous Improvement",
   ];
   const technicalSkills = Array.from(new Set(version.coreSkills));
-  const splitIndex = Math.ceil(technicalSkills.length / 2);
-  const technicalSkillColumns = [technicalSkills.slice(0, splitIndex), technicalSkills.slice(splitIndex)].filter((column) => column.length > 0);
 
   return (
     <article className={`cv-doc cv-paper-${format.paperSize.toLowerCase()} cv-market-${format.market}`} aria-label={`${profile.name} CV - ${version.title}`}>
-      <header className={`cv-header ${photoEnabled ? "cv-header-with-photo" : ""}`}>
+      <header className="cv-header">
         <div className="cv-identity">
           <h1>{profile.name}</h1>
           <div className="cv-contact" aria-label="Contact information">
@@ -37,7 +34,6 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
             {contactItems.map((item) => <span key={item.label}>{item.value}</span>)}
           </div>
         </div>
-        {photoEnabled && <img className="cv-profile-photo" src={settings.photoUrl} alt="Professional profile" />}
       </header>
 
       <section><h2>SUMMARY</h2><p>{version.summary}</p></section>
@@ -58,9 +54,7 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
         </article>
       )))}</section>
 
-      <section><h2>TECHNICAL SKILLS</h2><div className="cv-skill-grid" role="list">{technicalSkillColumns.map((column, columnIndex) => (
-        <ul key={`skills-${columnIndex}`}>{column.map((skill) => <li key={skill}>{skill}</li>)}</ul>
-      ))}</div></section>
+      <section><h2>TECHNICAL SKILLS</h2><ul className="cv-skill-list">{technicalSkills.map((skill) => <li key={skill}>{skill}</li>)}</ul></section>
 
       <section><h2>SELECTED ACHIEVEMENTS</h2><ul>{version.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}</ul></section>
 
