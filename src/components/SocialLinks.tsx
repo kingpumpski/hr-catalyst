@@ -1,10 +1,10 @@
-import { AtSign, ExternalLink, Facebook, Github, Instagram, Youtube } from "lucide-react";
+import { AtSign, ExternalLink, Facebook, Instagram, Youtube } from "lucide-react";
 import { useMemo } from "react";
 import { loadSocialSettings } from "@/lib/socialSettings";
 
 type SocialLinksProps = { variant?: "default" | "profile" };
 
-const iconMap = { LinkedIn: AtSign, GitHub: Github, X: AtSign, Facebook, Instagram, YouTube: Youtube };
+const iconMap = { LinkedIn: AtSign, GitHub: AtSign, X: AtSign, Facebook, Instagram, YouTube: Youtube };
 
 const SocialLinks = ({ variant = "default" }: SocialLinksProps) => {
   const links = useMemo(() => loadSocialSettings(), []);
