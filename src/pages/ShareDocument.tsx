@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Printer, Mail } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
+import { profile } from "@/data/profile";
 import CvDocument from "@/components/CvDocument";
 import ResumeDocument from "@/components/ResumeDocument";
 import CoverLetterDocument from "@/components/CoverLetterDocument";
@@ -20,6 +21,7 @@ const ShareDocumentPage = () => {
 
   const resolvedType = useMemo(() => normalizeShareDocumentType(documentType), [documentType]);
   const version = slug ? getCvVersionFromCatalog(slug) : null;
+  const contactHref = `mailto:${profile.email}?subject=Recruiter%20document%20request`;
 
   if (!isShareDocumentType(documentType) || !version) return <NotFound />;
 
@@ -33,7 +35,7 @@ const ShareDocumentPage = () => {
           </div>
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />Download / Print</Button>
-            <Button variant="outline" asChild><a href="mailto:kingpumpski@gmail.com?subject=Recruiter%20document%20request"><Mail className="mr-2 h-4 w-4" />Contact me</a></Button>
+            <Button variant="outline" asChild><a href={contactHref}><Mail className="mr-2 h-4 w-4" />Contact me</a></Button>
           </div>
         </div>
 
