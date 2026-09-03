@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { cvCatalog, getCvVersionFromCatalog } from "@/data/cvCatalog";
+import { getShareLink, type ShareDocumentType } from "@/lib/shareLinks";
 
 describe("CV catalog integrity", () => {
   it("contains unique, URL-safe slugs", () => {
@@ -22,6 +23,18 @@ describe("CV catalog integrity", () => {
       expect(version.coverLetter.opening.trim()).not.toBe("");
       expect(version.coverLetter.body.length).toBeGreaterThan(0);
       expect(version.coverLetter.closing.trim()).not.toBe("");
+    }
+  });
+
+  it("keeps every catalog version addressable by all supported share variants", () => {
+    const documentTypes: ShareDocumentType[] = ["cv", "resume", "letter"];
+
+    for (const version of cvCatalog) {
+      for (const documentType of documentTypes) {
+        expect(getShareLink(version.slug, documentType)).toBe(
+          `/share/${documentType}/${version.slug}`,
+        );
+      }
     }
   });
 
