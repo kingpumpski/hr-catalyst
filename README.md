@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
+# Kingsley Junior Norku — Professional Career Platform
 
-## Project info
+A recruiter-focused professional profile and CV platform built with React, TypeScript, Vite, and Tailwind CSS. The application presents career experience, recruiter-oriented CV tracks, professional documents, and contact information through a responsive web experience.
 
-**URL**: https://lovable.dev/projects/fa223b43-c51d-4ecd-96fe-f6ef19cb3e32
+## Technology
 
-## How can I edit this code?
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Vitest
+- Cloudflare Workers Static Assets
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/fa223b43-c51d-4ecd-96fe-f6ef19cb3e32) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Local development
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+npm ci
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The development server is configured for port `8080`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Quality checks
 
-**Use GitHub Codespaces**
+Run the same checks used by the repository's GitHub Actions quality workflow:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+npm run lint
+npx tsc --noEmit
+npm test
+npm run build
+```
 
-## What technologies are used for this project?
+## Production build
 
-This project is built with:
+```sh
+npm run build
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Vite outputs the production application to `dist/`.
 
-## How can I deploy this project?
+## Cloudflare Workers deployment
 
-Simply open [Lovable](https://lovable.dev/projects/fa223b43-c51d-4ecd-96fe-f6ef19cb3e32) and click on Share -> Publish.
+The project is configured for Cloudflare Workers Static Assets through `wrangler.jsonc`. The configuration publishes the Vite `dist/` directory and enables SPA fallback so client-side routes resolve through `index.html` when a matching static asset does not exist.
 
-## Can I connect a custom domain to my Lovable project?
+If deploying from a local environment with Wrangler installed, use:
 
-Yes, you can!
+```sh
+npm run build
+wrangler deploy
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+For Cloudflare Workers Builds, configure the project to build the application with `npm run build` and deploy the resulting Worker/static assets using the repository's `wrangler.jsonc` configuration.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Repository workflow
+
+- `main` is the stable integration branch.
+- `career-update-vehicle-accounting` is the active development branch for recruiter-focused career platform enhancements.
+- Keep production-facing changes validated by lint, typecheck, tests, and a production build before merging.
+
+## Content integrity
+
+Professional positioning is based on documented experience and transferable skills. The platform does not claim prior remote employment or invent vehicle-accounting employment history.
