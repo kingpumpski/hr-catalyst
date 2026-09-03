@@ -6,14 +6,28 @@ export type ConfiguredSocialLink = SocialLink & { enabled: boolean };
 
 export const DEFAULT_SOCIAL_SETTINGS: ConfiguredSocialLink[] = socialLinks.map((link) => ({ ...link, enabled: Boolean(link.url.trim()) }));
 
+const isSafeSocialUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:";
+  } catch {
+    return false;
+  }
+};
+
+const normalizeUrl = (value: string, fallback: string) => {
+  const trimmed = value.trim();
+  return trimmed && isSafeSocialUrl(trimmed) ? trimmed : fallback;
+};
+
 export const normalizeSocialSettings = (value: unknown): ConfiguredSocialLink[] => {
   if (!Array.isArray(value)) return DEFAULT_SOCIAL_SETTINGS;
   const byLabel = new Map(DEFAULT_SOCIAL_SETTINGS.map((link) => [link.label, link]));
   return DEFAULT_SOCIAL_SETTINGS.map((fallback) => {
     const stored = value.find((item) => item && typeof item === "object" && "label" in item && item.label === fallback.label) as Partial<ConfiguredSocialLink> | undefined;
-    const url = typeof stored?.url === "string" ? stored.url.trim() : fallback.url;
+    const url = normalizeUrl(typeof stored?.url === "string" ? stored.url : "", fallback.url);
     const handle = typeof stored?.handle === "string" ? stored.handle.trim() : fallback.handle;
-    return { ...fallback, ...stored, label: byLabel.get(fallback.label)?.label ?? fallback.label, url, handle, enabled: typeof stored?.enabled === "boolean" ? stored.enabled : Boolean(url) };
+    return { ...fallback, ...stored, label: byLabel.get(fallback.label)?.label ?? fallback.label, url, handle, enabled: typeof stored?.enabled === "boolean" && Boolean(url) ? stored.enabled : Boolean(url) };
   });
 };
 
