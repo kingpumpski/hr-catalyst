@@ -6,6 +6,7 @@ import {
   isShareDocumentType,
   isShareRoute,
   normalizeShareDocumentType,
+  parseShareRoute,
 } from "@/lib/shareLinks";
 
 describe("share link contracts", () => {
@@ -48,5 +49,36 @@ describe("share link contracts", () => {
     expect(isShareRoute("/share/cv/remote-claims-billing")).toBe(true);
     expect(isShareRoute("/cv/remote-claims-billing")).toBe(false);
     expect(isShareRoute("/share")).toBe(false);
+  });
+
+  it("parses only canonical share routes with safe slugs", () => {
+    expect(parseShareRoute("/share/cv/remote-claims-billing")).toEqual({
+      documentType: "cv",
+      slug: "remote-claims-billing",
+    });
+    expect(parseShareRoute("/SHARE/Resume/REMOTE-CLAIMS-BILLING")).toEqual({
+      documentType: "resume",
+      slug: "REMOTE-CLAIMS-BILLING",
+    });
+    expect(parseShareRoute("/share/letter/customer-admin-operations/")).toEqual({
+      documentType: "letter",
+      slug: "customer-admin-operations",
+    });
+  });
+
+  it("rejects malformed or unsupported share routes", () => {
+    const invalidRoutes = [
+      "/share",
+      "/share/cv",
+      "/share/pdf/remote-claims-billing",
+      "/share/cv/remote claims billing",
+      "/share/cv/remote_claims_billing",
+      "/share/cv/remote-claims-billing/extra",
+      "/cv/remote-claims-billing",
+    ];
+
+    for (const route of invalidRoutes) {
+      expect(parseShareRoute(route)).toBeUndefined();
+    }
   });
 });
