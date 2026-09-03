@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 type LazySectionProps = {
   children: ReactNode;
@@ -11,38 +11,28 @@ const LazySection = ({
   fallback = <div className="min-h-[220px]" />,
   navId,
 }: LazySectionProps) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [hasTriggered, setHasTriggered] = useState(false);
+  const supportsIntersectionObserver = typeof IntersectionObserver !== "undefined";
+  const [isVisible, setIsVisible] = useState(() => !supportsIntersectionObserver);
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (hasTriggered || typeof IntersectionObserver === "undefined") {
-      return;
-    }
+    if (isVisible || !supportsIntersectionObserver) return;
 
     const element = ref.current;
-    if (!element) {
-      return;
-    }
+    if (!element) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          setHasTriggered(true);
-          observer.disconnect();
-        }
+        if (!entry.isIntersecting) return;
+        setIsVisible(true);
+        observer.disconnect();
       },
-      {
-        rootMargin: "200px 0px",
-        threshold: 0.1,
-      },
+      { rootMargin: "240px 0px", threshold: 0.01 },
     );
 
     observer.observe(element);
-
     return () => observer.disconnect();
-  }, [hasTriggered]);
+  }, [isVisible, supportsIntersectionObserver]);
 
   return (
     <div ref={ref} data-nav-section={navId} className="below-fold-section">
