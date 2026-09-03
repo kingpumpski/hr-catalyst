@@ -1,5 +1,10 @@
 export type ShareDocumentType = "cv" | "resume" | "letter";
 
+export const isShareDocumentType = (value?: string): value is ShareDocumentType => {
+  const normalized = value?.toLowerCase();
+  return normalized === "cv" || normalized === "resume" || normalized === "letter";
+};
+
 export const normalizeShareDocumentType = (value?: string): ShareDocumentType => {
   const normalized = value?.toLowerCase();
   if (normalized === "resume") return "resume";
