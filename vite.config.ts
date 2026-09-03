@@ -6,7 +6,8 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
   server: {
-    host: "::",
+    // Keep the development server local by default; Codespaces can still forward the port.
+    host: "127.0.0.1",
     port: 8080,
   },
   plugins: [react()],
