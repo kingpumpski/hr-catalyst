@@ -47,6 +47,8 @@
   .cv-doc.cv-paper-a4 { page: cv-a4; }
   .cv-doc.cv-paper-letter { page: cv-letter; }
   html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; color: #000 !important; }
+  .cv-document-page { min-height: 0 !important; margin: 0 !important; padding: 0 !important; }
+  .cv-document-page > .container { width: auto !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
   .cv-doc { width: 210mm; max-width: none; min-height: 297mm; margin: 0; padding: 14mm 15mm 13mm; font-size: 10.5pt; line-height: 1.28; box-shadow: none !important; border: 0 !important; border-radius: 0 !important; }
   .cv-doc.cv-paper-letter { width: 215.9mm; min-height: 279.4mm; }
   .cv-doc section, .cv-doc .cv-entry { break-inside: avoid; page-break-inside: avoid; }
