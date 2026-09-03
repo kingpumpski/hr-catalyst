@@ -1,5 +1,6 @@
 import "@/cv-print.css";
-import { companies, education, leadership } from "@/data/profile";
+import { companies, leadership } from "@/data/profile";
+import { education } from "@/data/education";
 import { getCvFormatProfile } from "@/data/cvFormatProfiles";
 import type { CvVersion } from "@/data/cvVersions";
 import { useMemo } from "react";
@@ -83,7 +84,7 @@ const CvDocument = ({ version }: { version: CvVersion }) => {
 
       <section><h2>PROFESSIONAL STRENGTHS</h2><p>{strengths.join(" | ")}</p></section>
       <section><h2>LANGUAGES</h2><p>{atsDocumentProfile.languages.join(" | ")}</p></section>
-      {settings.showReferences && <section><h2>REFERENCES</h2><p>{atsDocumentProfile.references}</p></section>}
+      {settings.showReferences && <section><h2>REFERENCES</h2><p>{atsDocument.references}</p></section>}
     </article>
   );
 };
