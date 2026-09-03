@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,35 +25,11 @@ const CvVersionPage = () => {
   const [companyName, setCompanyName] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
-  const originalTitleRef = useRef(document.title);
-  const restoreTitleTimeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (!version) return;
-    const handleAfterPrint = () => {
-      if (restoreTitleTimeoutRef.current !== null) {
-        window.clearTimeout(restoreTitleTimeoutRef.current);
-        restoreTitleTimeoutRef.current = null;
-      }
-      document.title = originalTitleRef.current;
-    };
-    window.addEventListener("afterprint", handleAfterPrint);
-    return () => {
-      window.removeEventListener("afterprint", handleAfterPrint);
-      if (restoreTitleTimeoutRef.current !== null) window.clearTimeout(restoreTitleTimeoutRef.current);
-    };
-  }, [version]);
 
   if (!version) return <NotFound />;
 
   const handlePrint = () => {
-    originalTitleRef.current = document.title;
-    document.title = `Kingsley Junior Norku - ${version.title} - ${documentLabels[tab]}`;
     window.print();
-    restoreTitleTimeoutRef.current = window.setTimeout(() => {
-      document.title = originalTitleRef.current;
-      restoreTitleTimeoutRef.current = null;
-    }, 2000);
   };
 
   const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
