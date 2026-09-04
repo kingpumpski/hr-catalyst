@@ -33,7 +33,7 @@ const fromBase64 = (value: string) => {
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 };
 
-const deriveKey = async (password: string, salt: Uint8Array) => {
+const deriveKey = async (password: string, salt: Uint8Array<ArrayBuffer>) => {
   const material = await crypto.subtle.importKey(
     "raw",
     encoder.encode(password),
