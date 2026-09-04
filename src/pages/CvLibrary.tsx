@@ -7,9 +7,16 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, FileText, Search, X } from "lucide-react";
 import { cvCatalog } from "@/data/cvCatalog";
 import { getShareLink } from "@/lib/shareLinks";
+import { useSeo } from "@/lib/seo";
 
 const CvLibrary = () => {
   const [query, setQuery] = useState("");
+  useSeo({
+    title: "CV Library | Kingsley Junior Norku",
+    description:
+      "Tailored, ATS-friendly CVs, resumes and cover letters by Kingsley Junior Norku for claims, healthcare operations, accounting, finance and administration roles.",
+    path: "/cv",
+  });
 
   const filteredVersions = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();

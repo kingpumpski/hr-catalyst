@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Printer } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
 import NotFound from "./NotFound";
+import { useSeo } from "@/lib/seo";
 
 const CvDocument = lazy(() => import("@/components/CvDocument"));
 const ResumeDocument = lazy(() => import("@/components/ResumeDocument"));
@@ -25,6 +26,13 @@ const CvVersionPage = () => {
   const [companyName, setCompanyName] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
+  useSeo({
+    title: version ? `${version.title} | Kingsley Junior Norku` : "CV not found | Kingsley Junior Norku",
+    description: version
+      ? `${version.summary.slice(0, 150)}`
+      : "This CV version could not be found.",
+    path: version ? `/cv/${version.slug}` : "/cv",
+  });
 
   if (!version) return <NotFound />;
 
