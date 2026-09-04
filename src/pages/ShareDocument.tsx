@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Printer, Mail } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
-import { profile } from "@/data/profile";
+import { getEmailHref } from "@/lib/contactLinks";
 import { getSharePageTitle, isShareDocumentType, normalizeShareDocumentType } from "@/lib/shareLinks";
 import NotFound from "./NotFound";
 
@@ -22,7 +22,7 @@ const ShareDocumentPage = () => {
 
   const resolvedType = useMemo(() => normalizeShareDocumentType(documentType), [documentType]);
   const version = slug ? getCvVersionFromCatalog(slug) : null;
-  const contactHref = `mailto:${profile.email}?subject=Recruiter%20document%20request`;
+  const contactHref = getEmailHref("Recruiter document request");
 
   if (!isShareDocumentType(documentType) || !version) return <NotFound />;
 
