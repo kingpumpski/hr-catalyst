@@ -26,7 +26,7 @@ export const parseShareRoute = (pathname: string): ShareRouteMatch | undefined =
   const documentType = segments[1].toLowerCase();
   const slug = segments[2];
 
-  if (!isShareDocumentType(documentType) || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+  if (!isShareDocumentType(documentType) || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(slug)) {
     return undefined;
   }
 
