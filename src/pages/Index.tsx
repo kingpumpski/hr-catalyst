@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import LazySection from "@/components/LazySection";
 import { usePresentationTheme } from "@/components/PresentationThemeProvider";
+import { useSeo } from "@/lib/seo";
 
 const RecruiterSnapshot = lazy(() => import("@/components/RecruiterSnapshot"));
 const Experience = lazy(() => import("@/components/Experience"));
@@ -18,6 +19,12 @@ const SectionFallback = () => <div className="min-h-24" aria-hidden="true" />;
 
 const Index = () => {
   const { theme } = usePresentationTheme();
+  useSeo({
+    title: "Kingsley Junior Norku | Claims, Accounting & Operations Professional",
+    description:
+      "Portfolio of Kingsley Junior Norku, BSc Accounting professional with 6+ years in claims management, healthcare operations, billing, reconciliation and administration.",
+    path: "/",
+  });
 
   if (theme === "professional") {
     return (

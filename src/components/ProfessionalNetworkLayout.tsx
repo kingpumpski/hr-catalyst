@@ -22,8 +22,8 @@ const ProfessionalNetworkLayout = () => (
             <div className="professional-avatar flex h-24 w-24 items-center justify-center rounded-2xl text-2xl font-bold shadow-soft md:h-28 md:w-28">KJN</div>
             <div>
               <div className="professional-status mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wider"><Globe2 className="h-4 w-4" aria-hidden="true" /> Open to remote & international opportunities</div>
-              <h1 className="text-3xl font-bold tracking-tight md:text-5xl">Kingsley Junior Norku</h1>
-              <p className="mt-2 text-lg font-semibold md:text-xl">Operations, Claims & Accounting Professional</p>
+              <h1 className="text-3xl font-bold tracking-tight md:text-5xl">Kingsley Junior Norku — Operations, Claims &amp; Accounting Professional</h1>
+              <p className="mt-2 text-lg font-semibold md:text-xl">BSc. Accounting · Claims, Billing &amp; Healthcare Operations</p>
               <p className="mt-3 max-w-3xl text-sm leading-6 md:text-base">BSc. Accounting · 6+ years across claims management, healthcare operations, accounting, billing, reconciliation, administration, IT support and logistics.</p>
               <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm"><span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4" aria-hidden="true" />Accra, Ghana</span><span className="inline-flex items-center gap-2"><BriefcaseBusiness className="h-4 w-4" aria-hidden="true" />6+ years experience</span></div>
             </div>
