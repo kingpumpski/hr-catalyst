@@ -1,0 +1,69 @@
+/* Canonical ATS CV / resume export styling with market-aware paper rules. */
+.cv-doc {
+  width: 100%;
+  max-width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 15mm;
+  background: #fff;
+  color: #000;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 10.5pt;
+  line-height: 1.28;
+  text-align: left;
+}
+
+.cv-doc .cv-header { margin-bottom: 12pt; padding-bottom: 8pt; border-bottom: 0; text-align: center; }
+.cv-doc .cv-header-with-photo { display: flex; align-items: flex-start; justify-content: center; gap: 14pt; }
+.cv-doc .cv-identity { min-width: 0; flex: 1; }
+.cv-doc .cv-profile-photo { width: 32mm; height: 40mm; object-fit: cover; border: 1px solid #777; flex: 0 0 auto; }
+.cv-doc h1 { margin: 0; font-family: "Times New Roman", Times, serif; font-size: 23pt; line-height: 1.05; font-weight: 700; letter-spacing: 0; text-align: center; }
+.cv-doc .cv-contact { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; margin-top: 5pt; font-size: 9pt; line-height: 1.35; text-align: center; }
+.cv-doc .cv-contact span { display: inline; white-space: nowrap; }
+.cv-doc .cv-contact span + span::before { content: " | "; white-space: pre; }
+.cv-doc section { margin: 0 0 11pt; }
+.cv-doc h2 { margin: 0 0 5pt; padding-bottom: 2pt; border-bottom: 1px solid #777; font-family: "Times New Roman", Times, serif; font-size: 11.5pt; line-height: 1.15; font-weight: 700; letter-spacing: 0; }
+.cv-doc h3 { margin: 0; font-family: "Times New Roman", Times, serif; font-size: 10.5pt; line-height: 1.2; font-weight: 700; letter-spacing: 0; }
+.cv-doc p { margin: 0; }
+.cv-doc ul { margin: 3pt 0 0; padding-left: 16pt; }
+.cv-doc li { margin: 0 0 1.5pt; padding-left: 1pt; }
+.cv-doc .cv-entry { margin-bottom: 8pt; break-inside: avoid; page-break-inside: avoid; }
+.cv-doc .cv-entry-line { display: flex; align-items: baseline; justify-content: space-between; gap: 12pt; }
+.cv-doc .cv-entry-line > :first-child { min-width: 0; }
+.cv-doc .cv-entry-line > .cv-meta { flex: 0 0 auto; text-align: right; white-space: nowrap; }
+.cv-doc .cv-entry-subline { margin-top: 1pt; }
+.cv-doc .cv-company { font-size: 10.5pt; line-height: 1.2; font-style: italic; font-weight: 400; }
+.cv-doc .cv-italic { font-style: italic; }
+.cv-doc .cv-meta { font-size: 9pt; line-height: 1.2; }
+.cv-doc .cv-coursework { margin-top: 1pt; font-size: 10pt; line-height: 1.25; }
+.cv-doc .cv-skill-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24pt; line-height: 1.3; }
+.cv-doc .cv-skill-grid ul { margin: 0; padding-left: 16pt; }
+.cv-doc .cv-skill-grid li { margin-bottom: 1.5pt; }
+
+@media print {
+  @page { size: A4; margin: 0; }
+  @page cv-a4 { size: A4; margin: 0; }
+  @page cv-letter { size: Letter; margin: 0; }
+  .cv-doc.cv-paper-a4 { page: cv-a4; }
+  .cv-doc.cv-paper-letter { page: cv-letter; }
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; color: #000 !important; }
+  .cv-document-page { min-height: 0 !important; margin: 0 !important; padding: 0 !important; }
+  .cv-document-page > .container { width: auto !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
+  .cv-doc { width: 210mm; max-width: none; min-height: 297mm; margin: 0; padding: 14mm 15mm 13mm; font-size: 10.5pt; line-height: 1.28; box-shadow: none !important; border: 0 !important; border-radius: 0 !important; }
+  .cv-doc.cv-paper-letter { width: 215.9mm; min-height: 279.4mm; }
+  .cv-doc section, .cv-doc .cv-entry { break-inside: avoid; page-break-inside: avoid; }
+  .cv-doc .cv-contact { display: flex; }
+}
+
+@media (max-width: 767px) {
+  .cv-doc { min-height: auto; padding: 1.25rem; font-size: 10pt; }
+  .cv-doc h1 { font-size: 20pt; }
+  .cv-doc .cv-header-with-photo { display: block; }
+  .cv-doc .cv-profile-photo { display: block; margin: 8pt auto 0; }
+  .cv-doc .cv-contact { display: block; }
+  .cv-doc .cv-contact span { display: inline; white-space: normal; }
+  .cv-doc .cv-contact span + span::before { content: " | "; }
+  .cv-doc .cv-entry-line { display: block; }
+  .cv-doc .cv-entry-line > .cv-meta { display: block; margin-top: 1pt; text-align: left; white-space: normal; }
+  .cv-doc .cv-skill-grid { grid-template-columns: 1fr; gap: 0; }
+}

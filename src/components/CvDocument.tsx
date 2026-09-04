@@ -1,124 +1,86 @@
-import { companies, education, profile } from "@/data/profile";
+import "@/cv-print.css";
+import { companies, leadership, profile } from "@/data/profile";
+import { education } from "@/data/education";
+import { getCvFormatProfile } from "@/data/cvFormatProfiles";
 import type { CvVersion } from "@/data/cvVersions";
 import { useMemo } from "react";
 import { loadDocumentSettings } from "@/lib/documentSettings";
 
-/** ATS-friendly single-column document: plain semantic text, no columns, no graphics. */
 const CvDocument = ({ version }: { version: CvVersion }) => {
   const settings = useMemo(() => loadDocumentSettings(), []);
+  const format = getCvFormatProfile(settings.targetMarket);
+  const showPhoto = settings.includePhoto && Boolean(settings.photoUrl) && format.photoPolicy !== "never";
   const contactItems = [
-    { label: "Email", value: profile.email },
     { label: "Phone", value: profile.phone },
-    { label: "WhatsApp", value: profile.whatsapp },
-    { label: "LinkedIn", value: profile.linkedin },
+    { label: "Email", value: profile.email },
+    { label: "LinkedIn", value: profile.linkedin.replace(/^https?:\/\//, "") },
   ].filter((item) => {
-    if (item.label === "Email" || item.label === "Phone") return settings.showContactDetails;
-    if (item.label === "WhatsApp") return settings.includeWhatsApp && settings.showContactDetails;
-    if (item.label === "LinkedIn") return settings.includeLinkedIn && settings.showContactDetails;
-    return Boolean(item.value);
+    if (item.label === "Phone" || item.label === "Email") return settings.showContactDetails;
+    return settings.includeLinkedIn && settings.showContactDetails;
   });
 
+  const strengths = [
+    "Accuracy", "Integrity", "Financial Discipline", "Attention to Detail", "Confidentiality", "Analytical Thinking",
+    "Problem Solving", "Operational Coordination", "Documentation", "Team Collaboration", "Time Management", "Continuous Improvement",
+  ];
+  const technicalSkills = Array.from(new Set(version.coreSkills));
+
   return (
-    <article className="cv-doc bg-card text-card-foreground rounded-lg border border-border p-8 md:p-12 leading-relaxed">
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold text-foreground">{profile.name}</h1>
-        <p className="text-lg text-foreground/90">{version.title}</p>
-        <p className="text-sm text-muted-foreground mt-2">{profile.headline}</p>
-        <div className="mt-3 space-y-1 text-sm text-foreground/90">
-          {settings.showLocation && <p>{profile.address}</p>}
-          {settings.showLocation && <p>GPS / location: {profile.gpsAddress}</p>}
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {contactItems.map((item) => (
-              <span key={item.label}>
-                <span className="font-semibold">{item.label}:</span> {item.value}
-              </span>
-            ))}
+    <article className={`cv-doc cv-paper-${format.paperSize.toLowerCase()} cv-market-${format.market}`} aria-label={`${profile.name} CV - ${version.title}`}>
+      <header className="cv-header">
+        <div className={showPhoto ? "cv-header-with-photo" : undefined}>
+          <div className="cv-identity">
+            <h1>{profile.name}</h1>
+            <p className="cv-target-title">{version.title}</p>
+            <div className="cv-contact" aria-label="Contact information">
+              {settings.showLocation && <span>{profile.address}</span>}
+              {contactItems.map((item) => <span key={item.label}>{item.value}</span>)}
+            </div>
           </div>
+          {showPhoto && (
+            <img
+              className="cv-profile-photo"
+              src={settings.photoUrl}
+              alt={profile.name}
+              loading="lazy"
+            />
+          )}
         </div>
       </header>
 
-      <section className="mb-6">
-        <h2 className="text-base font-bold uppercase tracking-wide text-foreground border-b border-border pb-1 mb-3">
-          Professional Summary
-        </h2>
-        <p className="text-sm text-foreground/90">{version.summary}</p>
-      </section>
+      <section><h2>SUMMARY</h2><p>{version.summary}</p></section>
 
-      <section className="mb-6">
-        <h2 className="text-base font-bold uppercase tracking-wide text-foreground border-b border-border pb-1 mb-3">
-          Core Competencies
-        </h2>
-        <p className="text-sm text-foreground/90">{version.coreSkills.join(" • ")}</p>
-      </section>
+      <section><h2>EDUCATION</h2>{education.map((entry) => (
+        <article key={entry.school} className="cv-entry">
+          <div className="cv-entry-line"><h3>{entry.school}</h3><span className="cv-meta">{entry.location}</span></div>
+          <div className="cv-entry-line cv-entry-subline"><p className="cv-italic">{entry.qualification}{entry.field ? ` — ${entry.field}` : ""}</p><span className="cv-meta">{entry.period}</span></div>
+          {entry.coursework?.length ? <p className="cv-coursework">Relevant areas include {entry.coursework.join(", ")}.</p> : null}
+        </article>
+      ))}</section>
 
-      <section className="mb-6">
-        <h2 className="text-base font-bold uppercase tracking-wide text-foreground border-b border-border pb-1 mb-3">
-          Key Achievements
-        </h2>
-        <ul className="list-disc pl-5 space-y-1 text-sm text-foreground/90">
-          {version.highlights.map((h) => (
-            <li key={h}>{h}</li>
-          ))}
-        </ul>
-      </section>
+      <section><h2>EXPERIENCE</h2>{companies.map((company) => company.roles.map((role) => (
+        <article key={company.company + role.title + role.period} className="cv-entry">
+          <div className="cv-entry-line"><h3>{role.title}</h3><span className="cv-meta">{role.period}</span></div>
+          <div className="cv-entry-line cv-entry-subline"><p className="cv-company">{company.company}</p><span className="cv-meta">{role.location}</span></div>
+          <ul>{role.contributions.map((contribution) => <li key={contribution}>{contribution}</li>)}</ul>
+        </article>
+      )))}</section>
 
-      <section className="mb-6">
-        <h2 className="text-base font-bold uppercase tracking-wide text-foreground border-b border-border pb-1 mb-3">
-          Professional Experience
-        </h2>
-        <div className="space-y-5">
-          {companies.map((company) =>
-            company.roles.map((role) => (
-              <div key={company.company + role.title + role.period}>
-                <h3 className="text-sm font-bold text-foreground">
-                  {role.title} — {company.company}
-                </h3>
-                <p className="text-xs text-muted-foreground mb-1">
-                  {role.period} · {role.employmentType} · {role.location}
-                </p>
-                <p className="text-sm text-foreground/90 mb-1">{role.summary}</p>
-                <ul className="list-disc pl-5 space-y-1 text-sm text-foreground/90">
-                  {role.contributions.map((c) => (
-                    <li key={c}>{c}</li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
+      <section><h2>TECHNICAL SKILLS</h2><ul className="cv-skill-list">{technicalSkills.map((skill) => <li key={skill}>{skill}</li>)}</ul></section>
 
-      <section className="mb-6">
-        <h2 className="text-base font-bold uppercase tracking-wide text-foreground border-b border-border pb-1 mb-3">
-          Education
-        </h2>
-        <div className="space-y-4">
-          {education.map((e) => (
-            <div key={e.school}>
-              <h3 className="text-sm font-bold text-foreground">{e.school}</h3>
-              <p className="text-sm text-foreground/90">{e.qualification}</p>
-              <p className="text-xs text-muted-foreground">
-                {e.period} · {e.location}
-              </p>
-              {e.coursework && (
-                <p className="text-sm text-foreground/90 mt-1">
-                  <span className="font-semibold">Relevant coursework: </span>
-                  {e.coursework.join(", ")}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+      <section><h2>SELECTED ACHIEVEMENTS</h2><ul>{version.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}</ul></section>
 
-      <section>
-        <h2 className="text-base font-bold uppercase tracking-wide text-foreground border-b border-border pb-1 mb-3">
-          Additional Information
-        </h2>
-        <p className="text-sm text-foreground/90">
-          Languages: {profile.languages.join(", ")}.{settings.showAvailability ? ` Availability: ${profile.availability}.` : ""}{settings.showReferences ? ` References: ${profile.references}.` : ""}
-        </p>
-      </section>
+      {leadership.length > 0 && <section><h2>LEADERSHIP &amp; FINANCIAL ACCOUNTABILITY</h2>{leadership.map((entry) => (
+        <article key={`${entry.company}-${entry.title}`} className="cv-entry">
+          <div className="cv-entry-line"><h3>{entry.company}</h3><span className="cv-meta">{entry.period}</span></div>
+          <div className="cv-entry-line cv-entry-subline"><p className="cv-company">{entry.title}</p><span className="cv-meta">{entry.location}</span></div>
+          <ul>{entry.contributions.slice(0, 5).map((contribution) => <li key={contribution}>{contribution}</li>)}</ul>
+        </article>
+      ))}</section>}
+
+      <section><h2>PROFESSIONAL STRENGTHS</h2><p>{strengths.join(" | ")}</p></section>
+      <section><h2>LANGUAGES</h2><p>{profile.languages.join(" | ")}</p></section>
+      {settings.showReferences && <section><h2>REFERENCES</h2><p>{profile.references}</p></section>}
     </article>
   );
 };

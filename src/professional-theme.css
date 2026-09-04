@@ -1,0 +1,41 @@
+/* Professional Network mode uses a separate semantic palette so shared UI components
+   automatically adopt the professional visual language without duplicating markup. */
+html[data-presentation-theme="professional"] {
+  --background: 216 28% 94%;
+  --foreground: 220 32% 17%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 32% 17%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 32% 17%;
+  --primary: 174 62% 34%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 24% 90%;
+  --secondary-foreground: 220 55% 24%;
+  --muted: 216 24% 91%;
+  --muted-foreground: 216 16% 43%;
+  --accent: 42 76% 49%;
+  --accent-foreground: 220 55% 18%;
+  --border: 216 20% 84%;
+  --input: 216 20% 84%;
+  --ring: 174 62% 34%;
+  --gradient-primary: linear-gradient(135deg, hsl(220 55% 24%), hsl(174 62% 34%));
+  --gradient-accent: linear-gradient(135deg, hsl(42 76% 49%), hsl(42 82% 58%));
+  --shadow-soft: 0 4px 14px -6px hsl(220 55% 18% / 0.14);
+  --shadow-medium: 0 12px 30px -18px hsl(220 55% 18% / 0.28);
+}
+
+html[data-presentation-theme="professional"] .professional-network a:focus-visible,
+html[data-presentation-theme="professional"] .professional-network button:focus-visible {
+  outline: 3px solid hsl(var(--accent));
+  outline-offset: 3px;
+}
+
+html[data-presentation-theme="professional"] .professional-network .text-primary,
+html[data-presentation-theme="professional"] .professional-network .text-primary\/80,
+html[data-presentation-theme="professional"] .professional-network .text-primary\/90 {
+  color: hsl(var(--professional-teal));
+}
+
+html[data-presentation-theme="professional"] .professional-network .bg-primary\/10 {
+  background-color: hsl(var(--professional-teal) / 0.10);
+}

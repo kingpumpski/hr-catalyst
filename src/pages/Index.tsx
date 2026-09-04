@@ -1,79 +1,48 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import Experience from "@/components/Experience";
-import Education from "@/components/Education";
-import Leadership from "@/components/Leadership";
-import WorkshopsAndSeminars from "@/components/WorkshopsAndSeminars";
-import Skills from "@/components/Skills";
-import Interests from "@/components/Interests";
-import Contact from "@/components/Contact";
 import LazySection from "@/components/LazySection";
-import DocumentSettingsPanel from "@/components/DocumentSettingsPanel";
-import type { DocumentSettings } from "@/lib/documentSettings";
+import { usePresentationTheme } from "@/components/PresentationThemeProvider";
 
-const LazySkills = lazy(() => import("@/components/Skills"));
-const LazyEducation = lazy(() => import("@/components/Education"));
-const LazyInterests = lazy(() => import("@/components/Interests"));
-const LazyContact = lazy(() => import("@/components/Contact"));
+const RecruiterSnapshot = lazy(() => import("@/components/RecruiterSnapshot"));
+const Experience = lazy(() => import("@/components/Experience"));
+const Leadership = lazy(() => import("@/components/Leadership"));
+const WorkshopsAndSeminars = lazy(() => import("@/components/WorkshopsAndSeminars"));
+const Skills = lazy(() => import("@/components/Skills"));
+const Education = lazy(() => import("@/components/Education"));
+const Interests = lazy(() => import("@/components/Interests"));
+const Contact = lazy(() => import("@/components/Contact"));
+const ProfessionalNetworkLayout = lazy(() => import("@/components/ProfessionalNetworkLayout"));
+
+const SectionFallback = () => <div className="min-h-24" aria-hidden="true" />;
 
 const Index = () => {
-  const [documentSettings, setDocumentSettings] = useState<DocumentSettings | null>(null);
-  const [showOwnerControls, setShowOwnerControls] = useState(false);
+  const { theme } = usePresentationTheme();
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setShowOwnerControls(params.get("mode") === "owner");
-  }, []);
+  if (theme === "professional") {
+    return (
+      <Suspense fallback={<SectionFallback />}>
+        <ProfessionalNetworkLayout />
+      </Suspense>
+    );
+  }
 
   return (
     <main className="min-h-screen">
       <Navbar />
       <Hero />
-      {showOwnerControls && (
-        <section className="px-6 py-12 bg-background">
-          <div className="container max-w-5xl mx-auto">
-            <DocumentSettingsPanel onChange={setDocumentSettings} />
-            <div className="mt-4 rounded-lg border border-dashed border-border bg-muted/20 p-4 text-sm text-muted-foreground">
-              {documentSettings?.resumeMode
-                ? "Resume-style layout is enabled for your document output."
-                : "CV-style layout is enabled for your document output."}
-            </div>
-          </div>
-        </section>
-      )}
-      <Experience />
-      <Leadership />
-      <WorkshopsAndSeminars />
-
-      <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" /> }>
-          <LazySkills />
-        </Suspense>
-      </LazySection>
-
-      <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" /> }>
-          <LazyEducation />
-        </Suspense>
-      </LazySection>
-
-      <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" /> }>
-          <LazyInterests />
-        </Suspense>
-      </LazySection>
-
-      <LazySection>
-        <Suspense fallback={<div className="min-h-[260px]" /> }>
-          <LazyContact />
-        </Suspense>
-      </LazySection>
-
+      <Suspense fallback={<SectionFallback />}>
+        <RecruiterSnapshot />
+      </Suspense>
+      <LazySection navId="experience"><Suspense fallback={<SectionFallback />}><Experience /></Suspense></LazySection>
+      <LazySection navId="leadership"><Suspense fallback={<SectionFallback />}><Leadership /></Suspense></LazySection>
+      <LazySection navId="workshops"><Suspense fallback={<SectionFallback />}><WorkshopsAndSeminars /></Suspense></LazySection>
+      <LazySection navId="skills"><Suspense fallback={<SectionFallback />}><Skills /></Suspense></LazySection>
+      <LazySection navId="education"><Suspense fallback={<SectionFallback />}><Education /></Suspense></LazySection>
+      <LazySection navId="interests"><Suspense fallback={<SectionFallback />}><Interests /></Suspense></LazySection>
+      <LazySection navId="contact"><Suspense fallback={<SectionFallback />}><Contact /></Suspense></LazySection>
       <footer className="bg-primary text-primary-foreground py-8 px-6 text-center">
-        <p className="text-sm">
-          © {new Date().getFullYear()} Kingsley Junior Norku. All rights reserved.
-        </p>
+        <p className="text-sm">© {new Date().getFullYear()} Kingsley Junior Norku. All rights reserved.</p>
       </footer>
     </main>
   );

@@ -245,7 +245,7 @@ export type LeadershipEntry = {
 export const leadership: LeadershipEntry[] = [
   {
     // company: "Volunteer Leadership Role",
-    company: "National Service Personel Association (NSPA) - Prampram District",
+    company: "National Service Personnel Association (NSPA) - Prampram District",
     title: "Financial Secretary",
     employmentType: "Volunteer",
     location: "Ningo-Prampram, Greater Accra Region, Ghana",
@@ -275,7 +275,7 @@ export const leadership: LeadershipEntry[] = [
     company: "Student Representative Council (SRC) - University College of Management Studies (UCOMS)",
     title: "Sports Committee Chairperson | Minister",
     employmentType: "Volunteer",
-    location: "Adjecent SCC traffic light Weija, Greater Accra Region, Ghana",
+    location: "Adjacent SCC traffic light Weija, Greater Accra Region, Ghana",
     period: "October 2017 - July 2018",
     duration: "10 mos",
     totalPeriod: "August 2017 - July 2018",
@@ -358,41 +358,3 @@ export type EducationEntry = {
   activities?: string[];
   coursework?: string[];
 };
-
-export const education: EducationEntry[] = [
-  {
-    school: "University College of Management Studies (UCOMS)",
-    qualification: "Bachelor of Science (BSc), Accounting",
-    field: "Accounting",
-    period: "2014 - 2018",
-    location: "Weija, Greater Accra Region, Ghana",
-    description:
-      "Completed undergraduate studies in Accounting with a strong foundation in financial accounting, management accounting, auditing, taxation, business law, economics, and financial management. Developed analytical and problem-solving skills applicable to finance, healthcare administration, and operational management.",
-    activities: [
-      "Sports Activities (PUFA Association) (2015 - 2015)",
-    ],
-    coursework: [
-      "Financial Accounting",
-      "Cost & Management Accounting",
-      "Auditing",
-      "Taxation",
-      "Business Law",
-      "Financial Management",
-      "Economics",
-      "Business Statistics",
-      "Management Information Systems",
-      "Corporate Finance",
-      "Fiduciary Law",
-      "Strategic Management"
-    ],
-  },
-  {
-    school: "Bisease Senior High School (BISECO)",
-    qualification: "West African Senior School Certificate Examination (WASSCE)",
-    field: "Business (Accounting)",
-    period: "2008 - 2011",
-    location: "Ajumako-Bisease Central Region, Ghana",
-    description:
-      "Completed secondary education with a concentration in Business, building foundational knowledge in Accounting, Economics, Commerce, and Business Management.",
-  },
-];
