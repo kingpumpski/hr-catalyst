@@ -27,10 +27,11 @@ const CvVersionPage = () => {
   const [companyAddress, setCompanyAddress] = useState("");
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useSeo({
-    title: version ? `${version.title} | Kingsley Junior Norku` : "CV not found | Kingsley Junior Norku",
-    description: version
-      ? `${version.summary.slice(0, 150)}`
-      : "This CV version could not be found.",
+    // Keep recruiter-facing PDF/browser document naming generic. The route and
+    // on-page selection can remain role-specific because that context belongs
+    // to the application workflow, not the document being shared.
+    title: version ? `Career ${documentLabels[tab]} | Kingsley Junior Norku` : "CV not found | Kingsley Junior Norku",
+    description: version ? version.summary.slice(0, 150) : "This CV version could not be found.",
     path: version ? `/cv/${version.slug}` : "/cv",
   });
 
@@ -83,7 +84,7 @@ const CvVersionPage = () => {
         </div>
         <Suspense fallback={<DocumentFallback />}>
           <div id={`document-panel-${tab}`} role="tabpanel" aria-labelledby={`document-tab-${tab}`} tabIndex={-1}>
-            {tab === "cv" ? <CvDocument version={version} /> : tab === "resume" ? <ResumeDocument version={version} /> : <CoverLetterDocument version={version} recipientName={recipientName} companyName={companyName || "[Company Name]"} companyAddress={companyAddress || "[Company Address]"} />}
+            {tab === "cv" ? <CvDocument version={version} documentType="cv" /> : tab === "resume" ? <ResumeDocument version={version} /> : <CoverLetterDocument version={version} recipientName={recipientName} companyName={companyName || "[Company Name]"} companyAddress={companyAddress || "[Company Address]"} />}
           </div>
         </Suspense>
       </div>
