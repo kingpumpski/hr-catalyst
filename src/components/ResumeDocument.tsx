@@ -3,9 +3,11 @@ import type { CvVersion } from "@/data/cvVersions";
 
 /**
  * Resume exports intentionally use the same approved ATS document format as
- * CV exports so every downloadable career document has a consistent identity,
- * typography, hierarchy and print layout.
+ * CV exports. The selected career track is an internal targeting mechanism and
+ * is never rendered as the resume's visible job title or document heading.
  */
-const ResumeDocument = ({ version }: { version: CvVersion }) => <CvDocument version={version} />;
+const ResumeDocument = ({ version }: { version: CvVersion }) => (
+  <CvDocument version={version} documentType="resume" />
+);
 
 export default ResumeDocument;
