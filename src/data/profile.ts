@@ -16,6 +16,11 @@ export type Company = {
   roles: Role[];
 };
 
+export type LanguageEntry = {
+  name: string;
+  proficiency: "Fluent" | "Conversational";
+};
+
 export const profile = {
   name: "Kingsley Junior Norku",
   headline: "Claims Manager & IT Support | Healthcare Operations | BSc. Accounting",
@@ -27,7 +32,11 @@ export const profile = {
   whatsapp: "https://wa.me/233208791163",
   linkedin: "http://www.linkedin.com/in/kingsleynorku",
   availability: "Immediate",
-  languages: ["English (Fluent)", "Twi (Conversational)"],
+  languages: [
+    { name: "English", proficiency: "Fluent" },
+    { name: "Fante", proficiency: "Conversational" },
+    { name: "Twi", proficiency: "Conversational" },
+  ] satisfies LanguageEntry[],
   references: "Available on request",
 };
 
@@ -44,17 +53,8 @@ export const companies: Company[] = [
         period: "April 2023 - Present",
         duration: "3 yrs 8 mos",
         summary:
-          // "Lead health insurance claims operations while supporting healthcare technology systems and collaborating across clinical, administrative, and finance teams to improve operational performance.",
           "Lead operational coordination across claims administration, finance, clinical teams, and technology support while helping management improve efficiency, reporting, and service delivery.",
         contributions: [
-          // "Lead end-to-end health insurance claims operations.",
-          // "Coordinate with insurers, providers, and internal stakeholders to facilitate efficient claims management.",
-          // "Improve claims workflows to enhance operational efficiency and reduce processing delays.",
-          // "Prepare operational reports and management insights to support decision-making.",
-          // "Provide IT support for hospital systems, users, and operational technologies.",
-          // "Support process improvement initiatives that strengthen service delivery and operational effectiveness.",
-          // "Contribute to digital transformation initiatives by aligning healthcare operations with technology solutions."
-          
           "Coordinate daily operational activities involving multiple departments to ensure timely execution of business priorities.",
           "Support leadership by preparing operational reports and monitoring departmental performance.",
           "Improve internal workflows that strengthen claims processing and organizational efficiency.",
@@ -125,15 +125,8 @@ export const companies: Company[] = [
         period: "July 2013 - August 2017",
         duration: "2 yrs 10 mos",
         summary:
-          // "Supported financial operations through accurate accounting processes and financial reporting.",
           "Supported financial administration through accurate bookkeeping, reconciliations, reporting, and financial record management.",
         contributions: [
-          // "Processed financial transactions accurately and on time.",
-          // "Assisted with account reconciliations.",
-          // "Maintained accounting records and supporting documentation.",
-          // "Prepared financial reports for management.",
-          // "Supported budgeting and internal control processes.",
-
           "Maintained financial records.",
           "Processed accounting transactions.",
           "Assisted preparation of management reports.",
@@ -154,14 +147,8 @@ export const companies: Company[] = [
         period: "June 2012 - June 2013",
         duration: "1 yr",
         summary:
-          // "Managed warehouse operations and inventory while ensuring efficient stock control and supporting business operations.",
           "Managed inventory operations while supporting procurement and warehouse efficiency.",
         contributions: [
-          // "Managed inventory accuracy and stock control activities.",
-          // "Improved inventory organization and warehouse efficiency.",
-          // "Coordinated stock movement and documentation.",
-          // "Assisted procurement and distribution activities.",
-
           "Coordinated inventory movement.",
           "Improved stock organization.",
           "Supported operational efficiency through accurate record keeping.",
@@ -184,11 +171,9 @@ export const companies: Company[] = [
         period: "January 2013 - December 2013",
         duration: "1 yr",
         summary:
-          // "Supported logistics and warehouse operations by ensuring efficient movement and handling of goods while maintaining operational standards.",
           "Supported warehouse and logistics operations while ensuring accurate inventory handling and operational efficiency.",
         contributions: [
           "Assisted with warehouse and logistics operations.",
-          // "Maintained inventory records and stock movement documentation.",,
           "Worked collaboratively to meet operational deadlines.",
           "Developed strong understanding of supply chain and warehouse processes.",
         ],
@@ -244,7 +229,6 @@ export type LeadershipEntry = {
 
 export const leadership: LeadershipEntry[] = [
   {
-    // company: "Volunteer Leadership Role",
     company: "National Service Personnel Association (NSPA) - Prampram District",
     title: "Financial Secretary",
     employmentType: "Volunteer",
@@ -271,7 +255,6 @@ export const leadership: LeadershipEntry[] = [
     roles: [],
   },
   {
-    // company: "Student and Community Leadership",
     company: "Student Representative Council (SRC) - University College of Management Studies (UCOMS)",
     title: "Sports Committee Chairperson | Minister",
     employmentType: "Volunteer",
@@ -334,18 +317,6 @@ export const workshopsAndSeminars: WorkshopEntry[] = [
     ],
     skills: ["Healthcare Administration", "Claims Operations", "Compliance", "Operational Excellence"],
   },
-  // {
-  //   title: "Leadership and Team Coordination Workshop",
-  //   organization: "Community and Volunteer Development Programme",
-  //   period: "2018 - 2019",
-  //   location: "Prampram, Greater Accra Region, Ghana",
-  //   summary: "Participated in leadership-focused training that strengthened communication, coordination, planning, and team engagement capabilities.",
-  //   highlights: [
-  //     "Developed practical skills in organizing community activities and managing stakeholder expectations.",
-  //     "Strengthened confidence in team coordination, administration, and service delivery.",
-  //   ],
-  //   skills: ["Leadership", "Stakeholder Engagement", "Event Coordination", "Communication"],
-  // },
 ];
 
 export type EducationEntry = {
