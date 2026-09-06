@@ -189,9 +189,9 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
       <section>
         <h2>LANGUAGES</h2>
         <ul className="cv-bullet-list">
-          <li>English — Fluent</li>
-          <li>Fante — Conversational</li>
-          <li>Twi — Conversational</li>
+          {profile.languages.map((language) => (
+            <li key={language.name}>{language.name} — {language.proficiency}</li>
+          ))}
         </ul>
       </section>
 
