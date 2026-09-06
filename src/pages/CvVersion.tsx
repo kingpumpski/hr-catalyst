@@ -8,6 +8,7 @@ import { ArrowLeft, Printer } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
 import NotFound from "./NotFound";
 import { useSeo } from "@/lib/seo";
+import { getRecruiterDocumentTitle } from "@/lib/recruiterDocument";
 
 const CvDocument = lazy(() => import("@/components/CvDocument"));
 const ResumeDocument = lazy(() => import("@/components/ResumeDocument"));
@@ -27,10 +28,10 @@ const CvVersionPage = () => {
   const [companyAddress, setCompanyAddress] = useState("");
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useSeo({
-    // Keep recruiter-facing PDF/browser document naming generic. The route and
-    // on-page selection can remain role-specific because that context belongs
-    // to the application workflow, not the document being shared.
-    title: version ? `Career ${documentLabels[tab]} | Kingsley Junior Norku` : "CV not found | Kingsley Junior Norku",
+    // The application track remains visible to the user in the page UI, but
+    // the browser/PDF document title is intentionally generic so Save as PDF
+    // cannot inherit the internal target position.
+    title: version ? getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv") : "CV not found | Kingsley Junior Norku",
     description: version ? version.summary.slice(0, 150) : "This CV version could not be found.",
     path: version ? `/cv/${version.slug}` : "/cv",
   });
