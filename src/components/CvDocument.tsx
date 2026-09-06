@@ -5,6 +5,7 @@ import { getCvFormatProfile } from "@/data/cvFormatProfiles";
 import type { CvVersion } from "@/data/cvVersions";
 import { useMemo } from "react";
 import { loadDocumentSettings } from "@/lib/documentSettings";
+import { getRecruiterSafeSummary } from "@/lib/recruiterDocument";
 
 type CareerDocumentType = "cv" | "resume";
 
@@ -37,6 +38,7 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
     "Problem Solving", "Operational Coordination", "Documentation", "Team Collaboration", "Time Management", "Continuous Improvement",
   ];
   const technicalSkills = Array.from(new Set(version.coreSkills));
+  const recruiterSummary = getRecruiterSafeSummary(version);
 
   return (
     <article className={`cv-doc cv-paper-${format.paperSize.toLowerCase()} cv-market-${format.market}`} aria-label={`${profile.name} ${documentLabel}`}>
@@ -61,7 +63,9 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
         </div>
       </header>
 
-      <section><h2>SUMMARY</h2><p>{version.summary}</p></section>
+      <section><h2>SUMMARY</h2><p>{recruiterSummary}</p></section>
+
+      <section><h2>CORE COMPETENCIES</h2><p>{technicalSkills.join(" | ")}</p></section>
 
       <section><h2>EXPERIENCE</h2>{companies.map((company) => company.roles.map((role) => (
         <article key={company.company + role.title + role.period} className="cv-entry">
@@ -91,8 +95,7 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
         </article>
       ))}</section>}
 
-      <section><h2>PROFESSIONAL STRENGTHS</h2><p>{strengths.join(" | ")}</p></section>
-      <section><h2>LANGUAGES</h2><p>{profile.languages.join(" | ")}</p></section>
+      <section><h2>ADDITIONAL INFORMATION</h2><p>{strengths.join(" | ")}</p><p>{profile.languages.join(" | ")}</p></section>
       {settings.showReferences && <section><h2>REFERENCES</h2><p>{profile.references}</p></section>}
     </article>
   );
