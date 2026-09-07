@@ -19,6 +19,11 @@ const documentLabels: Record<CareerDocumentType, string> = {
   resume: "Resume",
 };
 
+const splitIntoBalancedColumns = <T,>(items: T[]): [T[], T[]] => {
+  const midpoint = Math.ceil(items.length / 2);
+  return [items.slice(0, midpoint), items.slice(midpoint)];
+};
+
 const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
   const settings = useMemo(() => loadDocumentSettings(), []);
   const format = getCvFormatProfile(settings.targetMarket);
@@ -47,7 +52,9 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
     "Time Management",
     "Continuous Improvement",
   ];
-  const technicalSkills = Array.from(new Set(version.coreSkills));
+  const skills = Array.from(new Set(version.coreSkills));
+  const skillColumns = splitIntoBalancedColumns(skills);
+  const strengthColumns = splitIntoBalancedColumns(strengths);
   const recruiterSummary = getRecruiterSafeSummary(version);
 
   return (
@@ -81,10 +88,14 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
       </section>
 
       <section>
-        <h2>CORE COMPETENCIES</h2>
-        <ul className="cv-bullet-list">
-          {technicalSkills.map((skill) => <li key={skill}>{skill}</li>)}
-        </ul>
+        <h2>SKILLS</h2>
+        <div className="cv-skill-grid" aria-label="Skills">
+          {skillColumns.map((column, columnIndex) => (
+            <ul key={`skills-${columnIndex}`} className="cv-bullet-list">
+              {column.map((skill) => <li key={skill}>{skill}</li>)}
+            </ul>
+          ))}
+        </div>
       </section>
 
       <section>
@@ -143,13 +154,6 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
       </section>
 
       <section>
-        <h2>TECHNICAL SKILLS</h2>
-        <ul className="cv-bullet-list">
-          {technicalSkills.map((skill) => <li key={skill}>{skill}</li>)}
-        </ul>
-      </section>
-
-      <section>
         <h2>SELECTED ACHIEVEMENTS</h2>
         <ul className="cv-bullet-list">
           {version.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}
@@ -181,16 +185,23 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
 
       <section>
         <h2>PROFESSIONAL STRENGTHS</h2>
-        <ul className="cv-bullet-list">
-          {strengths.map((strength) => <li key={strength}>{strength}</li>)}
-        </ul>
+        <div className="cv-skill-grid" aria-label="Professional strengths">
+          {strengthColumns.map((column, columnIndex) => (
+            <ul key={`strengths-${columnIndex}`} className="cv-bullet-list">
+              {column.map((strength) => <li key={strength}>{strength}</li>)}
+            </ul>
+          ))}
+        </div>
       </section>
 
       <section>
         <h2>LANGUAGES</h2>
-        <ul className="cv-bullet-list">
+        <ul className="cv-bullet-list cv-language-list">
           {profile.languages.map((language) => (
-            <li key={language.name}>{language.name} — {language.proficiency}</li>
+            <li key={language.name}>
+              <span>{language.name}</span>
+              <span>{language.proficiency}</span>
+            </li>
           ))}
         </ul>
       </section>
@@ -198,9 +209,7 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
       {settings.showReferences && (
         <section>
           <h2>REFERENCES</h2>
-          <ul className="cv-bullet-list">
-            <li>{profile.references}</li>
-          </ul>
+          <p>{profile.references}</p>
         </section>
       )}
     </article>
