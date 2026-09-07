@@ -28,9 +28,8 @@ const CvVersionPage = () => {
   const [companyAddress, setCompanyAddress] = useState("");
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useSeo({
-    // The application track remains visible to the user in the page UI, but
-    // the browser/PDF document title is intentionally generic so Save as PDF
-    // cannot inherit the internal target position.
+    // Application-track titles remain internal UI metadata. CV/resume browser
+    // titles are deliberately generic so PDF export never inherits a target role.
     title: version ? getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv") : "CV not found | Kingsley Junior Norku",
     description: version ? version.summary.slice(0, 150) : "This CV version could not be found.",
     path: version ? `/cv/${version.slug}` : "/cv",
@@ -39,6 +38,12 @@ const CvVersionPage = () => {
   if (!version) return <NotFound />;
 
   const handlePrint = () => {
+    if (tab === "cv" || tab === "resume") {
+      // Set the title again immediately before invoking the browser print
+      // dialog. This creates a hard export boundary even if page-level SEO or
+      // application metadata changes elsewhere in the future.
+      document.title = getRecruiterDocumentTitle(tab);
+    }
     window.print();
   };
 
