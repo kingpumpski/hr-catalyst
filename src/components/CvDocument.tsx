@@ -1,5 +1,5 @@
 import "@/cv-print.css";
-import { companies, leadership, profile } from "@/data/profile";
+import { companies, leadership, profile, workshopsAndSeminars } from "@/data/profile";
 import { education } from "@/data/education";
 import { getCvFormatProfile } from "@/data/cvFormatProfiles";
 import type { CvVersion } from "@/data/cvVersions";
@@ -193,6 +193,19 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
           ))}
         </div>
       </section>
+
+      {workshopsAndSeminars.length > 0 && (
+        <section>
+          <h2>PROFESSIONAL DEVELOPMENT</h2>
+          <ul className="cv-bullet-list">
+            {workshopsAndSeminars.map((item) => (
+              <li key={item.title}>
+                {item.title} — {item.organization}, {item.period}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section>
         <h2>LANGUAGES</h2>
