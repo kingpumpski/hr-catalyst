@@ -4,15 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, FileDown, Printer } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
 import NotFound from "./NotFound";
 import { useSeo } from "@/lib/seo";
 import { getRecruiterDocumentTitle } from "@/lib/recruiterDocument";
+import { toast } from "@/hooks/use-toast";
 
 const CvDocument = lazy(() => import("@/components/CvDocument"));
 const ResumeDocument = lazy(() => import("@/components/ResumeDocument"));
 const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
+const AtsKeywordChecker = lazy(() => import("@/components/AtsKeywordChecker"));
 
 type DocumentTab = "cv" | "resume" | "letter";
 const documentTabs: DocumentTab[] = ["cv", "resume", "letter"];
@@ -24,8 +26,11 @@ const CvVersionPage = () => {
   const version = getCvVersionFromCatalog(slug);
   const [tab, setTab] = useState<DocumentTab>("cv");
   const [recipientName, setRecipientName] = useState("Hiring Manager");
-  const [companyName, setCompanyName] = useState("");
+  const [employerName, setEmployerName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobReference, setJobReference] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useSeo({
     // Application-track titles remain internal UI metadata. CV/resume browser
@@ -37,6 +42,14 @@ const CvVersionPage = () => {
 
   if (!version) return <NotFound />;
 
+  const letterInputs = {
+    recipientName,
+    employerName,
+    companyAddress,
+    jobTitle,
+    jobReference,
+  };
+
   const handlePrint = () => {
     if (tab === "cv" || tab === "resume") {
       // Set the title again immediately before invoking the browser print
@@ -45,6 +58,19 @@ const CvVersionPage = () => {
       document.title = getRecruiterDocumentTitle(tab);
     }
     window.print();
+  };
+
+  const handleDocxDownload = async () => {
+    setIsExporting(true);
+    try {
+      const { downloadCvDocx, downloadCoverLetterDocx } = await import("@/lib/docxExport");
+      if (tab === "letter") await downloadCoverLetterDocx(version, letterInputs);
+      else await downloadCvDocx(version, tab);
+    } catch {
+      toast({ title: "Word download failed", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -68,7 +94,12 @@ const CvVersionPage = () => {
           <Button variant="ghost" asChild className="mb-6"><Link to="/cv"><ArrowLeft className="mr-2 h-4 w-4" /> All versions</Link></Button>
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div><h1 className="text-3xl font-semibold text-foreground">{version.title}</h1><p className="text-sm text-muted-foreground">{version.targetRoles}</p></div>
-            <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" />Download / Save {documentLabels[tab]} as PDF</Button>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" />Download {documentLabels[tab]} as PDF</Button>
+              <Button variant="outline" onClick={handleDocxDownload} disabled={isExporting}>
+                <FileDown className="mr-2 h-4 w-4" />{isExporting ? "Preparing…" : `Download ${documentLabels[tab]} as Word`}
+              </Button>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Career document type">
             {documentTabs.map((documentTab) => (
@@ -76,21 +107,28 @@ const CvVersionPage = () => {
             ))}
           </div>
           <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
+
           {tab === "letter" && (
             <div className="mb-8 rounded-lg border border-border bg-muted/20 p-4 no-print">
-              <h2 className="text-sm font-semibold text-foreground">Quick cover letter update</h2>
-              <p className="text-sm text-muted-foreground mt-1">Update the recipient and organisation details before printing or downloading.</p>
+              <h2 className="text-sm font-semibold text-foreground">Tailor this cover letter</h2>
+              <p className="text-sm text-muted-foreground mt-1">Enter the employer and job title — the letter below rewrites itself instantly.</p>
               <div className="grid md:grid-cols-2 gap-3 mt-4">
+                <div><label className="text-sm text-foreground mb-1 block" htmlFor="employer-name">Employer name</label><Input id="employer-name" value={employerName} onChange={(e) => setEmployerName(e.target.value)} placeholder="Company or organisation" /></div>
+                <div><label className="text-sm text-foreground mb-1 block" htmlFor="job-title">Job title</label><Input id="job-title" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder={version.title} /></div>
                 <div><label className="text-sm text-foreground mb-1 block" htmlFor="recipient-name">Recipient name</label><Input id="recipient-name" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="Hiring Manager" /></div>
-                <div><label className="text-sm text-foreground mb-1 block" htmlFor="company-name">Company name</label><Input id="company-name" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Company name" /></div>
+                <div><label className="text-sm text-foreground mb-1 block" htmlFor="job-reference">Job reference (optional)</label><Input id="job-reference" value={jobReference} onChange={(e) => setJobReference(e.target.value)} placeholder="e.g. REF/2026/014" /></div>
               </div>
-              <div className="mt-3"><label className="text-sm text-foreground mb-1 block" htmlFor="company-address">Company address</label><Textarea id="company-address" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} placeholder="Company address" rows={3} /></div>
+              <div className="mt-3"><label className="text-sm text-foreground mb-1 block" htmlFor="company-address">Employer address</label><Textarea id="company-address" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} placeholder="Employer address" rows={3} /></div>
             </div>
           )}
+
+          <Suspense fallback={null}>
+            <AtsKeywordChecker version={version} />
+          </Suspense>
         </div>
         <Suspense fallback={<DocumentFallback />}>
           <div id={`document-panel-${tab}`} role="tabpanel" aria-labelledby={`document-tab-${tab}`} tabIndex={-1}>
-            {tab === "cv" ? <CvDocument version={version} documentType="cv" /> : tab === "resume" ? <ResumeDocument version={version} /> : <CoverLetterDocument version={version} recipientName={recipientName} companyName={companyName || "[Company Name]"} companyAddress={companyAddress || "[Company Address]"} />}
+            {tab === "cv" ? <CvDocument version={version} documentType="cv" /> : tab === "resume" ? <ResumeDocument version={version} /> : <CoverLetterDocument version={version} {...letterInputs} />}
           </div>
         </Suspense>
       </div>
