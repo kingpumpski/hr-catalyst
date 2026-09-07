@@ -19,10 +19,11 @@ describe("CvDocument ATS export structure", () => {
 
   it("renders the skills section as two ordinary bulleted lists", () => {
     const skillsSection = markup.match(/<section><h2>SKILLS<\/h2>([\s\S]*?)<\/section>/)?.[1] ?? "";
+    const readableSkillsSection = skillsSection.replaceAll("&amp;", "&");
     expect(skillsSection).toContain('class="cv-skill-grid"');
     expect((skillsSection.match(/<ul/g) ?? []).length).toBe(2);
     for (const skill of version.coreSkills) {
-      expect(skillsSection).toContain(skill);
+      expect(readableSkillsSection).toContain(skill);
     }
   });
 
