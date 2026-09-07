@@ -82,20 +82,42 @@
 }
 .cv-doc .cv-language-row > span:last-child { text-align: right; white-space: nowrap; }
 
+/* Cover letter shares the CV document shell so margins stay identical. */
+.cv-doc.cv-letter .cv-header { text-align: center; }
+.cv-doc .cv-letter-date { margin-bottom: 10pt; }
+.cv-doc .cv-letter-recipient { margin-bottom: 10pt; }
+.cv-doc .cv-letter-subject { margin-bottom: 10pt; font-weight: 700; }
+.cv-doc .cv-letter-paragraph { margin-bottom: 8pt; text-align: left; }
+.cv-doc .cv-letter-signature { margin-top: 18pt; font-weight: 700; }
+
 @media print {
-  @page { size: A4; margin: 0; }
-  @page cv-a4 { size: A4; margin: 0; }
-  @page cv-letter { size: Letter; margin: 0; }
+  /* Page margins live on @page so every page (not just the first) keeps the
+     same top/bottom/left/right whitespace. The document itself has no padding. */
+  @page { size: A4; margin: 14mm 15mm; }
+  @page cv-a4 { size: A4; margin: 14mm 15mm; }
+  @page cv-letter { size: Letter; margin: 14mm 15mm; }
   .cv-doc.cv-paper-a4 { page: cv-a4; }
   .cv-doc.cv-paper-letter { page: cv-letter; }
   html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; color: #000 !important; }
   .cv-document-page { min-height: 0 !important; margin: 0 !important; padding: 0 !important; }
   .cv-document-page > .container { width: auto !important; max-width: none !important; margin: 0 !important; padding: 0 !important; }
-  .cv-doc { width: 210mm; max-width: none; min-height: 297mm; margin: 0; padding: 14mm 15mm 13mm; font-size: 10.5pt; line-height: 1.28; box-shadow: none !important; border: 0 !important; border-radius: 0 !important; }
-  .cv-doc.cv-paper-letter { width: 215.9mm; min-height: 279.4mm; }
+  .cv-doc {
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10.5pt;
+    line-height: 1.28;
+    box-shadow: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
   .cv-doc section, .cv-doc .cv-entry { break-inside: avoid; page-break-inside: avoid; }
+  .cv-doc h2 { break-after: avoid; page-break-after: avoid; }
   .cv-doc .cv-contact { display: flex; }
 }
+
 
 @media (max-width: 767px) {
   .cv-doc { min-height: auto; padding: 1.25rem; font-size: 10pt; }
