@@ -199,8 +199,10 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
         <ul className="cv-bullet-list cv-language-list">
           {profile.languages.map((language) => (
             <li key={language.name}>
-              <span>{language.name}</span>
-              <span>{language.proficiency}</span>
+              <span className="cv-language-row">
+                <span>{language.name}</span>
+                <span>{language.proficiency}</span>
+              </span>
             </li>
           ))}
         </ul>
