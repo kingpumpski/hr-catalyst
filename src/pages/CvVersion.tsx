@@ -14,7 +14,6 @@ import { toast } from "@/hooks/use-toast";
 import CvEditorPanel from "@/components/CvEditorPanel";
 import EditableCvDocument from "@/components/EditableCvDocument";
 import { loadCvEditorData, saveCvEditorData, type CvEditorData } from "@/lib/cvEditor";
-import { downloadEditedCvDocx } from "@/lib/editedCvDocx";
 
 const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 const AtsKeywordChecker = lazy(() => import("@/components/AtsKeywordChecker"));
@@ -51,8 +50,6 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
     path: `/cv/${version.slug}`,
   });
 
-  if (!version) return <NotFound />;
-
   const letterInputs = { recipientName, employerName, companyAddress, jobTitle, jobReference };
   const handlePrint = () => {
     if (tab !== "letter") document.title = getRecruiterDocumentTitle(tab);
@@ -65,6 +62,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
         const { downloadCoverLetterDocx } = await import("@/lib/docxExport");
         await downloadCoverLetterDocx(version, letterInputs);
       } else if (editorData) {
+        const { downloadEditedCvDocx } = await import("@/lib/editedCvDocx");
         await downloadEditedCvDocx(editorData, tab);
       }
     } catch {
@@ -115,7 +113,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
             </div>
             <div className="mt-3"><label className="text-sm text-foreground mb-1 block" htmlFor="company-address">Employer address</label><Textarea id="company-address" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} placeholder="Employer address" rows={3} /></div>
           </div>}
-          <Suspense fallback={null}><AtsKeywordChecker version={version} /></Suspense>
+          {tab !== "letter" && <Suspense fallback={null}><AtsKeywordChecker version={version} editorData={editorData} onApply={setEditorData} /></Suspense>}
         </div>
         <Suspense fallback={<DocumentFallback />}>
           <div id={`document-panel-${tab}`} role="tabpanel" aria-labelledby={`document-tab-${tab}`} tabIndex={-1}>

@@ -1,16 +1,24 @@
+import { lazy, Suspense, type ReactNode } from "react";
 import { ArrowRight, BriefcaseBusiness, FileText, Globe2, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import RecruiterSnapshot from "@/components/RecruiterSnapshot";
-import ProfessionalProfileSections from "@/components/ProfessionalProfileSections";
-import Experience from "@/components/Experience";
-import Education from "@/components/Education";
-import Leadership from "@/components/Leadership";
-import WorkshopsAndSeminars from "@/components/WorkshopsAndSeminars";
-import Skills from "@/components/Skills";
-import Interests from "@/components/Interests";
-import Contact from "@/components/Contact";
 import SocialLinks from "@/components/SocialLinks";
+import LazySection from "@/components/LazySection";
+
+const RecruiterSnapshot = lazy(() => import("@/components/RecruiterSnapshot"));
+const ProfessionalProfileSections = lazy(() => import("@/components/ProfessionalProfileSections"));
+const Experience = lazy(() => import("@/components/Experience"));
+const Education = lazy(() => import("@/components/Education"));
+const Leadership = lazy(() => import("@/components/Leadership"));
+const WorkshopsAndSeminars = lazy(() => import("@/components/WorkshopsAndSeminars"));
+const Skills = lazy(() => import("@/components/Skills"));
+const Interests = lazy(() => import("@/components/Interests"));
+const Contact = lazy(() => import("@/components/Contact"));
+
+const SectionFallback = () => <div className="min-h-[220px]" aria-hidden="true" />;
+const Deferred = ({ children }: { children: ReactNode }) => (
+  <Suspense fallback={<SectionFallback />}>{children}</Suspense>
+);
 
 const ProfessionalNetworkLayout = () => (
   <main className="professional-network min-h-screen">
@@ -33,18 +41,24 @@ const ProfessionalNetworkLayout = () => (
         </div>
       </div>
     </section>
-    <div className="container mx-auto max-w-6xl px-6 pb-8"><RecruiterSnapshot /></div>
-    <ProfessionalProfileSections />
+
+    <LazySection navId="recruiter-snapshot"><Deferred><RecruiterSnapshot /></Deferred></LazySection>
+    <LazySection navId="about"><Deferred><ProfessionalProfileSections /></Deferred></LazySection>
+
     <section className="container mx-auto grid max-w-6xl gap-8 px-6 pb-20 lg:grid-cols-[minmax(0,1.65fr)_minmax(280px,.8fr)]">
-      <div className="space-y-8"><Experience /><Leadership /><WorkshopsAndSeminars /></div>
+      <div className="space-y-8">
+        <LazySection navId="experience"><Deferred><Experience /></Deferred></LazySection>
+        <LazySection navId="leadership"><Deferred><Leadership /></Deferred></LazySection>
+        <LazySection navId="workshops"><Deferred><WorkshopsAndSeminars /></Deferred></LazySection>
+      </div>
       <aside className="space-y-8 lg:sticky lg:top-24 lg:self-start">
-        <div data-nav-section="skills" className="professional-side-card rounded-2xl border p-5 shadow-soft"><Skills /></div>
-        <div data-nav-section="education" className="professional-side-card rounded-2xl border p-5 shadow-soft"><Education /></div>
-        <div data-nav-section="interests" className="professional-side-card rounded-2xl border p-5 shadow-soft"><Interests /></div>
+        <LazySection navId="skills"><Deferred><div className="professional-side-card rounded-2xl border p-5 shadow-soft"><Skills /></div></Deferred></LazySection>
+        <LazySection navId="education"><Deferred><div className="professional-side-card rounded-2xl border p-5 shadow-soft"><Education /></div></Deferred></LazySection>
+        <LazySection navId="interests"><Deferred><div className="professional-side-card rounded-2xl border p-5 shadow-soft"><Interests /></div></Deferred></LazySection>
       </aside>
     </section>
     <section className="professional-cta border-y px-6 py-10"><div className="container mx-auto flex max-w-6xl flex-col items-start justify-between gap-5 md:flex-row md:items-center"><div><p className="text-xs font-bold uppercase tracking-[.18em]">Recruiter connection</p><h2 className="mt-2 text-2xl font-bold">Let's discuss the right opportunity.</h2></div><Link to="/cv" className="professional-primary-action inline-flex items-center rounded-xl px-5 py-3 text-sm font-semibold">View CV & recruiter documents <ArrowRight className="ml-2 h-4 w-4" /></Link></div></section>
-    <div data-nav-section="contact"><Contact /></div>
+    <LazySection navId="contact"><Deferred><Contact /></Deferred></LazySection>
     <footer className="professional-footer px-6 py-8 text-center"><p className="text-sm">© {new Date().getFullYear()} Kingsley Junior Norku. All rights reserved.</p></footer>
   </main>
 );
