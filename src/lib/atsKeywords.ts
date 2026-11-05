@@ -189,6 +189,6 @@ export const createEvidenceBasedTailoring = (
     }
   }
 
-  const skippedTerms = missingTerms.filter((term) => !applied.has(term.toLowerCase()) && !applied.has(term.toLowerCase().replace(/s$/, "")));
+  const skippedTerms = missingTerms.filter((term) => {\n    const family = Object.values(WORD_FAMILIES).find((words) => words.includes(term.toLowerCase())) ?? [term.toLowerCase()];\n    return !family.some((word) => applied.has(word));\n  });
   return { data, appliedTerms: [...applied], skippedTerms, changes };
 };
