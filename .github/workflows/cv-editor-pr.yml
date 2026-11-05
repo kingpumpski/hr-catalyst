@@ -1,0 +1,58 @@
+name: CV Editor PR Quality
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/pages/CvVersion.tsx"
+      - "src/components/CvDocument.tsx"
+      - "src/components/CvDocument.test.tsx"
+      - "src/components/CvEditorPanel.tsx"
+      - "src/components/ResumeDocument.tsx"
+      - "src/lib/cvEditor.ts"
+      - "src/lib/cvEditor.test.ts"
+      - "src/lib/docxExport.ts"
+      - "src/data/**"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig*.json"
+      - "vite.config.*"
+      - ".github/workflows/cv-editor-pr.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cv-editor-pr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  cv-editor-quality:
+    name: CV editor quality gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type-check
+        run: npm run typecheck
+
+      - name: Run automated tests
+        run: npm test
+
+      - name: Build production bundle
+        run: npm run build
