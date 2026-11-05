@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const SITE_URL = "https://skill-portfolio-showcase.lovable.app";
+const SITE_URL = (import.meta.env.VITE_SITE_URL || "https://hr-catalyst-five.vercel.app").replace(/\/+$/, "");
 
 type SeoOptions = {
   title: string;
