@@ -15,7 +15,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const App = () => (
   <TooltipProvider>
     <DeferredNotifications />
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <PresentationThemeProvider>
         <Suspense fallback={<div className="min-h-screen bg-background" />}>
           <Routes>
