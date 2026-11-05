@@ -35,4 +35,26 @@ const sitemap = [
 ].join("\n");
 
 writeFileSync(resolve("public/sitemap.xml"), sitemap);
-console.log(`sitemap.xml written (${entries.length} entries)`);
+
+const robots = [
+  "User-agent: Googlebot",
+  "Allow: /",
+  "",
+  "User-agent: Bingbot",
+  "Allow: /",
+  "",
+  "User-agent: Twitterbot",
+  "Allow: /",
+  "",
+  "User-agent: facebookexternalhit",
+  "Allow: /",
+  "",
+  "User-agent: *",
+  "Allow: /",
+  "",
+  `Sitemap: ${BASE_URL}/sitemap.xml`,
+  "",
+].join("\n");
+
+writeFileSync(resolve("public/robots.txt"), robots);
+console.log(`sitemap.xml and robots.txt written (${entries.length} entries)`);
