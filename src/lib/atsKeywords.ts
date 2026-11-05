@@ -10,10 +10,10 @@ const STOP_WORDS = new Set([
 export type KeywordMatch = { term: string; count: number; inCv: boolean };
 export type AtsAnalysis = { score: number; matched: KeywordMatch[]; missing: KeywordMatch[]; totalTerms: number };
 
-const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9+#\\s-]/g, " ");
+const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9+#\s-]/g, " ");
 const tokenize = (value: string): string[] =>
-  normalize(value).split(/\\s+/).map((token) => token.replace(/^-+|-+$/g, ""))
-    .filter((token) => token.length > 2 && !STOP_WORDS.has(token) && !/^\\d+$/.test(token));
+  normalize(value).split(/\s+/).map((token) => token.replace(/^-+|-+$/g, ""))
+    .filter((token) => token.length > 2 && !STOP_WORDS.has(token) && !/^\d+$/.test(token));
 
 /** Searchable text from the editable document currently shown and exported. */
 export const buildEditorCorpus = (data: CvEditorData): string => [
@@ -100,7 +100,7 @@ export const createEvidenceBasedTailoring = (
   const mark = (term: string, description: string) => { applied.add(term); changes.push(description); };
   const terms = new Set(missingTerms.map((term) => term.toLowerCase()));
 
-  const accountsRole = data.experience.find((item) => /accounts|claims/i.test(item.title));
+  const accountsRole = data.experience.find((item) => /accounts/i.test(item.title));
   const claimsRole = data.experience.find((item) => /claims manager|claims/i.test(item.title));
   const existingText = [source.summary, ...source.skills, ...source.highlights, ...source.experience.flatMap((item) => item.contributions), ...version.coverLetter.body].join(" ").toLowerCase();
 
