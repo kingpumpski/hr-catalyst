@@ -9,10 +9,9 @@ import {
   TextRun,
 } from "docx";
 
-import { companies, leadership, profile, workshopsAndSeminars } from "@/data/profile";
-import { education } from "@/data/education";
 import type { CvVersion } from "@/data/cvVersions";
-import { getRecruiterSafeSummary } from "@/lib/recruiterDocument";
+import { createOriginalCvContent, type CvDocumentContent } from "@/data/cvDocumentContent";
+import { getRecruiterDocumentFilename } from "@/lib/recruiterDocument";
 import { buildCoverLetter, type CoverLetterInputs } from "@/lib/coverLetter";
 import { loadDocumentSettings } from "@/lib/documentSettings";
 import { getCvFormatProfile } from "@/data/cvFormatProfiles";
@@ -99,47 +98,53 @@ const downloadBlob = (blob: Blob, filename: string) => {
   URL.revokeObjectURL(url);
 };
 
-const buildContactLine = () => {
+const buildContactLine = (content: CvDocumentContent) => {
   const settings = loadDocumentSettings();
   const parts = [
-    settings.showLocation ? profile.address : "",
-    settings.showContactDetails ? profile.phone : "",
-    settings.showContactDetails ? profile.email : "",
-    settings.includeLinkedIn && settings.showContactDetails ? profile.linkedin.replace(/^https?:\/\//, "") : "",
+    settings.showLocation ? content.address : "",
+    settings.showContactDetails ? content.phone : "",
+    settings.showContactDetails ? content.email : "",
+    settings.includeLinkedIn && settings.showContactDetails ? content.linkedin.replace(/^https?:\/\//, "") : "",
   ].filter(Boolean);
   return parts.join(" | ");
 };
 
 /** Word export of the CV / resume, mirroring the on-screen ATS document. */
-export const downloadCvDocx = async (version: CvVersion, documentType: "cv" | "resume" = "cv") => {
+export const downloadCvDocx = async (
+  version: CvVersion,
+  documentType: "cv" | "resume" = "cv",
+  content: CvDocumentContent = createOriginalCvContent(version),
+) => {
   const settings = loadDocumentSettings();
   const format = getCvFormatProfile(settings.targetMarket);
   const size = PAGE_SIZES[format.paperSize] ?? PAGE_SIZES.A4;
 
   const children: Paragraph[] = [
-    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(profile.name)] }),
+    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(content.name)] }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 160 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "777777", space: 4 } },
-      children: [new TextRun({ text: buildContactLine(), size: 18 })],
+      children: [new TextRun({ text: buildContactLine(content), size: 18 })],
     }),
     heading("SUMMARY"),
-    body(getRecruiterSafeSummary(version)),
+    body(content.summary),
     heading("SKILLS"),
-    ...Array.from(new Set(version.coreSkills)).map(bullet),
+    ...Array.from(new Set(content.coreSkills)).map(bullet),
     heading("EXPERIENCE"),
   ];
 
-  for (const company of companies) {
+  for (const company of content.companies) {
     for (const role of company.roles) {
       children.push(...entryHeader(role.title, company.company, `${role.location} | ${role.period}`));
+      if (role.summary) children.push(body(role.summary));
       children.push(...role.contributions.map(bullet));
+      if (role.skills.length) children.push(body(`Skills: ${role.skills.join(", ")}`));
     }
   }
 
   children.push(heading("EDUCATION"));
-  for (const entry of education) {
+  for (const entry of content.education) {
     children.push(
       ...entryHeader(
         entry.school,
@@ -152,27 +157,32 @@ export const downloadCvDocx = async (version: CvVersion, documentType: "cv" | "r
     entry.activities?.forEach((activity) => children.push(bullet(activity)));
   }
 
-  children.push(heading("SELECTED ACHIEVEMENTS"), ...version.highlights.map(bullet));
+  children.push(heading("SELECTED ACHIEVEMENTS"), ...content.highlights.map(bullet));
 
-  if (leadership.length) {
+  if (content.leadership.length) {
     children.push(heading("LEADERSHIP & FINANCIAL ACCOUNTABILITY"));
-    for (const entry of leadership) {
+    for (const entry of content.leadership) {
       children.push(...entryHeader(entry.title, entry.company, `${entry.location} | ${entry.period}`));
+      if (entry.summary) children.push(body(entry.summary));
       children.push(...entry.contributions.slice(0, 5).map(bullet));
     }
   }
 
-  if (workshopsAndSeminars.length) {
+  children.push(heading("PROFESSIONAL STRENGTHS"), ...content.strengths.map(bullet));
+
+  if (content.workshops.length) {
     children.push(heading("PROFESSIONAL DEVELOPMENT"));
-    for (const item of workshopsAndSeminars) {
-      children.push(bullet(`${item.title} — ${item.organization}, ${item.period}`));
+    for (const item of content.workshops) {
+      children.push(bullet(`${item.title} — ${item.organization}, ${item.period}${item.location ? ` | ${item.location}` : ""}`));
+      if (item.summary) children.push(body(item.summary));
+      children.push(...item.highlights.map(bullet));
     }
   }
 
-  children.push(heading("LANGUAGES"), ...profile.languages.map((language) => bullet(`${language.name} — ${language.proficiency}`)));
+  children.push(heading("LANGUAGES"), ...content.languages.map((language) => bullet(`${language.name} — ${language.proficiency}`)));
 
   if (settings.showReferences) {
-    children.push(heading("REFERENCES"), body(profile.references));
+    children.push(heading("REFERENCES"), body(content.references));
   }
 
   const doc = new Document({
@@ -182,23 +192,24 @@ export const downloadCvDocx = async (version: CvVersion, documentType: "cv" | "r
   });
 
   const blob = await Packer.toBlob(doc);
-  downloadBlob(blob, `Kingsley Junior Norku - ${documentType === "resume" ? "Resume" : "CV"}.docx`);
+  downloadBlob(blob, `${getRecruiterDocumentFilename(content.name, documentType)}.docx`);
 };
 
 /** Word export of the tailored cover letter. */
 export const downloadCoverLetterDocx = async (version: CvVersion, inputs: CoverLetterInputs = {}) => {
   const letter = buildCoverLetter(version, inputs);
+  const originalContent = createOriginalCvContent(version);
   const settings = loadDocumentSettings();
   const format = getCvFormatProfile(settings.targetMarket);
   const size = PAGE_SIZES[format.paperSize] ?? PAGE_SIZES.A4;
   const today = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
   const children: Paragraph[] = [
-    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(profile.name)] }),
+    new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun(originalContent.name)] }),
     new Paragraph({
       alignment: AlignmentType.CENTER,
       spacing: { after: 240 },
-      children: [new TextRun({ text: buildContactLine(), size: 18 })],
+      children: [new TextRun({ text: buildContactLine(originalContent), size: 18 })],
     }),
     body(today, { after: 200 }),
     body(letter.recipientName),

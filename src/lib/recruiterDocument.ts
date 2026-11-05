@@ -4,7 +4,21 @@ export type RecruiterDocumentType = "cv" | "resume";
 
 export const getRecruiterDocumentTitle = (
   documentType: RecruiterDocumentType,
-): string => `Kingsley Junior Norku - ${documentType === "resume" ? "Resume" : "CV"}`;
+  name = "Kingsley Junior Norku",
+): string => `${name} - ${documentType === "resume" ? "Resume" : "CV"}`;
+
+export const getRecruiterDocumentFilename = (
+  name: string,
+  documentType: RecruiterDocumentType,
+): string => {
+  const safeName = name
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^A-Za-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  const safeDocumentName = safeName || "Professional";
+  return `${safeDocumentName}_${documentType === "resume" ? "Resume" : "CV"}`;
+};
 
 /**
  * Career-track titles are internal selection metadata. They may drive keyword

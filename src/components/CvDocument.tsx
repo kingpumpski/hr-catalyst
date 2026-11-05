@@ -1,17 +1,15 @@
 import "@/cv-print.css";
-import { companies, leadership, profile, workshopsAndSeminars } from "@/data/profile";
-import { education } from "@/data/education";
 import { getCvFormatProfile } from "@/data/cvFormatProfiles";
 import type { CvVersion } from "@/data/cvVersions";
-import { useMemo } from "react";
 import { loadDocumentSettings } from "@/lib/documentSettings";
-import { getRecruiterSafeSummary } from "@/lib/recruiterDocument";
+import { createOriginalCvContent, type CvDocumentContent } from "@/data/cvDocumentContent";
 
 type CareerDocumentType = "cv" | "resume";
 
 type CvDocumentProps = {
   version: CvVersion;
   documentType?: CareerDocumentType;
+  content?: CvDocumentContent;
 };
 
 const documentLabels: Record<CareerDocumentType, string> = {
@@ -24,50 +22,35 @@ const splitIntoBalancedColumns = <T,>(items: T[]): [T[], T[]] => {
   return [items.slice(0, midpoint), items.slice(midpoint)];
 };
 
-const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
-  const settings = useMemo(() => loadDocumentSettings(), []);
+const CvDocument = ({ version, documentType = "cv", content = createOriginalCvContent(version) }: CvDocumentProps) => {
+  const settings = loadDocumentSettings();
   const format = getCvFormatProfile(settings.targetMarket);
   const documentLabel = documentLabels[documentType];
   const showPhoto = settings.includePhoto && Boolean(settings.photoUrl) && format.photoPolicy !== "never";
   const contactItems = [
-    { label: "Phone", value: profile.phone },
-    { label: "Email", value: profile.email },
-    { label: "LinkedIn", value: profile.linkedin.replace(/^https?:\/\//, "") },
+    { label: "Phone", value: content.phone },
+    { label: "Email", value: content.email },
+    { label: "LinkedIn", value: content.linkedin.replace(/^https?:\/\//, "") },
   ].filter((item) => {
     if (item.label === "Phone" || item.label === "Email") return settings.showContactDetails;
     return settings.includeLinkedIn && settings.showContactDetails;
   });
 
-  const strengths = [
-    "Accuracy",
-    "Integrity",
-    "Financial Discipline",
-    "Attention to Detail",
-    "Confidentiality",
-    "Analytical Thinking",
-    "Problem Solving",
-    "Operational Coordination",
-    "Documentation",
-    "Team Collaboration",
-    "Time Management",
-    "Continuous Improvement",
-  ];
-  const skills = Array.from(new Set(version.coreSkills));
+  const skills = Array.from(new Set(content.coreSkills));
   const skillColumns = splitIntoBalancedColumns(skills);
-  const strengthColumns = splitIntoBalancedColumns(strengths);
-  const recruiterSummary = getRecruiterSafeSummary(version);
+  const strengthColumns = splitIntoBalancedColumns(content.strengths);
 
   return (
     <article
       className={`cv-doc cv-paper-${format.paperSize.toLowerCase()} cv-market-${format.market}`}
-      aria-label={`${profile.name} ${documentLabel}`}
+      aria-label={`${content.name} ${documentLabel}`}
     >
       <header className="cv-header">
         <div className={showPhoto ? "cv-header-with-photo" : undefined}>
           <div className="cv-identity">
-            <h1>{profile.name}</h1>
+            <h1>{content.name}</h1>
             <div className="cv-contact" aria-label="Contact information">
-              {settings.showLocation && <span>{profile.address}</span>}
+              {settings.showLocation && <span>{content.address}</span>}
               {contactItems.map((item) => <span key={item.label}>{item.value}</span>)}
             </div>
           </div>
@@ -75,7 +58,7 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
             <img
               className="cv-profile-photo"
               src={settings.photoUrl}
-              alt={profile.name}
+              alt={content.name}
               loading="lazy"
             />
           )}
@@ -84,7 +67,7 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
 
       <section>
         <h2>SUMMARY</h2>
-        <p>{recruiterSummary}</p>
+        <p>{content.summary}</p>
       </section>
 
       <section>
@@ -100,7 +83,7 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
 
       <section>
         <h2>EXPERIENCE</h2>
-        {companies.map((company) => company.roles.map((role) => (
+        {content.companies.map((company) => company.roles.map((role) => (
           <article key={company.company + role.title + role.period} className="cv-entry">
             <div className="cv-entry-header">
               <div className="cv-entry-primary">
@@ -112,16 +95,18 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
                 <span>{role.period}</span>
               </div>
             </div>
+            {role.summary && <p>{role.summary}</p>}
             <ul className="cv-bullet-list">
               {role.contributions.map((contribution) => <li key={contribution}>{contribution}</li>)}
             </ul>
+            {role.skills.length > 0 && <p className="cv-role-skills"><strong>Skills:</strong> {role.skills.join(", ")}</p>}
           </article>
         )))}
       </section>
 
       <section>
         <h2>EDUCATION</h2>
-        {education.map((entry) => (
+        {content.education.map((entry) => (
           <article key={entry.school} className="cv-entry">
             <div className="cv-entry-header">
               <div className="cv-entry-primary">
@@ -156,14 +141,14 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
       <section>
         <h2>SELECTED ACHIEVEMENTS</h2>
         <ul className="cv-bullet-list">
-          {version.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}
+          {content.highlights.map((highlight, index) => <li key={`${highlight}-${index}`}>{highlight}</li>)}
         </ul>
       </section>
 
-      {leadership.length > 0 && (
+      {content.leadership.length > 0 && (
         <section>
           <h2>LEADERSHIP &amp; FINANCIAL ACCOUNTABILITY</h2>
-          {leadership.map((entry) => (
+          {content.leadership.map((entry, index) => (
             <article key={`${entry.company}-${entry.title}`} className="cv-entry">
               <div className="cv-entry-header">
                 <div className="cv-entry-primary">
@@ -175,8 +160,9 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
                   <span>{entry.period}</span>
                 </div>
               </div>
+              {entry.summary && <p>{entry.summary}</p>}
               <ul className="cv-bullet-list">
-                {entry.contributions.slice(0, 5).map((contribution) => <li key={contribution}>{contribution}</li>)}
+                {entry.contributions.slice(0, 5).map((contribution, contributionIndex) => <li key={`${index}-${contributionIndex}`}>{contribution}</li>)}
               </ul>
             </article>
           ))}
@@ -194,13 +180,16 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
         </div>
       </section>
 
-      {workshopsAndSeminars.length > 0 && (
+      {content.workshops.length > 0 && (
         <section>
           <h2>PROFESSIONAL DEVELOPMENT</h2>
           <ul className="cv-bullet-list">
-            {workshopsAndSeminars.map((item) => (
-              <li key={item.title}>
+            {content.workshops.map((item, index) => (
+              <li key={`${item.title}-${index}`}>
                 {item.title} — {item.organization}, {item.period}
+                {item.location && ` | ${item.location}`}
+                {item.summary && <p>{item.summary}</p>}
+                {item.highlights.map((highlight, highlightIndex) => <p key={`${index}-${highlightIndex}`}>{highlight}</p>)}
               </li>
             ))}
           </ul>
@@ -210,7 +199,7 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
       <section>
         <h2>LANGUAGES</h2>
         <ul className="cv-bullet-list cv-language-list">
-          {profile.languages.map((language) => (
+          {content.languages.map((language) => (
             <li key={language.name}>
               <span className="cv-language-row">
                 <span>{language.name}</span>
@@ -224,7 +213,7 @@ const CvDocument = ({ version, documentType = "cv" }: CvDocumentProps) => {
       {settings.showReferences && (
         <section>
           <h2>REFERENCES</h2>
-          <p>{profile.references}</p>
+          <p>{content.references}</p>
         </section>
       )}
     </article>

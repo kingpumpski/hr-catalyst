@@ -2,12 +2,23 @@ import { describe, expect, it } from "vitest";
 
 import { cvCatalog } from "@/data/cvCatalog";
 import { profile } from "@/data/profile";
-import { getRecruiterDocumentTitle, getRecruiterSafeSummary } from "@/lib/recruiterDocument";
+import {
+  getRecruiterDocumentFilename,
+  getRecruiterDocumentTitle,
+  getRecruiterSafeSummary,
+} from "@/lib/recruiterDocument";
 
 describe("recruiter document export boundary", () => {
   it("uses generic recruiter-facing document titles", () => {
     expect(getRecruiterDocumentTitle("cv")).toBe("Kingsley Junior Norku - CV");
     expect(getRecruiterDocumentTitle("resume")).toBe("Kingsley Junior Norku - Resume");
+    expect(getRecruiterDocumentTitle("cv", "Edited Name")).toBe("Edited Name - CV");
+  });
+
+  it("uses a safe name-based recruiter filename without exposing the target role", () => {
+    expect(getRecruiterDocumentFilename("Éva O'Neil / Norku", "cv")).toBe("Eva_O_Neil_Norku_CV");
+    expect(getRecruiterDocumentFilename("Edited Name", "resume")).toBe("Edited_Name_Resume");
+    expect(getRecruiterDocumentFilename("!!!", "cv")).toBe("Professional_CV");
   });
 
   it("removes internal target titles from every catalogue summary", () => {

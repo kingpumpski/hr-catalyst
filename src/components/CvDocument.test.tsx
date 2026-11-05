@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import CvDocument from "@/components/CvDocument";
 import { cvCatalog } from "@/data/cvCatalog";
+import { createOriginalCvContent } from "@/data/cvDocumentContent";
 import { profile } from "@/data/profile";
 
 describe("CvDocument ATS export structure", () => {
@@ -41,5 +42,25 @@ describe("CvDocument ATS export structure", () => {
       expect(markup).toContain(language.name);
       expect(markup).toContain(language.proficiency);
     }
+  });
+
+  it("renders edited profile, dates, locations, descriptions, skills, and achievements", () => {
+    const content = createOriginalCvContent(version);
+    content.name = "Updated Name";
+    content.companies[0].roles[0].period = "January 2025 - Present";
+    content.companies[0].roles[0].location = "Remote";
+    content.companies[0].roles[0].summary = "User-entered role description.";
+    content.education[0].location = "Updated education location";
+    content.coreSkills = ["User-entered skill"];
+    content.highlights = ["User-entered achievement"];
+
+    const editedMarkup = renderToStaticMarkup(<CvDocument version={version} content={content} />);
+    expect(editedMarkup).toContain("Updated Name");
+    expect(editedMarkup).toContain("January 2025 - Present");
+    expect(editedMarkup).toContain("Remote");
+    expect(editedMarkup).toContain("User-entered role description.");
+    expect(editedMarkup).toContain("Updated education location");
+    expect(editedMarkup).toContain("User-entered skill");
+    expect(editedMarkup).toContain("User-entered achievement");
   });
 });

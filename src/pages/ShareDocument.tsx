@@ -6,8 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Printer, Mail } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
+import type { CvVersion } from "@/data/cvVersions";
+import { createOriginalCvContent, loadCvDocumentContent, type CvDocumentContent } from "@/data/cvDocumentContent";
 import { getEmailHref } from "@/lib/contactLinks";
 import { getSharePageTitle, isShareDocumentType, normalizeShareDocumentType } from "@/lib/shareLinks";
+import { getRecruiterDocumentFilename } from "@/lib/recruiterDocument";
 import NotFound from "./NotFound";
 
 const CvDocument = lazy(() => import("@/components/CvDocument"));
@@ -16,15 +19,43 @@ const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"
 
 const ShareDocumentPage = () => {
   const { documentType, slug } = useParams<{ documentType?: string; slug?: string }>();
-  const [recipientName, setRecipientName] = useState("Hiring Manager");
-  const [companyName, setCompanyName] = useState("");
-  const [companyAddress, setCompanyAddress] = useState("");
-
   const resolvedType = useMemo(() => normalizeShareDocumentType(documentType), [documentType]);
   const version = slug ? getCvVersionFromCatalog(slug) : null;
   const contactHref = getEmailHref("Recruiter document request");
 
   if (!isShareDocumentType(documentType) || !version) return <NotFound />;
+  return <ShareDocumentWorkspace key={`${version.slug}-${resolvedType}`} version={version} resolvedType={resolvedType} contactHref={contactHref} />;
+};
+
+const ShareDocumentWorkspace = ({
+  version,
+  resolvedType,
+  contactHref,
+}: {
+  version: CvVersion;
+  resolvedType: ReturnType<typeof normalizeShareDocumentType>;
+  contactHref: string;
+}) => {
+  const [recipientName, setRecipientName] = useState("Hiring Manager");
+  const [companyName, setCompanyName] = useState("");
+  const [companyAddress, setCompanyAddress] = useState("");
+  const [contentState] = useState(() => {
+    try {
+      return { content: loadCvDocumentContent(version), error: null as string | null };
+    } catch (error) {
+      return {
+        content: createOriginalCvContent(version),
+        error: error instanceof Error ? error.message : "Saved CV edits could not be loaded.",
+      };
+    }
+  });
+  const content: CvDocumentContent = contentState.content;
+  const handlePrint = () => {
+    if (resolvedType === "cv" || resolvedType === "resume") {
+      document.title = getRecruiterDocumentFilename(content.name, resolvedType);
+    }
+    window.print();
+  };
 
   return (
     <main className="cv-document-page min-h-screen bg-background py-8 px-6">
@@ -35,7 +66,7 @@ const ShareDocumentPage = () => {
             <h1 className="text-3xl font-semibold text-foreground">{version.title}</h1>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />Download / Print</Button>
+            <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" />Download / Print</Button>
             <Button variant="outline" asChild><a href={contactHref}><Mail className="mr-2 h-4 w-4" />Contact me</a></Button>
           </div>
         </div>
@@ -47,6 +78,7 @@ const ShareDocumentPage = () => {
             <Badge variant={resolvedType === "letter" ? "default" : "secondary"}>Cover letter</Badge>
           </div>
           <p className="text-sm text-muted-foreground">This page is intentionally restricted to the selected document so recruiters can review it without seeing unrelated portfolio content.</p>
+          {contentState.error && resolvedType !== "letter" && <p className="mt-2 text-sm text-destructive" role="alert">{contentState.error} Showing the original CV content.</p>}
         </div>
 
         {resolvedType === "letter" && (
@@ -63,7 +95,7 @@ const ShareDocumentPage = () => {
         <div className="mb-6 flex items-center gap-2 no-print"><Button variant="ghost" asChild><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />Back to main profile</Link></Button></div>
 
         <Suspense fallback={<div className="cv-doc mx-auto min-h-[12rem] animate-pulse rounded-lg bg-muted" aria-label="Loading document" />}>
-          {resolvedType === "resume" ? <ResumeDocument version={version} /> : resolvedType === "letter" ? <CoverLetterDocument version={version} recipientName={recipientName} companyName={companyName || "[Company Name]"} companyAddress={companyAddress || "[Company Address]"} /> : <CvDocument version={version} />}
+          {resolvedType === "resume" ? <ResumeDocument version={version} content={content} /> : resolvedType === "letter" ? <CoverLetterDocument version={version} recipientName={recipientName} companyName={companyName || "[Company Name]"} companyAddress={companyAddress || "[Company Address]"} /> : <CvDocument version={version} content={content} />}
         </Suspense>
       </div>
     </main>

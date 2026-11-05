@@ -4,11 +4,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import CvContentEditor from "@/components/CvContentEditor";
 import { ArrowLeft, FileDown, Printer } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
+import type { CvVersion } from "@/data/cvVersions";
+import {
+  createOriginalCvContent,
+  getCvContentIssues,
+  loadCvDocumentContent,
+  resetCvDocumentContent,
+  saveCvDocumentContent,
+  type CvDocumentContent,
+} from "@/data/cvDocumentContent";
 import NotFound from "./NotFound";
 import { useSeo } from "@/lib/seo";
-import { getRecruiterDocumentTitle } from "@/lib/recruiterDocument";
+import { getRecruiterDocumentFilename, getRecruiterDocumentTitle } from "@/lib/recruiterDocument";
 import { toast } from "@/hooks/use-toast";
 
 const CvDocument = lazy(() => import("@/components/CvDocument"));
@@ -24,6 +34,11 @@ const DocumentFallback = () => <div className="min-h-[60vh] rounded-lg border bo
 const CvVersionPage = () => {
   const { slug } = useParams();
   const version = getCvVersionFromCatalog(slug);
+  if (!version) return <NotFound />;
+  return <CvVersionWorkspace key={version.slug} version={version} />;
+};
+
+const CvVersionWorkspace = ({ version }: { version: CvVersion }) => {
   const [tab, setTab] = useState<DocumentTab>("cv");
   const [recipientName, setRecipientName] = useState("Hiring Manager");
   const [employerName, setEmployerName] = useState("");
@@ -31,31 +46,41 @@ const CvVersionPage = () => {
   const [jobReference, setJobReference] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<CvDocumentContent | null>(null);
+  const [validationIssues, setValidationIssues] = useState<string[]>([]);
+  const [initialContentState] = useState(() => {
+    try {
+      return { content: loadCvDocumentContent(version), error: null as string | null };
+    } catch (error) {
+      return {
+        content: createOriginalCvContent(version),
+        error: error instanceof Error ? error.message : "Saved CV edits could not be loaded.",
+      };
+    }
+  });
+  const [content, setContent] = useState(initialContentState.content);
+  const [storageError, setStorageError] = useState<string | null>(initialContentState.error);
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
+  const previewContent = editing && draft ? draft : content;
+  const activeVersion = {
+    ...version,
+    summary: previewContent.summary,
+    coreSkills: previewContent.coreSkills,
+    highlights: previewContent.highlights,
+  };
+
   useSeo({
-    // Application-track titles remain internal UI metadata. CV/resume browser
-    // titles are deliberately generic so PDF export never inherits a target role.
-    title: version ? getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv") : "CV not found | Kingsley Junior Norku",
-    description: version ? version.summary.slice(0, 150) : "This CV version could not be found.",
-    path: version ? `/cv/${version.slug}` : "/cv",
+    title: getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv", content.name),
+    description: content.summary.slice(0, 150),
+    path: `/cv/${version.slug}`,
   });
 
-  if (!version) return <NotFound />;
-
-  const letterInputs = {
-    recipientName,
-    employerName,
-    companyAddress,
-    jobTitle,
-    jobReference,
-  };
+  const letterInputs = { recipientName, employerName, companyAddress, jobTitle, jobReference };
 
   const handlePrint = () => {
     if (tab === "cv" || tab === "resume") {
-      // Set the title again immediately before invoking the browser print
-      // dialog. This creates a hard export boundary even if page-level SEO or
-      // application metadata changes elsewhere in the future.
-      document.title = getRecruiterDocumentTitle(tab);
+      document.title = getRecruiterDocumentFilename(content.name, tab);
     }
     window.print();
   };
@@ -65,11 +90,58 @@ const CvVersionPage = () => {
     try {
       const { downloadCvDocx, downloadCoverLetterDocx } = await import("@/lib/docxExport");
       if (tab === "letter") await downloadCoverLetterDocx(version, letterInputs);
-      else await downloadCvDocx(version, tab);
+      else await downloadCvDocx(activeVersion, tab, content);
     } catch {
       toast({ title: "Word download failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  const handleSave = () => {
+    if (!draft) return;
+    const issues = getCvContentIssues(draft);
+    setValidationIssues(issues);
+    if (issues.length) return;
+    try {
+      saveCvDocumentContent(version.slug, draft);
+      setContent(draft);
+      setDraft(null);
+      setEditing(false);
+      setStorageError(null);
+      toast({ title: "CV changes saved", description: "This version is saved in this browser on this device." });
+    } catch (error) {
+      toast({
+        title: "CV changes could not be saved",
+        description: error instanceof Error ? error.message : "Check browser storage and try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setDraft(null);
+    setValidationIssues([]);
+    setEditing(false);
+  };
+
+  const handleReset = () => {
+    if (!window.confirm("Reset this CV version to its original content? Your saved edits for this version will be removed.")) return;
+    try {
+      resetCvDocumentContent(version.slug);
+      const original = createOriginalCvContent(version);
+      setContent(original);
+      setDraft(null);
+      setValidationIssues([]);
+      setEditing(false);
+      setStorageError(null);
+      toast({ title: "Original CV restored", description: "Saved edits for this version have been removed." });
+    } catch (error) {
+      toast({
+        title: "CV could not be reset",
+        description: error instanceof Error ? error.message : "Check browser storage and try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -92,43 +164,88 @@ const CvVersionPage = () => {
       <div className="container max-w-3xl mx-auto">
         <div className="no-print">
           <Button variant="ghost" asChild className="mb-6"><Link to="/cv"><ArrowLeft className="mr-2 h-4 w-4" /> All versions</Link></Button>
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
             <div><h1 className="text-3xl font-semibold text-foreground">{version.title}</h1><p className="text-sm text-muted-foreground">{version.targetRoles}</p></div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" />Download {documentLabels[tab]} as PDF</Button>
-              <Button variant="outline" onClick={handleDocxDownload} disabled={isExporting}>
+              <Button onClick={handlePrint} disabled={editing}><Printer className="mr-2 h-4 w-4" />Download {documentLabels[tab]} as PDF</Button>
+              <Button variant="outline" onClick={handleDocxDownload} disabled={isExporting || editing}>
                 <FileDown className="mr-2 h-4 w-4" />{isExporting ? "Preparing…" : `Download ${documentLabels[tab]} as Word`}
               </Button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Career document type">
+          <div className="mb-4 flex flex-wrap gap-2" role="tablist" aria-label="Career document type">
             {documentTabs.map((documentTab) => (
-              <Button key={documentTab} ref={(element) => { tabRefs.current[documentTab] = element; }} variant={tab === documentTab ? "default" : "outline"} id={`document-tab-${documentTab}`} role="tab" aria-selected={tab === documentTab} aria-controls={`document-panel-${documentTab}`} tabIndex={tab === documentTab ? 0 : -1} onClick={() => setTab(documentTab)} onKeyDown={handleTabKeyDown}>{documentLabels[documentTab]}</Button>
+              <Button key={documentTab} ref={(element) => { tabRefs.current[documentTab] = element; }} variant={tab === documentTab ? "default" : "outline"} id={`document-tab-${documentTab}`} role="tab" aria-selected={tab === documentTab} aria-controls={`document-panel-${documentTab}`} tabIndex={tab === documentTab ? 0 : -1} disabled={editing && documentTab === "letter"} onClick={() => setTab(documentTab)} onKeyDown={handleTabKeyDown}>{documentLabels[documentTab]}</Button>
             ))}
           </div>
-          <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-2">{version.keywords.map((keyword) => <Badge key={keyword} variant="secondary" className="text-xs">{keyword}</Badge>)}</div>
+            {tab !== "letter" && (
+              <div className="flex gap-2">
+                {!editing && <Button variant="outline" onClick={() => { setDraft(structuredClone(content)); setEditing(true); }}>Edit CV content</Button>}
+                {!editing && tab !== "letter" && <Button variant="ghost" onClick={handleReset}>Reset to original</Button>}
+              </div>
+            )}
+          </div>
+
+          {storageError && (
+            <p className="mb-4 rounded-md border border-destructive/50 p-3 text-sm text-destructive" role="alert">
+              {storageError} The original content is shown; browser-local saving may be unavailable.
+            </p>
+          )}
+
+          {editing && draft && (
+            <>
+              <CvContentEditor content={draft} versionTitle={`${version.title} ${tab === "resume" ? "Resume" : "CV"}`} onChange={(updated) => { setDraft(updated); setValidationIssues([]); }} />
+              {validationIssues.length > 0 && (
+                <div className="mb-4 rounded-md border border-destructive/50 p-4 text-sm text-destructive" role="alert" aria-live="assertive">
+                  <p className="font-semibold">Resolve these issues before saving:</p>
+                  <ul className="mt-2 list-disc pl-5">{validationIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul>
+                </div>
+              )}
+              <div className="no-print mb-8 flex flex-wrap gap-2">
+                <Button onClick={handleSave}>Save changes</Button>
+                <Button variant="outline" onClick={handleCancel}>Cancel</Button>
+                <Button variant="ghost" onClick={handleReset}>Reset to original</Button>
+              </div>
+            </>
+          )}
 
           {tab === "letter" && (
             <div className="mb-8 rounded-lg border border-border bg-muted/20 p-4 no-print">
               <h2 className="text-sm font-semibold text-foreground">Tailor this cover letter</h2>
-              <p className="text-sm text-muted-foreground mt-1">Enter the employer and job title — the letter below rewrites itself instantly.</p>
-              <div className="grid md:grid-cols-2 gap-3 mt-4">
-                <div><label className="text-sm text-foreground mb-1 block" htmlFor="employer-name">Employer name</label><Input id="employer-name" value={employerName} onChange={(e) => setEmployerName(e.target.value)} placeholder="Company or organisation" /></div>
-                <div><label className="text-sm text-foreground mb-1 block" htmlFor="job-title">Job title</label><Input id="job-title" value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} placeholder={version.title} /></div>
-                <div><label className="text-sm text-foreground mb-1 block" htmlFor="recipient-name">Recipient name</label><Input id="recipient-name" value={recipientName} onChange={(e) => setRecipientName(e.target.value)} placeholder="Hiring Manager" /></div>
-                <div><label className="text-sm text-foreground mb-1 block" htmlFor="job-reference">Job reference (optional)</label><Input id="job-reference" value={jobReference} onChange={(e) => setJobReference(e.target.value)} placeholder="e.g. REF/2026/014" /></div>
+              <p className="mt-1 text-sm text-muted-foreground">Enter the employer and job title — the letter below rewrites itself instantly.</p>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div><label className="mb-1 block text-sm text-foreground" htmlFor="employer-name">Employer name</label><Input id="employer-name" value={employerName} onChange={(event) => setEmployerName(event.target.value)} placeholder="Company or organisation" /></div>
+                <div><label className="mb-1 block text-sm text-foreground" htmlFor="job-title">Job title</label><Input id="job-title" value={jobTitle} onChange={(event) => setJobTitle(event.target.value)} placeholder={version.title} /></div>
+                <div><label className="mb-1 block text-sm text-foreground" htmlFor="recipient-name">Recipient name</label><Input id="recipient-name" value={recipientName} onChange={(event) => setRecipientName(event.target.value)} placeholder="Hiring Manager" /></div>
+                <div><label className="mb-1 block text-sm text-foreground" htmlFor="job-reference">Job reference (optional)</label><Input id="job-reference" value={jobReference} onChange={(event) => setJobReference(event.target.value)} placeholder="e.g. REF/2026/014" /></div>
               </div>
-              <div className="mt-3"><label className="text-sm text-foreground mb-1 block" htmlFor="company-address">Employer address</label><Textarea id="company-address" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} placeholder="Employer address" rows={3} /></div>
+              <div className="mt-3"><label className="mb-1 block text-sm text-foreground" htmlFor="company-address">Employer address</label><Textarea id="company-address" value={companyAddress} onChange={(event) => setCompanyAddress(event.target.value)} placeholder="Employer address" rows={3} /></div>
             </div>
           )}
 
           <Suspense fallback={null}>
-            <AtsKeywordChecker version={version} />
+            <AtsKeywordChecker version={activeVersion} />
           </Suspense>
         </div>
         <Suspense fallback={<DocumentFallback />}>
           <div id={`document-panel-${tab}`} role="tabpanel" aria-labelledby={`document-tab-${tab}`} tabIndex={-1}>
-            {tab === "cv" ? <CvDocument version={version} documentType="cv" /> : tab === "resume" ? <ResumeDocument version={version} /> : <CoverLetterDocument version={version} {...letterInputs} />}
+            {tab === "cv" ? (
+              <>
+                <div className={editing ? "cv-draft-preview" : undefined}>
+                  <CvDocument version={activeVersion} content={previewContent} documentType="cv" />
+                </div>
+                {editing && <div className="cv-saved-print-preview"><CvDocument version={version} content={content} documentType="cv" /></div>}
+              </>
+            ) : tab === "resume" ? (
+              <>
+                <div className={editing ? "cv-draft-preview" : undefined}>
+                  <ResumeDocument version={activeVersion} content={previewContent} />
+                </div>
+                {editing && <div className="cv-saved-print-preview"><ResumeDocument version={version} content={content} /></div>}
+              </>
+            ) : <CoverLetterDocument version={version} {...letterInputs} />}
           </div>
         </Suspense>
       </div>
