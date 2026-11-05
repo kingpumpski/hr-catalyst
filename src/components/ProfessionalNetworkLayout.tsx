@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { ArrowRight, BriefcaseBusiness, FileText, Globe2, Mail, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
@@ -16,7 +16,7 @@ const Interests = lazy(() => import("@/components/Interests"));
 const Contact = lazy(() => import("@/components/Contact"));
 
 const SectionFallback = () => <div className="min-h-[220px]" aria-hidden="true" />;
-const Deferred = ({ children }: { children: React.ReactNode }) => (
+const Deferred = ({ children }: { children: ReactNode }) => (
   <Suspense fallback={<SectionFallback />}>{children}</Suspense>
 );
 
