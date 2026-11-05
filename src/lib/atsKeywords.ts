@@ -156,7 +156,8 @@ export const createEvidenceBasedTailoring = (
       data.education.some((item) => /bachelor|bsc/i.test(item.qualification))) {
     const degree = data.education.find((item) => /bachelor|bsc/i.test(item.qualification));
     if (degree && !data.summary.toLowerCase().includes(degree.qualification.toLowerCase())) {
-      const qualificationLabel = /\\bBSc\\b/i.test(degree.qualification) ? "bachelor’s degree (BSc)" : degree.qualification;\n      data.summary = `${data.summary.trim()} Holds a ${qualificationLabel} in ${degree.field || "Accounting"}.`;
+      const qualificationLabel = /BSc/i.test(degree.qualification) ? "bachelor’s degree (BSc)" : degree.qualification;
+      data.summary = `${data.summary.trim()} Holds a ${qualificationLabel} in ${degree.field || "Accounting"}.`;
       mark("degree", "Made the existing academic qualification more visible in the summary.");
       if (terms.has("qualification") || terms.has("qualifications")) applied.add("qualification");
       if (terms.has("field")) applied.add("field");
