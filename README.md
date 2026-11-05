@@ -77,4 +77,4 @@ Professional positioning is based on documented experience and transferable skil
 
 ## Canonical site origin and SEO
 
-The canonical production origin defaults to `https://hr-catalyst-five.vercel.app`, matching the repository's configured homepage. If the production domain changes, set `VITE_SITE_URL` in the build environment (without a trailing slash) so the generated sitemap and route-level canonical/Open Graph URLs use the same origin. Update the static root metadata in `index.html` at the same time.
+The canonical production origin defaults to `https://hr-catalyst-five.vercel.app`, matching the repository's configured homepage. If the production domain changes, set `VITE_SITE_URL` in the build environment (without a trailing slash) so the generated `sitemap.xml`, the sitemap directive in generated `robots.txt`, and route-level canonical/Open Graph URLs use the same origin. Update the static root metadata in `index.html` at the same time.
