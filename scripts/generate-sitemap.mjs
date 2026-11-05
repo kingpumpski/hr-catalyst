@@ -1,9 +1,9 @@
-// Runs before `vite dev` and `vite build` (predev/prebuild hooks); writes public/sitemap.xml.
+// Runs before `vite dev` and `vite build` (predev/prebuild hooks); writes public/sitemap.xml and public/robots.txt.
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const BASE_URL = process.env.VITE_SITE_URL || "https://hr-catalyst-five.vercel.app";
+const BASE_URL = (process.env.VITE_SITE_URL || "https://hr-catalyst-five.vercel.app").replace(/\/+$/, "");
 
 const readSlugs = (file) =>
   Array.from(readFileSync(resolve(file), "utf8").matchAll(/slug:\s*"([a-z0-9-]+)"/g)).map((match) => match[1]);
