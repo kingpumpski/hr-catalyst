@@ -44,6 +44,10 @@ const CvEditorPanel = ({ value, onChange }: Props) => {
         </div>)}
         <Button variant="outline" onClick={()=>update({experience:[...value.experience,{id:crypto.randomUUID(),company:"",title:"",location:"",period:"",contributions:[]}]})}><Plus className="mr-2 h-4 w-4"/>Add position</Button>
       </div>}
+      {active === "additional" && <div className="space-y-4">
+        {([["leadership","Leadership and volunteering"],["professionalDevelopment","Professional development"],["professionalStrengths","Professional strengths"],["languages","Languages and proficiency"]] as const).map(([field,label]) => <label key={field} className="block text-sm font-medium">{label} <span className="font-normal text-muted-foreground">(one entry per line)</span><Textarea className="mt-1" rows={5} value={value[field].join("\n")} onChange={e=>update({[field]:e.target.value.split("\n").map(v=>v.trim()).filter(Boolean)})}/></label>)}
+        <label className="block text-sm font-medium">References<Textarea className="mt-1" rows={2} value={value.references} onChange={e=>update({references:e.target.value})}/></label>
+      </div>}
       {active === "education" && <div className="space-y-4">
         {value.education.map((item,index)=><div key={item.id} className="rounded-lg border border-border p-3">
           <div className="mb-3 flex items-center justify-between"><h3 className="text-sm font-semibold">Education {index+1}</h3><Button size="sm" variant="ghost" aria-label={`Remove education ${index+1}`} onClick={()=>update({education:value.education.filter(x=>x.id!==item.id)})}><Trash2 className="h-4 w-4"/></Button></div>

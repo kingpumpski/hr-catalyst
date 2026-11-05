@@ -22,6 +22,11 @@ export const downloadEditedCvDocx = async (data: CvEditorData, kind: "cv" | "res
     if (item.description) children.push(paragraph(item.description));
   }
   children.push(section("SELECTED ACHIEVEMENTS"), ...data.highlights.map(item=>paragraph(item)));
+  if (data.leadership.length) children.push(section("LEADERSHIP & VOLUNTEERING"), ...data.leadership.map(item => paragraph(item)));
+  if (data.professionalStrengths.length) children.push(section("PROFESSIONAL STRENGTHS"), ...data.professionalStrengths.map(item => paragraph(item)));
+  if (data.professionalDevelopment.length) children.push(section("PROFESSIONAL DEVELOPMENT"), ...data.professionalDevelopment.map(item => paragraph(item)));
+  if (data.languages.length) children.push(section("LANGUAGES"), ...data.languages.map(item => paragraph(item)));
+  if (data.references.trim()) children.push(section("REFERENCES"), paragraph(data.references));
   const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 794, right: 851, bottom: 794, left: 851 } } }, children }] });
   const blob = await Packer.toBlob(doc);
   const safeName = data.profile.name.trim().replace(/[^a-z0-9]+/gi,"_").replace(/^_|_$/g,"") || "Candidate";

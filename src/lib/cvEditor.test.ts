@@ -10,7 +10,7 @@ describe("CV editor data", () => {
     expect(finance.summary).toBe(cvVersions[2].summary);
     expect(claims.skills).not.toBe(cvVersions[0].coreSkills);
     expect(claims.experience.length).toBeGreaterThan(0);
-    expect(claims.education.length).toBeGreaterThan(0);
+    expect(claims.education.length).toBeGreaterThan(0);\n    expect(claims.leadership.length).toBeGreaterThan(0);\n    expect(claims.professionalDevelopment.length).toBeGreaterThan(0);\n    expect(claims.languages).toContain("English — Fluent");\n    expect(claims.references).toBe("Available on request");
   });
   it("uses a version-specific, namespaced browser storage key", () => {
     expect(cvEditorStorageKey("claims-manager")).not.toBe(cvEditorStorageKey("accounting-finance"));
