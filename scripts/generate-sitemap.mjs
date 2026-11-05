@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const BASE_URL = "https://skill-portfolio-showcase.lovable.app";
+const BASE_URL = process.env.VITE_SITE_URL || "https://hr-catalyst-five.vercel.app";
 
 const readSlugs = (file) =>
   Array.from(readFileSync(resolve(file), "utf8").matchAll(/slug:\s*"([a-z0-9-]+)"/g)).map((match) => match[1]);
