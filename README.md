@@ -73,3 +73,8 @@ For Cloudflare Workers Builds, configure the project to build the application wi
 ## Content integrity
 
 Professional positioning is based on documented experience and transferable skills. The platform does not claim prior remote employment or invent vehicle-accounting employment history.
+
+
+## Canonical site origin and SEO
+
+The canonical production origin defaults to `https://hr-catalyst-five.vercel.app`, matching the repository's configured homepage. If the production domain changes, set `VITE_SITE_URL` in the build environment (without a trailing slash) so the generated sitemap and route-level canonical/Open Graph URLs use the same origin. Update the static root metadata in `index.html` at the same time.
