@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, FileDown, Printer } from "lucide-react";
 import { getCvVersionFromCatalog } from "@/data/cvCatalog";
+import type { CvVersion } from "@/data/cvVersions";
 import NotFound from "./NotFound";
 import { useSeo } from "@/lib/seo";
 import { getRecruiterDocumentTitle } from "@/lib/recruiterDocument";
@@ -26,6 +27,11 @@ const DocumentFallback = () => <div className="min-h-[60vh] rounded-lg border bo
 const CvVersionPage = () => {
   const { slug } = useParams();
   const version = getCvVersionFromCatalog(slug);
+  if (!version) return <NotFound />;
+  return <CvVersionContent key={version.slug} version={version} />;
+};
+
+const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [tab, setTab] = useState<DocumentTab>("cv");
   const [recipientName, setRecipientName] = useState("Hiring Manager");
   const [employerName, setEmployerName] = useState("");
@@ -33,19 +39,16 @@ const CvVersionPage = () => {
   const [jobReference, setJobReference] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const [isExporting, setIsExporting] = useState(false);
-  const [editorData, setEditorData] = useState<CvEditorData | null>(() => version ? loadCvEditorData(version.slug, version) : null);
+  const [editorData, setEditorData] = useState<CvEditorData>(() => loadCvEditorData(version.slug, version));
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useEffect(() => {
-    setEditorData(version ? loadCvEditorData(version.slug, version) : null);
-  }, [slug, version]);
-  useEffect(() => {
-    if (version && editorData) saveCvEditorData(version.slug, editorData);
-  }, [version, editorData]);
+    saveCvEditorData(version.slug, editorData);
+  }, [version.slug, editorData]);
 
   useSeo({
-    title: version ? getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv") : "CV not found | Kingsley Junior Norku",
-    description: version ? version.summary.slice(0, 150) : "This CV version could not be found.",
-    path: version ? `/cv/${version.slug}` : "/cv",
+    title: getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv"),
+    description: version.summary.slice(0, 150),
+    path: `/cv/${version.slug}`,
   });
 
   if (!version) return <NotFound />;
@@ -93,14 +96,14 @@ const CvVersionPage = () => {
             <div><h1 className="text-3xl font-semibold text-foreground">{version.title}</h1><p className="text-sm text-muted-foreground">{version.targetRoles}</p></div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" />Download {documentLabels[tab]} as PDF</Button>
-              <Button variant="outline" onClick={handleDocxDownload} disabled={isExporting || (!editorData && tab !== "letter")}><FileDown className="mr-2 h-4 w-4" />{isExporting ? "Preparing…" : `Download ${documentLabels[tab]} as Word`}</Button>
+              <Button variant="outline" onClick={handleDocxDownload} disabled={isExporting}><FileDown className="mr-2 h-4 w-4" />{isExporting ? "Preparing…" : `Download ${documentLabels[tab]} as Word`}</Button>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Career document type">
             {documentTabs.map((documentTab) => <Button key={documentTab} ref={(element) => { tabRefs.current[documentTab] = element; }} variant={tab === documentTab ? "default" : "outline"} id={`document-tab-${documentTab}`} role="tab" aria-selected={tab === documentTab} aria-controls={`document-panel-${documentTab}`} tabIndex={tab === documentTab ? 0 : -1} onClick={() => setTab(documentTab)} onKeyDown={handleTabKeyDown}>{documentLabels[documentTab]}</Button>)}
           </div>
           <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
-          {tab !== "letter" && editorData && <CvEditorPanel value={editorData} onChange={setEditorData} />}
+          {tab !== "letter" && <CvEditorPanel value={editorData} onChange={setEditorData} />}
           {tab === "letter" && <div className="mb-8 rounded-lg border border-border bg-muted/20 p-4 no-print">
             <h2 className="text-sm font-semibold text-foreground">Tailor this cover letter</h2>
             <p className="text-sm text-muted-foreground mt-1">Enter the employer and job title — the letter below rewrites itself instantly.</p>
@@ -116,7 +119,7 @@ const CvVersionPage = () => {
         </div>
         <Suspense fallback={<DocumentFallback />}>
           <div id={`document-panel-${tab}`} role="tabpanel" aria-labelledby={`document-tab-${tab}`} tabIndex={-1}>
-            {tab === "letter" ? <CoverLetterDocument version={version} {...letterInputs} /> : editorData ? <EditableCvDocument data={editorData} /> : <DocumentFallback />}
+            {tab === "letter" ? <CoverLetterDocument version={version} {...letterInputs} /> : <EditableCvDocument data={editorData} />}
           </div>
         </Suspense>
       </div>
