@@ -48,9 +48,9 @@ const WORD_FAMILIES: Record<string, string[]> = {
   branch: ["branch", "branches"],
 };
 const hasTerm = (corpus: string, term: string) => {
-  const normalizedCorpus = normalize(corpus);
+  const corpusTokens = new Set(tokenize(corpus));
   const family = Object.values(WORD_FAMILIES).find((words) => words.includes(term)) ?? [term];
-  return family.some((word) => new RegExp(`(^|\\\\s)${word.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\\\$&")}($|\\\\s)`).test(normalizedCorpus));
+  return family.some((word) => corpusTokens.has(word));
 };
 
 export const analyseCorpus = (jobDescription: string, corpus: string): AtsAnalysis => {
