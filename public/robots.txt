@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://skill-portfolio-showcase.lovable.app/sitemap.xml
+Sitemap: https://hr-catalyst-five.vercel.app/sitemap.xml
