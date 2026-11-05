@@ -226,7 +226,19 @@ const CvVersionWorkspace = ({ version }: { version: CvVersion }) => {
           )}
 
           <Suspense fallback={null}>
-            <AtsKeywordChecker version={activeVersion} />
+            <AtsKeywordChecker
+              version={activeVersion}
+              content={previewContent}
+              onApplyContent={(updatedContent) => {
+                setDraft(updatedContent);
+                setEditing(true);
+                setValidationIssues([]);
+                toast({
+                  title: "Suggestions applied to an unsaved draft",
+                  description: "Review the updated document, then save your changes to keep them.",
+                });
+              }}
+            />
           </Suspense>
         </div>
         <Suspense fallback={<DocumentFallback />}>

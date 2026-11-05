@@ -10,7 +10,11 @@ import {
 } from "docx";
 
 import type { CvVersion } from "@/data/cvVersions";
-import { createOriginalCvContent, type CvDocumentContent } from "@/data/cvDocumentContent";
+import {
+  createOriginalCvContent,
+  formatEducationQualification,
+  type CvDocumentContent,
+} from "@/data/cvDocumentContent";
 import { getRecruiterDocumentFilename } from "@/lib/recruiterDocument";
 import { buildCoverLetter, type CoverLetterInputs } from "@/lib/coverLetter";
 import { loadDocumentSettings } from "@/lib/documentSettings";
@@ -148,7 +152,7 @@ export const downloadCvDocx = async (
     children.push(
       ...entryHeader(
         entry.school,
-        `${entry.qualification}${entry.field ? ` — ${entry.field}` : ""}`,
+        formatEducationQualification(entry),
         `${entry.location} | ${entry.period}`,
       ),
     );

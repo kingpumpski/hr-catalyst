@@ -2,7 +2,11 @@ import "@/cv-print.css";
 import { getCvFormatProfile } from "@/data/cvFormatProfiles";
 import type { CvVersion } from "@/data/cvVersions";
 import { loadDocumentSettings } from "@/lib/documentSettings";
-import { createOriginalCvContent, type CvDocumentContent } from "@/data/cvDocumentContent";
+import {
+  createOriginalCvContent,
+  formatEducationQualification,
+  type CvDocumentContent,
+} from "@/data/cvDocumentContent";
 
 type CareerDocumentType = "cv" | "resume";
 
@@ -111,9 +115,7 @@ const CvDocument = ({ version, documentType = "cv", content = createOriginalCvCo
             <div className="cv-entry-header">
               <div className="cv-entry-primary">
                 <h3>{entry.school}</h3>
-                <p className="cv-company">
-                  {entry.qualification}{entry.field ? ` — ${entry.field}` : ""}
-                </p>
+                <p className="cv-company">{formatEducationQualification(entry)}</p>
               </div>
               <div className="cv-entry-meta">
                 <span>{entry.location}</span>

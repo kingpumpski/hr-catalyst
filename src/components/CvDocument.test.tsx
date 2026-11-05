@@ -33,6 +33,7 @@ describe("CvDocument ATS export structure", () => {
     expect(markup).toContain("<h2>EDUCATION</h2>");
     expect(markup).toContain('class="cv-entry-primary"');
     expect(markup).toContain('class="cv-entry-meta"');
+    expect(markup).toContain("Qualification: Bachelor of Science (BSc) — Field: Accounting");
   });
 
   it("keeps languages and references as independent sections", () => {

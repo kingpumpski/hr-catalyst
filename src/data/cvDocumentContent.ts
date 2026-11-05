@@ -48,6 +48,14 @@ const originalStrengths = [
 
 const storageKey = (slug: string) => `hr-catalyst-cv-content:${slug}`;
 
+export const formatEducationQualification = (entry: EducationEntry): string => {
+  const fieldSuffix = entry.field
+    ? new RegExp(`(?:,\\s*|\\s*[—–-]\\s*|\\s+in\\s+)${entry.field.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i")
+    : /$^/;
+  const qualification = entry.qualification.replace(fieldSuffix, "");
+  return `Qualification: ${qualification}${entry.field ? ` — Field: ${entry.field}` : ""}`;
+};
+
 export const createOriginalCvContent = (version: CvVersion): CvDocumentContent => ({
   name: profile.name,
   address: profile.address,

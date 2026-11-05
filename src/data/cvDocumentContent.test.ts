@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cvCatalog } from "@/data/cvCatalog";
 import {
   createOriginalCvContent,
+  formatEducationQualification,
   getCvContentIssues,
   getCvDateRangeIssues,
   loadCvDocumentContent,
@@ -63,6 +64,17 @@ describe("CV document content", () => {
     expect(content.companies[0].roles[0].period).toBe("August 2024 - January 2022");
     expect(getCvContentIssues(content)).toContain(
       "Claims Manager & IT Support at Mount Carmel Hospital & Fertility Centre: the start date is after the end date (August 2024 - January 2022).",
+    );
+  });
+
+  it("formats existing education facts with clear qualification and field labels", () => {
+    const content = createOriginalCvContent(cvCatalog[0]);
+    expect(formatEducationQualification(content.education[0])).toBe(
+      "Qualification: Bachelor of Science (BSc) — Field: Accounting",
+    );
+    content.education[0].qualification = "Bachelor of Science degree (BSc) in Accounting";
+    expect(formatEducationQualification(content.education[0])).toBe(
+      "Qualification: Bachelor of Science degree (BSc) — Field: Accounting",
     );
   });
 
