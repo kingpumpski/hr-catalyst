@@ -137,9 +137,9 @@ export const createEvidenceBasedTailoring = (
   }
 
   if ((terms.has("rejected") || terms.has("rejection") || terms.has("rejections")) && /rejection/i.test(existingText) && claimsRole) {
-    const index = claimsRole.contributions.findIndex((line) => /resolve.*issue|rejection/i.test(line));
+    const index = claimsRole.contributions.findIndex((line) => /liaise with insurers|collaborat.*insurer|insurer.*provider|claims processing/i.test(line));
     if (index >= 0) {
-      claimsRole.contributions[index] = "Follow up on rejected claims with insurers and internal teams, resolving documentation queries and supporting reimbursement.";
+      claimsRole.contributions[index] = "Liaise with insurers and providers to resolve rejected claims, documentation queries and reimbursement delays.";
       mark("rejected", "Clarified the existing rejection follow-up responsibility.");
     }
   }
