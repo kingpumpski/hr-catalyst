@@ -14,7 +14,6 @@ import { toast } from "@/hooks/use-toast";
 import CvEditorPanel from "@/components/CvEditorPanel";
 import EditableCvDocument from "@/components/EditableCvDocument";
 import { loadCvEditorData, saveCvEditorData, type CvEditorData } from "@/lib/cvEditor";
-import { downloadEditedCvDocx } from "@/lib/editedCvDocx";
 
 const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 const AtsKeywordChecker = lazy(() => import("@/components/AtsKeywordChecker"));
@@ -51,8 +50,6 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
     path: `/cv/${version.slug}`,
   });
 
-  if (!version) return <NotFound />;
-
   const letterInputs = { recipientName, employerName, companyAddress, jobTitle, jobReference };
   const handlePrint = () => {
     if (tab !== "letter") document.title = getRecruiterDocumentTitle(tab);
@@ -65,6 +62,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
         const { downloadCoverLetterDocx } = await import("@/lib/docxExport");
         await downloadCoverLetterDocx(version, letterInputs);
       } else if (editorData) {
+        const { downloadEditedCvDocx } = await import("@/lib/editedCvDocx");
         await downloadEditedCvDocx(editorData, tab);
       }
     } catch {
