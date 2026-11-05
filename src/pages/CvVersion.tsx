@@ -115,7 +115,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
             </div>
             <div className="mt-3"><label className="text-sm text-foreground mb-1 block" htmlFor="company-address">Employer address</label><Textarea id="company-address" value={companyAddress} onChange={(e) => setCompanyAddress(e.target.value)} placeholder="Employer address" rows={3} /></div>
           </div>}
-          <Suspense fallback={null}><AtsKeywordChecker version={version} editorData={editorData} onApply={setEditorData} /></Suspense>
+          {tab !== "letter" && <Suspense fallback={null}><AtsKeywordChecker version={version} editorData={editorData} onApply={setEditorData} /></Suspense>}
         </div>
         <Suspense fallback={<DocumentFallback />}>
           <div id={`document-panel-${tab}`} role="tabpanel" aria-labelledby={`document-tab-${tab}`} tabIndex={-1}>
