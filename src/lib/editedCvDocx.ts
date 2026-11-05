@@ -1,42 +1,233 @@
-import { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } from "docx";
+import {
+  AlignmentType,
+  BorderStyle,
+  Document,
+  HeadingLevel,
+  LevelFormat,
+  Packer,
+  Paragraph,
+  TextRun,
+} from "docx";
 import type { CvEditorData } from "@/lib/cvEditor";
+import { getCvFormatProfile } from "@/data/cvFormatProfiles";
+import { loadDocumentSettings } from "@/lib/documentSettings";
 
-const paragraph = (text: string, bold = false) => new Paragraph({ children: [new TextRun({ text, bold })] });
-const section = (title: string) => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(title)] });
+const FONT = "Times New Roman";
+const PAGE_SIZES = {
+  A4: { width: 11906, height: 16838 },
+  Letter: { width: 12240, height: 15840 },
+} as const;
+const PAGE_MARGIN = { top: 794, right: 851, bottom: 794, left: 851 };
 
-export const downloadEditedCvDocx = async (data: CvEditorData, kind: "cv" | "resume") => {
-  const children: Paragraph[] = [
-    new Paragraph({ heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, children: [new TextRun({ text: data.profile.name, bold: true })] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: [data.profile.address, data.profile.phone, data.profile.email, data.profile.linkedin].filter(Boolean).join(" | ") })] }),
-    section("SUMMARY"), paragraph(data.summary),
-    section("SKILLS"), ...data.skills.map(item => paragraph(item)),
-    section("EXPERIENCE"),
-  ];
-  for (const item of data.experience) {
-    children.push(paragraph(item.title, true), paragraph(item.company), paragraph([item.location,item.period].filter(Boolean).join(" | ")));
-    item.contributions.forEach(line => children.push(paragraph(`• ${line}`)));
-  }
-  children.push(section("EDUCATION"));
-  for (const item of data.education) {
-    children.push(paragraph(item.school,true), paragraph([item.qualification,item.field].filter(Boolean).join(" — ")), paragraph([item.location,item.period].filter(Boolean).join(" | ")));
-    if (item.description) children.push(paragraph(item.description));
-  }
-  children.push(section("SELECTED ACHIEVEMENTS"), ...data.highlights.map(item=>paragraph(item)));
-  if (data.leadership.length) children.push(section("LEADERSHIP & VOLUNTEERING"), ...data.leadership.map(item => paragraph(item)));
-  if (data.professionalStrengths.length) children.push(section("PROFESSIONAL STRENGTHS"), ...data.professionalStrengths.map(item => paragraph(item)));
-  if (data.professionalDevelopment.length) children.push(section("PROFESSIONAL DEVELOPMENT"), ...data.professionalDevelopment.map(item => paragraph(item)));
-  if (data.languages.length) children.push(section("LANGUAGES"), ...data.languages.map(item => paragraph(item)));
-  if (data.references.trim()) children.push(section("REFERENCES"), paragraph(data.references));
-  const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 794, right: 851, bottom: 794, left: 851 } } }, children }] });
-  const blob = await Packer.toBlob(doc);
-  const safeName = data.profile.name.trim().replace(/[^a-z0-9]+/gi,"_").replace(/^_|_$/g,"") || "Candidate";
-  const month = new Date().toISOString().slice(0,7);
-  const anchor = document.createElement("a");
+const numbering = {
+  config: [
+    {
+      reference: "edited-cv-bullets",
+      levels: [{
+        level: 0,
+        format: LevelFormat.BULLET,
+        text: "\\u2022",
+        alignment: AlignmentType.LEFT,
+        style: { paragraph: { indent: { left: 340, hanging: 200 } } },
+      }],
+    },
+  ],
+};
+
+const styles = {
+  default: {
+    document: {
+      run: { font: FONT, size: 21, color: "111111" },
+      paragraph: { spacing: { after: 40 } },
+    },
+  },
+  paragraphStyles: [
+    {
+      id: "Heading1",
+      name: "Heading 1",
+      basedOn: "Normal",
+      next: "Normal",
+      quickFormat: true,
+      run: { font: FONT, size: 46, bold: true, color: "111111" },
+      paragraph: {
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 70 },
+        outlineLevel: 0,
+      },
+    },
+    {
+      id: "Heading2",
+      name: "Heading 2",
+      basedOn: "Normal",
+      next: "Normal",
+      quickFormat: true,
+      run: { font: FONT, size: 23, bold: true, color: "111111" },
+      paragraph: {
+        spacing: { before: 190, after: 90 },
+        outlineLevel: 1,
+        keepNext: true,
+        border: {
+          bottom: { style: BorderStyle.SINGLE, size: 6, color: "777777", space: 1 },
+        },
+      },
+    },
+  ],
+};
+
+const sectionHeading = (value: string) =>
+  new Paragraph({
+    heading: HeadingLevel.HEADING_2,
+    children: [new TextRun({ text: value.toUpperCase(), font: FONT, bold: true })],
+  });
+
+const body = (
+  value: string,
+  options: { bold?: boolean; italics?: boolean; size?: number; after?: number; before?: number } = {},
+) =>
+  new Paragraph({
+    spacing: { before: options.before ?? 0, after: options.after ?? 45 },
+    keepLines: true,
+    children: [new TextRun({
+      text: value,
+      font: FONT,
+      bold: options.bold,
+      italics: options.italics,
+      size: options.size,
+    })],
+  });
+
+const bullet = (value: string) =>
+  new Paragraph({
+    numbering: { reference: "edited-cv-bullets", level: 0 },
+    spacing: { after: 35 },
+    keepLines: true,
+    children: [new TextRun({ text: value, font: FONT, size: 21 })],
+  });
+
+const entryMeta = (location: string, period: string) =>
+  [location.trim(), period.trim()].filter(Boolean).join(" | ");
+
+const appendEntry = (
+  children: Paragraph[],
+  title: string,
+  organization: string,
+  location: string,
+  period: string,
+  details: string[],
+) => {
+  children.push(
+    body(title, { bold: true, before: 95, after: 15 }),
+    body(organization, { italics: true, after: 15 }),
+  );
+  const meta = entryMeta(location, period);
+  if (meta) children.push(body(meta, { size: 18, after: 55 }));
+  details.filter((item) => item.trim()).forEach((item) => children.push(bullet(item)));
+};
+
+const downloadBlob = (blob: Blob, filename: string) => {
   const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `${safeName}_${kind.toUpperCase()}_${month}.docx`;
+  anchor.download = filename;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
   URL.revokeObjectURL(url);
+};
+
+/**
+ * Export the current edited CV/resume using the same market-aware ATS layout
+ * rules as the project's canonical CV Word exporter. Keep the document in a
+ * simple semantic, single-column reading order for ATS parsing.
+ */
+export const downloadEditedCvDocx = async (data: CvEditorData, kind: "cv" | "resume") => {
+  const settings = loadDocumentSettings();
+  const format = getCvFormatProfile(settings.targetMarket);
+  const pageSize = PAGE_SIZES[format.paperSize] ?? PAGE_SIZES.A4;
+
+  const contact = [
+    settings.showLocation ? data.profile.address : "",
+    settings.showContactDetails ? data.profile.phone : "",
+    settings.showContactDetails ? data.profile.email : "",
+    settings.includeLinkedIn && settings.showContactDetails
+      ? data.profile.linkedin.replace(/^https?:\\/\\//, "")
+      : "",
+  ].filter((value) => value.trim());
+
+  const children: Paragraph[] = [
+    new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      alignment: AlignmentType.CENTER,
+      children: [new TextRun({ text: data.profile.name.trim(), font: FONT, bold: true, size: 46 })],
+    }),
+    new Paragraph({
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 160 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "777777", space: 4 } },
+      children: [new TextRun({ text: contact.join(" | "), font: FONT, size: 18 })],
+    }),
+  ];
+
+  if (data.summary.trim()) {
+    children.push(sectionHeading("Professional Summary"), body(data.summary.trim(), { after: 65 }));
+  }
+
+  if (data.skills.length) {
+    children.push(sectionHeading("Core Skills"));
+    data.skills.filter((item) => item.trim()).forEach((item) => children.push(bullet(item.trim())));
+  }
+
+  if (data.experience.length) {
+    children.push(sectionHeading("Professional Experience"));
+    for (const item of data.experience) {
+      appendEntry(children, item.title, item.company, item.location, item.period, item.contributions);
+    }
+  }
+
+  if (data.education.length) {
+    children.push(sectionHeading("Education & Qualifications"));
+    for (const item of data.education) {
+      const qualification = [item.qualification, item.field].filter(Boolean).join(" — ");
+      appendEntry(
+        children,
+        item.school,
+        qualification,
+        item.location,
+        item.period,
+        item.description ? [item.description] : [],
+      );
+    }
+  }
+
+  const appendListSection = (title: string, items: string[]) => {
+    const visible = items.map((item) => item.trim()).filter(Boolean);
+    if (!visible.length) return;
+    children.push(sectionHeading(title), ...visible.map(bullet));
+  };
+
+  appendListSection("Selected Achievements", data.highlights);
+  appendListSection("Leadership & Volunteering", data.leadership);
+  appendListSection("Professional Strengths", data.professionalStrengths);
+  appendListSection("Professional Development", data.professionalDevelopment);
+  appendListSection("Languages", data.languages);
+
+  if (settings.showReferences && data.references.trim()) {
+    children.push(sectionHeading("References"), body(data.references.trim()));
+  }
+
+  const doc = new Document({
+    styles,
+    numbering,
+    sections: [{
+      properties: {
+        page: { size: pageSize, margin: PAGE_MARGIN },
+      },
+      children,
+    }],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  const safeName = data.profile.name.trim().replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "Candidate";
+  const month = new Date().toISOString().slice(0, 7);
+  downloadBlob(blob, `${safeName}_${kind.toUpperCase()}_${month}.docx`);
 };
