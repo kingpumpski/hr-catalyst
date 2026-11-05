@@ -4,6 +4,8 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(() => ({
+  // GitHub Pages hosts this project beneath /hr-catalyst/; Vercel uses the domain root.
+  base: process.env.GITHUB_PAGES === "true" ? "/hr-catalyst/" : "/",
   server: {
     // Keep the development server local by default; Codespaces can still forward the port.
     host: "127.0.0.1",
