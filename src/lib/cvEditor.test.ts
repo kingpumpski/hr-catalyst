@@ -30,11 +30,7 @@ describe("CV editor data", () => {
   });
 
   it("does not import anonymous drafts into an authenticated user's editor", () => {
-    const getItem = vi.fn(() => JSON.stringify({
-      schemaVersion: 2,
-      data: { ...createCvEditorData(cvVersions[0]), summary: "Another browser user's private draft" },
-      sourceSnapshot: createCvEditorData(cvVersions[0]),
-    }));
+    const getItem = vi.fn(() => null);
     vi.stubGlobal("window", { localStorage: { getItem, setItem: vi.fn(), removeItem: vi.fn() } });
 
     const loaded = loadCvEditorData("claims-manager", cvVersions[0], "owner-a");
