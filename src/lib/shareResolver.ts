@@ -102,13 +102,17 @@ export const resolveShare = async (
 
   if (!response.ok) {
     const code = isRecord(payload) && typeof payload.error === "string" ? payload.error : "share_unavailable";
-    const message = response.status === 401
-      ? "Sign in with the invited email address to view this document."
-      : response.status === 404
-        ? "This sharing link is invalid, expired or has been revoked."
-        : response.status === 429
-          ? "This link has received too many requests. Please wait and try again."
-          : "This shared document is temporarily unavailable.";
+    const message = code === "email_not_verified"
+      ? "Verify the invited email address before opening this document."
+      : code === "share_recipient_mismatch"
+        ? "This link is restricted to a different email address."
+        : response.status === 401
+          ? "Sign in with the invited email address to view this document."
+          : response.status === 404
+            ? "This sharing link is invalid, expired or has been revoked."
+            : response.status === 429
+              ? "This link has received too many requests. Please wait and try again."
+              : "This shared document is temporarily unavailable.";
     throw new ShareResolutionError(message, response.status, code);
   }
 
