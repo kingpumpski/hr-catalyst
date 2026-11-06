@@ -134,6 +134,24 @@ describe("HR Catalyst Supabase authentication", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("recovers when another browser tab creates the unique owner workspace first", async () => {
+    const { getOrCreateWorkspace } = await import("@/lib/supabaseAuth");
+    const duplicate = new Response(JSON.stringify({ code: "23505", message: "duplicate key value violates unique constraint" }), {
+      status: 409,
+      headers: { "Content-Type": "application/json" },
+    });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(response([]))
+      .mockResolvedValueOnce(duplicate)
+      .mockResolvedValueOnce(response({ id: "workspace-from-other-tab", name: "My HR Catalyst workspace" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const workspace = await getOrCreateWorkspace(session);
+
+    expect(workspace.id).toBe("workspace-from-other-tab");
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
   it("creates a private workspace only after an authenticated lookup returns none", async () => {
     const { getOrCreateWorkspace } = await import("@/lib/supabaseAuth");
     const fetchMock = vi.fn()
