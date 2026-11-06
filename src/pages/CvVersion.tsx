@@ -134,7 +134,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
           : editorData;
         const artifact = tab === "letter"
           ? await import("@/lib/docxExport").then(({ createCoverLetterDocxBlob }) => createCoverLetterDocxBlob(version, letterInputs))
-          : await import("@/lib/editedCvDocx").then(({ createEditedCvDocxBlob }) => createEditedCvDocxBlob(editorData));
+          : await import("@/lib/editedCvDocx").then(({ createEditedCvDocxBlob }) => createEditedCvDocxBlob(editorData, tab));
         uploadedArtifactPath = await uploadWorkspaceDocumentArtifact(session, workspace, saved, artifact);
         const published = await publishWorkspaceDocument(session, workspace, saved, snapshot, uploadedArtifactPath);
         uploadedArtifactPath = null;
