@@ -31,7 +31,7 @@ Deno.serve(async (request: Request) => {
   }
 
   const token = typeof body.token === "string" ? body.token.trim() : "";
-  if (token.length < 32 || token.length > 256) return json(404, { error: "share_not_found" });
+  if (!/^[a-f0-9]{64}$/.test(token)) return json(404, { error: "share_not_found" });
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -80,6 +80,9 @@ Deno.serve(async (request: Request) => {
     const { data: userData, error: userError } = await viewer.auth.getUser(jwt);
     if (userError || userData.user?.email?.toLowerCase() !== link.invited_email) {
       return json(403, { error: "share_recipient_mismatch" });
+    }
+    if (!userData.user.email_confirmed_at) {
+      return json(403, { error: "email_not_verified" });
     }
   }
 

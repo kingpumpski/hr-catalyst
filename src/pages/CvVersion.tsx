@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,9 @@ import { toast } from "@/hooks/use-toast";
 import CvEditorPanel from "@/components/CvEditorPanel";
 import EditableCvDocument from "@/components/EditableCvDocument";
 import { loadCvEditorData, saveCvEditorData, type CvEditorData } from "@/lib/cvEditor";
+import { useAuth } from "@/components/AuthProvider";
+import { buildCoverLetter } from "@/lib/coverLetter";
+import { getWorkspaceDocumentContent, listWorkspaceDocuments, publishWorkspaceDocument, removeWorkspaceDocumentArtifact, saveWorkspaceDocument, uploadWorkspaceDocumentArtifact } from "@/lib/workspaceDocuments";
 
 const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 const AtsKeywordChecker = lazy(() => import("@/components/AtsKeywordChecker"));
@@ -31,7 +34,11 @@ const CvVersionPage = () => {
 };
 
 const CvVersionContent = ({ version }: { version: CvVersion }) => {
-  const [tab, setTab] = useState<DocumentTab>("cv");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab");
+  const workspaceMode = searchParams.get("workspace") === "1";
+  const [workspaceTab] = useState<DocumentTab>(initialTab === "resume" || initialTab === "letter" ? initialTab : "cv");
+  const [tab, setTab] = useState<DocumentTab>(workspaceTab);
   const [recipientName, setRecipientName] = useState("Hiring Manager");
   const [employerName, setEmployerName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
@@ -39,10 +46,38 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [companyAddress, setCompanyAddress] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [editorData, setEditorData] = useState<CvEditorData>(() => loadCvEditorData(version.slug, version));
+  const [workspaceBusy, setWorkspaceBusy] = useState(false);
+  const [workspaceFeedback, setWorkspaceFeedback] = useState("");
+  const { session, workspace, user } = useAuth();
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useEffect(() => {
     saveCvEditorData(version.slug, editorData, version);
-  }, [version.slug, editorData]);
+  }, [version, version.slug, editorData]);
+  useEffect(() => {
+    if (!workspaceMode || !session || !workspace) return;
+    let active = true;
+    getWorkspaceDocumentContent(session, workspace, `${version.slug}-${workspaceTab}`)
+      .then((saved) => {
+        if (!active || !saved) return;
+        const content = saved.content;
+        if (workspaceTab !== "letter" && content && typeof content === "object") {
+          setEditorData(content as CvEditorData);
+        } else if (workspaceTab === "letter" && content && typeof content === "object") {
+          const inputs = (content as { letterInputs?: Partial<{ recipientName: string; employerName: string; jobTitle: string; jobReference: string; companyAddress: string }> }).letterInputs;
+          if (inputs) {
+            setRecipientName(inputs.recipientName ?? "Hiring Manager");
+            setEmployerName(inputs.employerName ?? "");
+            setJobTitle(inputs.jobTitle ?? "");
+            setJobReference(inputs.jobReference ?? "");
+            setCompanyAddress(inputs.companyAddress ?? "");
+          }
+        }
+      })
+      .catch((reason: unknown) => {
+        if (active) setWorkspaceFeedback(reason instanceof Error ? reason.message : "Saved workspace content could not be loaded.");
+      });
+    return () => { active = false; };
+  }, [workspaceMode, session, workspace, version.slug, workspaceTab]);
 
   useSeo({
     title: getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv"),
@@ -51,6 +86,44 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   });
 
   const letterInputs = { recipientName, employerName, companyAddress, jobTitle, jobReference };
+  const saveToWorkspace = async (publish: boolean) => {
+    if (!session || !workspace) return;
+    setWorkspaceBusy(true);
+    setWorkspaceFeedback("");
+    let uploadedArtifactPath: string | null = null;
+    try {
+      const documentType = tab === "letter" ? "cover_letter" : tab;
+      const slug = `${version.slug}-${tab}`;
+      const title = `${version.title} — ${documentType === "cover_letter" ? "Cover Letter" : documentType.toUpperCase()}`;
+      const existing = (await listWorkspaceDocuments(session, workspace)).find((item) => item.slug === slug);
+      if (existing && !window.confirm(`A private ${documentType.replace("_", " ")} already exists in your workspace. Replace its current draft with this browser version?`)) return;
+      const coverLetter = tab === "letter" ? buildCoverLetter(version, letterInputs) : null;
+      const content = tab === "letter" ? { coverLetter, letterInputs } : editorData;
+      const saved = await saveWorkspaceDocument(session, workspace, { slug, title, documentType, content });
+      if (publish) {
+        const snapshot = tab === "letter" && coverLetter
+          ? { coverLetter: { opening: `${coverLetter.greeting} ${coverLetter.paragraphs[0]}`, body: coverLetter.paragraphs.slice(1, -2), closing: `${coverLetter.paragraphs.at(-2) ?? ""} ${coverLetter.paragraphs.at(-1) ?? ""} ${coverLetter.signOff}` } }
+          : editorData;
+        const artifact = tab === "letter"
+          ? await import("@/lib/docxExport").then(({ createCoverLetterDocxBlob }) => createCoverLetterDocxBlob(version, letterInputs))
+          : await import("@/lib/editedCvDocx").then(({ createEditedCvDocxBlob }) => createEditedCvDocxBlob(editorData));
+        uploadedArtifactPath = await uploadWorkspaceDocumentArtifact(session, workspace, saved, artifact);
+        const published = await publishWorkspaceDocument(session, workspace, saved, snapshot, uploadedArtifactPath);
+        uploadedArtifactPath = null;
+        setWorkspaceFeedback(`Published immutable version ${published.version_number} with a private Word download to your workspace.`);
+      } else {
+        setWorkspaceFeedback("Saved securely to your private workspace as a draft.");
+      }
+    } catch (reason) {
+      if (uploadedArtifactPath && session) {
+        await removeWorkspaceDocumentArtifact(session, uploadedArtifactPath).catch(() => undefined);
+      }
+      setWorkspaceFeedback(reason instanceof Error ? reason.message : "The document could not be saved to your workspace.");
+    } finally {
+      setWorkspaceBusy(false);
+    }
+  };
+
   const handlePrint = () => {
     if (tab !== "letter") document.title = getRecruiterDocumentTitle(tab);
     window.print();
@@ -93,6 +166,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div><h1 className="text-3xl font-semibold text-foreground">{version.title}</h1><p className="text-sm text-muted-foreground">{version.targetRoles}</p></div>
             <div className="flex flex-wrap gap-2">
+              {user ? <><Button variant="outline" onClick={() => void saveToWorkspace(false)} disabled={workspaceBusy}>{workspaceBusy ? "Saving…" : "Save to workspace"}</Button><Button variant="secondary" onClick={() => void saveToWorkspace(true)} disabled={workspaceBusy}>{workspaceBusy ? "Publishing…" : "Publish snapshot"}</Button></> : <Button variant="outline" asChild><Link to={`/auth?next=${encodeURIComponent(`/cv/${version.slug}`)}`}>Sign in to save</Link></Button>}
               <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" />Download {documentLabels[tab]} as PDF</Button>
               <Button variant="outline" onClick={handleDocxDownload} disabled={isExporting}><FileDown className="mr-2 h-4 w-4" />{isExporting ? "Preparing…" : `Download ${documentLabels[tab]} as Word`}</Button>
             </div>
@@ -100,6 +174,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
           <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Career document type">
             {documentTabs.map((documentTab) => <Button key={documentTab} ref={(element) => { tabRefs.current[documentTab] = element; }} variant={tab === documentTab ? "default" : "outline"} id={`document-tab-${documentTab}`} role="tab" aria-selected={tab === documentTab} aria-controls={`document-panel-${documentTab}`} tabIndex={tab === documentTab ? 0 : -1} onClick={() => setTab(documentTab)} onKeyDown={handleTabKeyDown}>{documentLabels[documentTab]}</Button>)}
           </div>
+          {workspaceFeedback && <p role="status" className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm">{workspaceFeedback}</p>}
           <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
           {tab !== "letter" && <CvEditorPanel value={editorData} onChange={setEditorData} />}
           {tab === "letter" && <div className="mb-8 rounded-lg border border-border bg-muted/20 p-4 no-print">

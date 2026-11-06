@@ -337,6 +337,18 @@ export type Database = {
         Args: { p_token_hash: string }
         Returns: boolean
       }
+      publish_workspace_document: {
+        Args: {
+          p_content_snapshot: Json
+          p_document_id: string
+          p_storage_path?: string
+          p_workspace_id: string
+        }
+        Returns: {
+          version_id: string
+          version_number: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

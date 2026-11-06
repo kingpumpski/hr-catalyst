@@ -76,7 +76,7 @@ The isolated HR Catalyst project has been provisioned in the approved Supabase o
 - Region: `eu-west-1` (Ireland)
 - API origin: `https://qmxpswxwdrjotidclmcz.supabase.co`
 - Storage bucket: `hr-catalyst-private` (private; PDF and DOCX only; 10 MiB per object)
-- Edge Function: `resolve-share` (deployed, version 3; JWT verification is disabled at the gateway because the function validates the share token itself and requires a verified Supabase user for email-restricted shares).
+- Edge Function: `resolve-share` (deployed, version 5; JWT verification is disabled at the gateway because the function validates the share token itself and requires a verified Supabase user for email-restricted shares).
 
 The project was created at the quoted $0/month project cost. It is isolated from the Harmony Health Hub Supabase project and its Vercel integration.
 
@@ -135,6 +135,79 @@ The recruiter route now treats every share URL as a bearer-token-protected resou
 - The resolver response is validated before rendering. Download URLs are accepted only when they use HTTPS and the configured HR Catalyst Supabase host.
 - The recruiter viewer honours the server's download permission: it only offers print/download controls when the resolver authorizes downloading.
 - CV/resume snapshots use the structured editable-CV document renderer. Cover-letter snapshots use the published opening/body/closing structure. Unknown snapshot shapes fail closed with a support message.
-- Resolver client tests cover token entropy/hash generation, fragment-based URLs, no-store requests, invalid/revoked tokens and signed-download host validation.
+- Resolver client tests cover token entropy/hash generation, fragment-based URLs, no-store requests, canonical 64-character lowercase hexadecimal token validation, invalid/revoked tokens and signed-download host validation.
 
 This is the recruiter-side resolver integration only. It does **not** complete owner authentication, document publishing, share-link creation/revocation UI, invited-recipient sign-in, or end-to-end authorization testing. Those remain release blockers until the owner workflow is connected to the authenticated Supabase workspace.
+
+
+## Implementation status — 6 November 2026
+
+The following items supersede the earlier "in progress" notes above:
+
+- Owner registration, sign-in, password recovery, password update, sign-out, protected routes and a private workspace dashboard are implemented on PR #20.
+- Browser authentication and session lifecycle now use the exact-pinned official `@supabase/supabase-js@2.119.0` client. Supabase Auth owns URL callback detection, local session persistence, automatic refresh and cross-tab auth events; the previous hand-written Auth REST/session implementation has been removed.
+- The dedicated project's generated `Database` types are refreshed in `src/integrations/supabase/types.ts` and applied to the Supabase client. Workspace provisioning now uses typed SDK queries and retries safely when a second browser tab wins the unique-owner insert race. Document and share CRUD now uses typed Supabase SDK queries and the typed publish RPC, with every client created using the exact owner access token supplied by the workflow.
+- Private Storage upload and removal now use the official Supabase SDK Storage client, scoped to the exact owner access token passed by the workflow. Unit tests cover upload, token binding, invalid path rejection and artifact removal.
+- CV/resume/cover-letter drafts are persisted in the owner's workspace. Owner workspace links reopen the matching editor and hydrate the saved content for that document.
+- Publishing now creates an immutable snapshot, updates the document status and records an audit event in one SECURITY INVOKER transaction.
+- Publishing also generates a DOCX artifact, uploads it to the private Storage bucket under `{workspace_id}/{document_id}/{random_file}.docx`, and stores that path on the immutable version. Failed publish attempts trigger best-effort cleanup of the uploaded artifact.
+- Owner recruiter-link UI supports creation, listing, editing expiry/email/download permissions and revocation. Raw 256-bit tokens are shown once; only SHA-256 hashes are stored and token hashes are not returned in owner API projections.
+- Download permission is enabled only when the published version has a stored DOCX artifact. The resolver issues a 60-second signed URL from the private bucket.
+- Invited-email access now requires both a matching authenticated email and a verified email address. Resolver version 5 is deployed with this check and canonical 64-character hexadecimal token validation.
+- Storage owner policies were corrected in migration `20261106114151_fix_private_storage_owner_policies.sql` to evaluate the first folder of `storage.objects.name` (workspace UUID). The previous policies incorrectly referenced `workspaces.name`.
+- Migration `20261106114318_publish_workspace_document_with_private_artifact.sql` replaces the earlier publish RPC signature with a four-argument SECURITY INVOKER RPC that persists the private artifact path. Only authenticated users can execute it; anonymous EXECUTE is denied.
+- Migration `20261106115025_audit_share_link_mutations.sql` adds an AFTER INSERT/UPDATE SECURITY INVOKER trigger that records share creation, settings changes and revocation in `audit_logs` in the same transaction; no invited email address or raw token is copied into audit metadata.
+- Migration `20261106141032_revoke_excess_authenticated_table_privileges.sql` removes `TRUNCATE`, `REFERENCES` and `TRIGGER` privileges from authenticated browser roles, removes direct update/delete rights from immutable audit/version tables, and denies all browser-role access to the resolver rate-limit table. Default privileges keep future public-schema tables/sequences closed until a migration grants access explicitly.
+- Migration `20261106144454_revoke_client_execution_on_trigger_functions.sql` revokes direct RPC execution of `set_updated_at` and `audit_share_link_mutations` from `PUBLIC`, `anon` and `authenticated`, and changes default function privileges so future public-schema functions are not executable by browser roles unless explicitly granted.
+- Live database verification confirmed RLS is enabled on all eight public tables; owner policies scope workspace/document/share access by `auth.uid()`, private Storage policies bind the first object-path folder to the owning workspace, and no anon/authenticated grants remain for `TRUNCATE`, `REFERENCES`, `TRIGGER`, audit/version UPDATE/DELETE or the rate-limit table. Supabase security and health advisors both returned zero lints.
+
+### Remaining release gates
+
+- Pass both Quality and CV Editor CI workflows on the final PR head after the latest typed SDK and privilege-hardening changes, including lint, typecheck, unit tests and production build.
+- Complete browser/end-to-end testing for the SDK-managed callback, session refresh and cross-tab events; the current unit tests do not substitute for real browser verification.
+- Re-run both Quality and CV Editor workflows on the final PR head after the typed SDK migration; verify all updated SDK query tests pass.
+- Add browser/end-to-end tests for signup, email verification, recovery, sign-in/out, refresh and cross-tab synchronization; owner document save/publish; share create/edit/revoke; invited-email restriction; recruiter viewing and DOCX download; A4/Letter print.
+- Add automated cross-account RLS tests and authenticated/anonymous Storage authorization tests.
+- Verify Supabase Auth Site URL, redirect allow-list and production email delivery for GitHub Pages and Vercel.
+- Verify the canonical production hostname `hr-catalyst.vercel.app`; prior Vercel domain inventory showed `hr-catalyst-five.vercel.app`.
+- Confirm GitHub main-branch protection and required checks. The current GitHub connection has not yet confirmed the branch ruleset.
+- Do not mark the feature production-ready or merge PR #20 until these gates pass.
+
+### Follow-up hardening — recruiter share mutation concurrency
+
+Owner share-link mutations now request the updated row from PostgREST and verify that a row was actually changed. Revocation and settings changes fail closed with an explicit stale/already-revoked error if the active-link filter matches no row. This prevents the UI from reporting success when a link was revoked or otherwise changed between the owner's initial read and the final update. Unit coverage exercises successful revocation, already-revoked/missing links and concurrent revocation during settings updates.
+
+A fresh live schema inspection on 6 November 2026 reconfirmed that all eight public tables have RLS enabled, workspace ownership policies are based on auth.uid(), workspace_members.role is constrained to recruiter or viewer, and the only SECURITY DEFINER application helpers have an empty or explicitly constrained search_path. These are structural checks; they do not replace cross-account requests using real authenticated users or browser-level Storage tests.
+
+### Typed SDK data-layer completion — 6 November 2026
+
+The remaining owner document and recruiter-share data operations have been migrated from hand-built PostgREST URLs to generated-type-aware Supabase SDK queries:
+
+- Workspace document list and content hydration use scoped documents select queries.
+- Document save uses a typed upsert on the workspace/slug conflict key and returns the saved projection.
+- Publish uses the generated publish_workspace_document RPC signature.
+- Share list/create/revoke/update and published-version lookups use typed share_links and document_versions operations.
+- All these operations use getSupabaseClientForSession(session), which disables implicit session persistence/refresh and binds the exact owner access token in the client Authorization header.
+- Unit tests were migrated to exercise the typed RPC/query interfaces, including hash-only token persistence, owner/workspace scoping, invalid invited-email and expiry rejection, download-artifact checks, stale revocation and fail-closed mutation behavior.
+
+This completes the application-side migration of owner document/share CRUD to the typed Supabase SDK. It does not replace the outstanding live cross-account RLS, browser, auth-configuration and production deployment release gates.
+
+
+### Trigger-function execution hardening — 6 November 2026
+
+Live SQL inspection found that the generic `set_updated_at()` trigger function retained default EXECUTE privileges for browser roles, and the share-audit trigger function had an explicit authenticated EXECUTE grant. Although PostgreSQL invokes trigger functions through their attached triggers rather than direct RPC calls, those grants were unnecessary. Applied remote migration `20261106144454_revoke_client_execution_on_trigger_functions` and committed the matching migration file. Verified that `anon`, `authenticated` and `PUBLIC` have no EXECUTE privilege on either trigger function; the publish RPC remains executable only by `authenticated`, and the resolver throttle remains service-role-only. Supabase security advisor returned zero lints after the change. Future functions in the public schema now require explicit grants before browser invocation.
+
+
+### Share-token input hardening — 6 November 2026
+
+The browser resolver and `resolve-share` Edge Function now accept only the exact canonical token representation generated by the application: 64 lowercase hexadecimal characters (256 bits). Malformed, truncated, oversized or non-hexadecimal tokens are rejected before database lookup. Client unit tests cover invalid alphabet and length; generated share tokens remain 64-character lowercase hexadecimal values. This narrows the resolver input surface without changing existing generated links.
+
+
+### Least-privilege browser mutation grants — 6 November 2026
+
+Live grants inspection found that authenticated users still had DELETE privileges on documents, profiles, share links and workspaces, plus full browser privileges on `workspace_members`, although the current UI uses document archival, share soft-revocation and auth-trigger profile creation and does not implement workspace membership administration. Applied migration `20261106144632_revoke_unsupported_browser_delete_and_membership_access.sql` and committed it with the exact remote migration version. It removes browser DELETE rights from those owner tables, removes profile INSERT/DELETE rights, and denies all browser-role access to `workspace_members` until a separately reviewed member-management feature is implemented. Rechecked live grants: authenticated now has only the SELECT/INSERT/UPDATE rights needed by current document/share/workspace flows, and SELECT/UPDATE on self-scoped profiles; no anon table grants remain. Supabase security advisor continues to report zero lints.
+
+
+### Live resolver deployment — 6 November 2026
+
+Deployed the updated `supabase/functions/resolve-share/index.ts` and its `deno.json` import map to the dedicated HR Catalyst Supabase project. Live function inventory confirms `resolve-share` is ACTIVE at version 5 with gateway JWT verification disabled because the function handles public share tokens itself and validates Supabase user JWTs for invited-email links. The deployed function now rejects all tokens except the exact 64-character lowercase hexadecimal format before hashing or database lookup. The source is committed in the PR branch; the matching remote function is active.

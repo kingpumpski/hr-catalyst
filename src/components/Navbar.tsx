@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Menu, Settings2, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/AuthProvider";
 
 const sections = [
   { id: "experience", label: "Experience" },
@@ -19,7 +20,7 @@ const Navbar = () => {
   const [activeSection, setActiveSection] = useState<string>("");
   const location = useLocation();
   const navigate = useNavigate();
-  const isOwnerMode = new URLSearchParams(location.search).get("mode") === "owner";
+  const { user } = useAuth();
   const visibleActiveSection = location.pathname === "/" ? activeSection : "";
 
   useEffect(() => {
@@ -142,9 +143,10 @@ const Navbar = () => {
             </button>
           ))}
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${linkClass}`}>Recruiter docs</Link>
-          {isOwnerMode && (
+          <Link to={user ? "/owner" : "/auth"} className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${linkClass}`}>{user ? "Workspace" : "Owner sign in"}</Link>
+          {user && (
             <Link
-              to="/settings?mode=owner"
+              to="/settings"
               className={`inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm transition-smooth hover:bg-foreground/10 ${linkClass}`}
             >
               <Settings2 className="h-4 w-4" aria-hidden="true" />
@@ -154,9 +156,9 @@ const Navbar = () => {
         </div>
 
         <div className="hidden lg:flex xl:hidden items-center gap-2">
-          {isOwnerMode && (
+          {user && (
             <Link
-              to="/settings?mode=owner"
+              to="/settings"
               aria-label="Open settings"
               className={`inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm ${linkClass}`}
             >
@@ -165,6 +167,7 @@ const Navbar = () => {
             </Link>
           )}
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md ${linkClass}`}>CV</Link>
+          <Link to={user ? "/owner" : "/auth"} className={`px-2 py-2 text-sm ${linkClass}`}>{user ? "Workspace" : "Sign in"}</Link>
           <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} className={scrolled ? "text-foreground" : "text-primary-foreground hover:bg-white/20"} onClick={() => setOpen((v) => !v)}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
@@ -179,9 +182,9 @@ const Navbar = () => {
 
       {open && (
         <div className="lg:hidden bg-background/95 backdrop-blur-md border-t border-border px-6 py-3 space-y-2">
-          {isOwnerMode && (
+          {user && (
             <Link
-              to="/settings?mode=owner"
+              to="/settings"
               onClick={() => setOpen(false)}
               className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-smooth"
             >
@@ -193,6 +196,7 @@ const Navbar = () => {
             <button type="button" key={s.id} onClick={() => go(s.id)} className={`block w-full text-left px-2 py-2 rounded-md text-sm hover:bg-muted transition-smooth ${visibleActiveSection === s.id ? "bg-muted font-semibold text-foreground" : "text-foreground"}`} aria-current={visibleActiveSection === s.id ? "location" : undefined}>{s.label}</button>
           ))}
           <Link to="/cv" onClick={() => setOpen(false)} className="block w-full text-left px-2 py-2 rounded-md text-sm text-foreground hover:bg-muted transition-smooth">Recruiter documents</Link>
+          <Link to={user ? "/owner" : "/auth"} onClick={() => setOpen(false)} className="block w-full text-left px-2 py-2 rounded-md text-sm font-semibold text-foreground hover:bg-muted transition-smooth">{user ? "Owner workspace" : "Owner sign in"}</Link>
         </div>
       )}
     </header>
