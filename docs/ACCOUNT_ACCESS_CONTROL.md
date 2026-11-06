@@ -76,7 +76,7 @@ The isolated HR Catalyst project has been provisioned in the approved Supabase o
 - Region: `eu-west-1` (Ireland)
 - API origin: `https://qmxpswxwdrjotidclmcz.supabase.co`
 - Storage bucket: `hr-catalyst-private` (private; PDF and DOCX only; 10 MiB per object)
-- Edge Function: `resolve-share` (deployed, version 2; JWT verification is disabled at the gateway because the function validates the share token itself and requires a verified Supabase user for email-restricted shares).
+- Edge Function: `resolve-share` (deployed, version 3; JWT verification is disabled at the gateway because the function validates the share token itself and requires a verified Supabase user for email-restricted shares).
 
 The project was created at the quoted $0/month project cost. It is isolated from the Harmony Health Hub Supabase project and its Vercel integration.
 
@@ -95,6 +95,8 @@ The following migrations are applied to the new project and stored under the mat
 3. `20261106103724_lock_down_trigger_and_index_foreign_keys.sql`
    - Revokes direct API execution of the SECURITY DEFINER auth trigger helper while preserving trigger invocation.
    - Adds indexes covering foreign-key columns to avoid unnecessary delete/update scans.
+4. `20261106103928_rate_limit_share_resolution.sql`
+   - Adds a token-hash-only, transaction-locked throttle that limits a valid share link to 30 resolver attempts per minute; only the service role can call the throttle RPC.
 
 ### Share resolver contract
 
