@@ -29,12 +29,13 @@ export const createOwnerShareLink = async (
   options: { invitedEmail?: string; allowDownload?: boolean; expiresInDays?: number | null },
 ) => {
   if (document.status !== "published") throw new Error("Publish this document before creating a recruiter link.");
-  const versions = await requestSupabase<Array<{ id: string; version_number: number }>>(
-    `/rest/v1/document_versions?select=id,version_number&workspace_id=eq.${encodeURIComponent(workspace.id)}&document_id=eq.${encodeURIComponent(document.id)}&order=version_number.desc&limit=1`,
+  const versions = await requestSupabase<Array<{ id: string; version_number: number; storage_path: string | null }>>(
+    `/rest/v1/document_versions?select=id,version_number,storage_path&workspace_id=eq.${encodeURIComponent(workspace.id)}&document_id=eq.${encodeURIComponent(document.id)}&order=version_number.desc&limit=1`,
     { accessToken: session.access_token },
   );
   const latest = versions[0];
   if (!latest) throw new Error("Publish this document before creating a recruiter link.");
+  if (options.allowDownload && !latest.storage_path) throw new Error("Re-publish this document to create a private Word download before enabling downloads.");
 
   const { token, tokenHash } = await createShareCredentials();
   const email = options.invitedEmail?.trim().toLowerCase() || null;
@@ -83,6 +84,18 @@ export const updateOwnerShareLink = async (
   shareId: string,
   updates: { invitedEmail: string; allowDownload: boolean; expiresInDays: number | null },
 ) => {
+  const shares = await requestSupabase<Array<{ document_version_id: string }>>(
+    `/rest/v1/share_links?select=document_version_id&id=eq.${encodeURIComponent(shareId)}&workspace_id=eq.${encodeURIComponent(workspace.id)}&revoked_at=is.null&limit=1`,
+    { accessToken: session.access_token },
+  );
+  if (!shares[0]) throw new Error("This recruiter link is no longer active.");
+  if (updates.allowDownload) {
+    const versions = await requestSupabase<Array<{ storage_path: string | null }>>(
+      `/rest/v1/document_versions?select=storage_path&id=eq.${encodeURIComponent(shares[0].document_version_id)}&workspace_id=eq.${encodeURIComponent(workspace.id)}&limit=1`,
+      { accessToken: session.access_token },
+    );
+    if (!versions[0]?.storage_path) throw new Error("Re-publish this document to create a private Word download before enabling downloads.");
+  }
   const email = updates.invitedEmail.trim().toLowerCase() || null;
   const expiresAt = updates.expiresInDays == null
     ? null
