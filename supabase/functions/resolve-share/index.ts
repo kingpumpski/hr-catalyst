@@ -81,6 +81,9 @@ Deno.serve(async (request: Request) => {
     if (userError || userData.user?.email?.toLowerCase() !== link.invited_email) {
       return json(403, { error: "share_recipient_mismatch" });
     }
+    if (!userData.user.email_confirmed_at) {
+      return json(403, { error: "email_not_verified" });
+    }
   }
 
   const { data: version, error: versionError } = await admin
