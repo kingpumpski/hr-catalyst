@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, Mail, Printer, ShieldAlert, ShieldCheck } from "lucide-react";
@@ -49,6 +49,13 @@ const isCoverLetterSnapshot = (value: unknown): value is { opening: string; body
 };
 
 const ShareDocumentPage = () => {
+  const location = useLocation();
+  return <ShareDocumentContent key={location.pathname} />;
+};
+
+type ShareViewState = { share: ResolvedShare | null; error: string; loading: boolean };
+
+const ShareDocumentContent = () => {
   const { documentType } = useParams<{ documentType?: string }>();
   const [token] = useState(() => {
     const storageKey = `hr-catalyst:share-token:${window.location.pathname}`;
@@ -60,21 +67,16 @@ const ShareDocumentPage = () => {
     }
     return window.sessionStorage.getItem(storageKey) ?? "";
   });
-  const [share, setShare] = useState<ResolvedShare | null>(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [viewState, setViewState] = useState<ShareViewState>(() => ({
+    share: null,
+    error: token ? "" : "This is a private sharing link. Open the complete link supplied by the document owner.",
+    loading: Boolean(token),
+  }));
+  const { share, error, loading } = viewState;
 
   useEffect(() => {
+    if (!token) return;
     const controller = new AbortController();
-    setShare(null);
-    setError("");
-    setLoading(true);
-
-    if (!token) {
-      setError("This is a private sharing link. Open the complete link supplied by the document owner.");
-      setLoading(false);
-      return () => controller.abort();
-    }
 
     resolveShare(token, { signal: controller.signal })
       .then((result) => {
@@ -84,14 +86,15 @@ const ShareDocumentPage = () => {
         if ((documentType === "cv" || documentType === "resume") && result.document.type !== documentType) {
           throw new ShareResolutionError("This link does not contain the requested document type.", 404, "document_type_mismatch");
         }
-        setShare(result);
+        setViewState({ share: result, error: "", loading: false });
       })
       .catch((reason: unknown) => {
         if (reason instanceof DOMException && reason.name === "AbortError") return;
-        setError(reason instanceof Error ? reason.message : "This shared document is unavailable.");
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
+        setViewState({
+          share: null,
+          error: reason instanceof Error ? reason.message : "This shared document is unavailable.",
+          loading: false,
+        });
       });
 
     return () => controller.abort();
