@@ -65,6 +65,21 @@ jobs:
             exit 1
           fi
 
+          # Guard against a successful deployment that bundles stale profile dates.
+          expected_profile_dates=(
+            "April 2021 - Present"
+            "February 2019 - March 2021"
+            "July 2014 - August 2017"
+            "June 2012 - June 2014"
+            "October 2011 - May 2012"
+          )
+          for expected_date in "${expected_profile_dates[@]}"; do
+            if ! grep -R -F -q -- "${expected_date}" dist/assets; then
+              echo "Built application is missing expected profile date: ${expected_date}"
+              exit 1
+            fi
+          done
+
       - name: Prepare SPA fallback
         run: cp dist/index.html dist/404.html
 
