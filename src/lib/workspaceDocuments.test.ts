@@ -35,7 +35,7 @@ describe("atomic workspace document publishing", () => {
     ]);
 
     const snapshot = { profile: { name: "Test Owner" }, experience: [] };
-    const result = await publishWorkspaceDocument(session, workspace, document, snapshot);
+    const result = await publishWorkspaceDocument(session, workspace, document, snapshot, "workspace-123/document-123/version-4.docx");
 
     expect(result).toEqual({ id: "version-123", version_number: 4 });
     expect(requestSupabase).toHaveBeenCalledOnce();
@@ -48,6 +48,7 @@ describe("atomic workspace document publishing", () => {
           p_workspace_id: "workspace-123",
           p_document_id: "document-123",
           p_content_snapshot: snapshot,
+          p_storage_path: "workspace-123/document-123/version-4.docx",
         },
       },
     );
@@ -55,7 +56,7 @@ describe("atomic workspace document publishing", () => {
 
   it("fails closed when the server does not return a published version", async () => {
     vi.mocked(requestSupabase).mockResolvedValue([]);
-    await expect(publishWorkspaceDocument(session, workspace, document, {}))
+    await expect(publishWorkspaceDocument(session, workspace, document, {}, "workspace-123/document-123/version-5.docx"))
       .rejects.toThrow("The document version could not be published.");
   });
 });
