@@ -1,50 +1,45 @@
-import { describe, expect, it } from "vitest";
+export type ShareDocumentType = "cv" | "resume" | "letter";
 
-import { cvCatalog, getCvVersionFromCatalog } from "@/data/cvCatalog";
-import { getShareLink, type ShareDocumentType } from "@/lib/shareLinks";
+export interface ShareRouteMatch {
+  documentType: ShareDocumentType;
+  slug: string;
+}
 
-describe("CV catalog integrity", () => {
-  it("contains unique, URL-safe slugs", () => {
-    const slugs = cvCatalog.map((version) => version.slug);
+export const isShareDocumentType = (value?: string): value is ShareDocumentType => {
+  const normalized = value?.toLowerCase();
+  return normalized === "cv" || normalized === "resume" || normalized === "letter";
+};
 
-    expect(slugs.length).toBeGreaterThan(0);
-    expect(new Set(slugs).size).toBe(slugs.length);
-    expect(slugs.every((slug) => /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))).toBe(true);
-  });
+export const normalizeShareDocumentType = (value?: string): ShareDocumentType => {
+  const normalized = value?.toLowerCase();
+  if (normalized === "resume") return "resume";
+  if (normalized === "letter") return "letter";
+  return "cv";
+};
 
-  it("provides complete recruiter-facing metadata for every version", () => {
-    for (const version of cvCatalog) {
-      expect(version.title.trim()).not.toBe("");
-      expect(version.targetRoles.trim()).not.toBe("");
-      expect(version.summary.trim()).not.toBe("");
-      expect(version.coreSkills.length).toBeGreaterThan(0);
-      expect(version.highlights.length).toBeGreaterThan(0);
-      expect(version.keywords.length).toBeGreaterThan(0);
-      expect(version.coverLetter.opening.trim()).not.toBe("");
-      expect(version.coverLetter.body.length).toBeGreaterThan(0);
-      expect(version.coverLetter.closing.trim()).not.toBe("");
-    }
-  });
+export const isShareRoute = (pathname: string) => pathname.startsWith("/share/");
 
-  it("keeps every catalog version addressable by all supported share variants", () => {
-    const documentTypes: ShareDocumentType[] = ["cv", "resume", "letter"];
+export const parseShareRoute = (pathname: string): ShareRouteMatch | undefined => {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length !== 3 || segments[0].toLowerCase() !== "share") return undefined;
 
-    for (const version of cvCatalog) {
-      for (const documentType of documentTypes) {
-        expect(getShareLink(version.slug, documentType)).toBe(
-          `/share/${documentType}/${version.slug}`,
-        );
-      }
-    }
-  });
+  const documentType = segments[1].toLowerCase();
+  const slug = segments[2];
 
-  it("resolves known versions and returns undefined for unknown slugs", () => {
-    expect(getCvVersionFromCatalog("vehicle-accounting-specialist")?.title).toContain(
-      "Vehicle Accounting Specialist",
-    );
-    expect(getCvVersionFromCatalog("remote-claims-billing")?.title).toBe(
-      "Remote Claims & Billing Operations",
-    );
-    expect(getCvVersionFromCatalog("does-not-exist")).toBeUndefined();
-  });
-});
+  if (!isShareDocumentType(documentType) || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(slug)) {
+    return undefined;
+  }
+
+  return { documentType, slug };
+};
+
+export const getSharePageTitle = (documentType: ShareDocumentType) => {
+  switch (documentType) {
+    case "resume":
+      return "Recruiter-ready resume";
+    case "letter":
+      return "Recruiter-ready cover letter";
+    default:
+      return "Recruiter-ready CV";
+  }
+};
