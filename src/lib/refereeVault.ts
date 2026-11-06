@@ -82,8 +82,8 @@ export const saveRefereeVault = async (referees: Referee[], password: string, us
 };
 
 export const unlockRefereeVault = async (password: string, userId?: string): Promise<Referee[]> => {
-  const key = refereeVaultStorageKey(userId);
-  const raw = localStorage.getItem(key) ?? (userId ? localStorage.getItem(STORAGE_KEY) : null);
+  const storageKey = refereeVaultStorageKey(userId);
+  const raw = localStorage.getItem(storageKey) ?? (userId ? localStorage.getItem(STORAGE_KEY) : null);
   if (!raw) return [];
 
   try {
@@ -91,11 +91,11 @@ export const unlockRefereeVault = async (password: string, userId?: string): Pro
     const salt = fromBase64(stored.salt);
     const iv = fromBase64(stored.iv);
     const ciphertext = fromBase64(stored.ciphertext);
-    const key = await deriveKey(password, salt);
-    const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
+    const cryptoKey = await deriveKey(password, salt);
+    const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, ciphertext);
     const parsed = JSON.parse(decoder.decode(plaintext)) as Referee[];
-    if (Array.isArray(parsed) && userId && !localStorage.getItem(key)) {
-      localStorage.setItem(key, raw);
+    if (Array.isArray(parsed) && userId && !localStorage.getItem(storageKey)) {
+      localStorage.setItem(storageKey, raw);
       localStorage.removeItem(STORAGE_KEY);
     }
     return Array.isArray(parsed) ? parsed : [];
