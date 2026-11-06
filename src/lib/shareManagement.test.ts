@@ -72,6 +72,34 @@ describe("owner recruiter share management", () => {
     expect(insertCall[0]).toContain("select=id,document_id,document_version_id");
   });
 
+  it("rejects malformed invited email addresses before inserting a share", async () => {
+    vi.mocked(requestSupabase).mockResolvedValueOnce([{
+      id: "version-9",
+      version_number: 9,
+      storage_path: null,
+    }]);
+    await expect(createOwnerShareLink(session, workspace, document, {
+      invitedEmail: "not-an-email",
+      allowDownload: false,
+      expiresInDays: 7,
+    })).rejects.toThrow("Enter a valid invited recruiter email address or leave it blank.");
+    expect(requestSupabase).toHaveBeenCalledOnce();
+  });
+
+  it("rejects invalid expiry periods before inserting a share", async () => {
+    vi.mocked(requestSupabase).mockResolvedValueOnce([{
+      id: "version-9",
+      version_number: 9,
+      storage_path: null,
+    }]);
+    await expect(createOwnerShareLink(session, workspace, document, {
+      invitedEmail: "",
+      allowDownload: false,
+      expiresInDays: 366,
+    })).rejects.toThrow("Choose a valid expiry between 1 and 365 days, or no expiry.");
+    expect(requestSupabase).toHaveBeenCalledOnce();
+  });
+
   it("refuses to create a share link before the document has a published version", async () => {
     vi.mocked(requestSupabase).mockResolvedValueOnce([]);
     await expect(createOwnerShareLink(session, workspace, document, {}))
