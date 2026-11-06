@@ -1,4 +1,5 @@
-import { removePrivateStorageObject, requestSupabase, uploadPrivateStorageObject, type AuthSession, type Workspace } from "@/lib/supabaseAuth";
+import { getSupabaseClientForSession, removePrivateStorageObject, uploadPrivateStorageObject, type AuthSession, type Workspace } from "@/lib/supabaseAuth";
+import type { Json } from "@/integrations/supabase/types";
 
 export type WorkspaceDocument = {
   id: string;
@@ -9,22 +10,31 @@ export type WorkspaceDocument = {
   updated_at: string;
 };
 
-export const listWorkspaceDocuments = (session: AuthSession, workspace: Workspace) =>
-  requestSupabase<WorkspaceDocument[]>(
-    `/rest/v1/documents?select=id,slug,title,document_type,status,updated_at&workspace_id=eq.${encodeURIComponent(workspace.id)}&order=updated_at.desc`,
-    { accessToken: session.access_token },
-  );
+const documentProjection = "id,slug,title,document_type,status,updated_at" as const;
+
+export const listWorkspaceDocuments = async (session: AuthSession, workspace: Workspace): Promise<WorkspaceDocument[]> => {
+  const { data, error } = await getSupabaseClientForSession(session)
+    .from("documents")
+    .select(documentProjection)
+    .eq("workspace_id", workspace.id)
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as WorkspaceDocument[];
+};
 
 export const getWorkspaceDocumentContent = async (
   session: AuthSession,
   workspace: Workspace,
   slug: string,
 ): Promise<{ content: unknown } | null> => {
-  const rows = await requestSupabase<Array<{ content: unknown }>>(
-    `/rest/v1/documents?select=content&workspace_id=eq.${encodeURIComponent(workspace.id)}&slug=eq.${encodeURIComponent(slug)}&limit=1`,
-    { accessToken: session.access_token },
-  );
-  return rows[0] ?? null;
+  const { data, error } = await getSupabaseClientForSession(session)
+    .from("documents")
+    .select("content")
+    .eq("workspace_id", workspace.id)
+    .eq("slug", slug)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? { content: data.content } : null;
 };
 
 export const getWorkspaceDocumentEditorPath = (document: Pick<WorkspaceDocument, "slug" | "document_type">) => {
@@ -38,20 +48,20 @@ export const saveWorkspaceDocument = async (
   workspace: Workspace,
   input: { slug: string; title: string; documentType: WorkspaceDocument["document_type"]; content: unknown },
 ) => {
-  const rows = await requestSupabase<WorkspaceDocument[]>("/rest/v1/documents?on_conflict=workspace_id,slug", {
-    method: "POST",
-    accessToken: session.access_token,
-    prefer: "resolution=merge-duplicates,return=representation",
-    body: {
+  const { data, error } = await getSupabaseClientForSession(session)
+    .from("documents")
+    .upsert({
       workspace_id: workspace.id,
       slug: input.slug,
       title: input.title,
       document_type: input.documentType,
-      content: input.content,
-    },
-  });
-  if (!rows[0]) throw new Error("The document was not saved to your private workspace.");
-  return rows[0];
+      content: input.content as Json,
+    }, { onConflict: "workspace_id,slug" })
+    .select(documentProjection)
+    .single();
+  if (error) throw error;
+  if (!data) throw new Error("The document was not saved to your private workspace.");
+  return data as WorkspaceDocument;
 };
 
 export const uploadWorkspaceDocumentArtifact = async (
@@ -83,20 +93,14 @@ export const publishWorkspaceDocument = async (
   snapshot: unknown,
   storagePath: string,
 ) => {
-  const published = await requestSupabase<Array<{ version_id: string; version_number: number }>>(
-    "/rest/v1/rpc/publish_workspace_document",
-    {
-      method: "POST",
-      accessToken: session.access_token,
-      body: {
-        p_workspace_id: workspace.id,
-        p_document_id: document.id,
-        p_content_snapshot: snapshot,
-        p_storage_path: storagePath,
-      },
-    },
-  );
-  const version = published[0];
+  const { data, error } = await getSupabaseClientForSession(session).rpc("publish_workspace_document", {
+    p_workspace_id: workspace.id,
+    p_document_id: document.id,
+    p_content_snapshot: snapshot as Json,
+    p_storage_path: storagePath,
+  });
+  if (error) throw error;
+  const version = data?.[0];
   if (!version) throw new Error("The document version could not be published.");
   return { id: version.version_id, version_number: version.version_number };
 };
