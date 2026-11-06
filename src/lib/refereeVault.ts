@@ -59,7 +59,7 @@ const deriveKey = async (password: string, salt: Uint8Array<ArrayBuffer>) => {
 
 export const hasRefereeVault = (userId?: string) => {
   if (typeof window === "undefined") return false;
-  return Boolean(localStorage.getItem(refereeVaultStorageKey(userId)) || (userId && localStorage.getItem(STORAGE_KEY)));
+  return Boolean(localStorage.getItem(refereeVaultStorageKey(userId)));
 };
 
 export const saveRefereeVault = async (referees: Referee[], password: string, userId?: string) => {
@@ -78,12 +78,14 @@ export const saveRefereeVault = async (referees: Referee[], password: string, us
   };
 
   localStorage.setItem(refereeVaultStorageKey(userId), JSON.stringify(stored));
-  if (userId) localStorage.removeItem(STORAGE_KEY);
+
 };
 
 export const unlockRefereeVault = async (password: string, userId?: string): Promise<Referee[]> => {
   const storageKey = refereeVaultStorageKey(userId);
-  const raw = localStorage.getItem(storageKey) ?? (userId ? localStorage.getItem(STORAGE_KEY) : null);
+  // Anonymous legacy vaults cannot be safely attributed to an authenticated owner.
+  // Never import them automatically on shared browsers.
+  const raw = localStorage.getItem(storageKey);
   if (!raw) return [];
 
   try {
@@ -94,10 +96,6 @@ export const unlockRefereeVault = async (password: string, userId?: string): Pro
     const cryptoKey = await deriveKey(password, salt);
     const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, cryptoKey, ciphertext);
     const parsed = JSON.parse(decoder.decode(plaintext)) as Referee[];
-    if (Array.isArray(parsed) && userId && !localStorage.getItem(storageKey)) {
-      localStorage.setItem(storageKey, raw);
-      localStorage.removeItem(STORAGE_KEY);
-    }
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     throw new Error("Unable to unlock the referee vault. Check the password.");
