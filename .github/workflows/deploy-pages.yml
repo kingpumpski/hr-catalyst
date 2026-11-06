@@ -126,21 +126,31 @@ jobs:
             sleep 6
           done
 
-          if ! grep -q '/hr-catalyst/assets/' /tmp/pages-home.html; then
-            echo "Published home page is missing the expected project asset base path."
-            exit 1
-          fi
+          # The Pages deployment API can report success before the CDN serves the new
+          # artifact globally. Retry content verification instead of failing on stale edge HTML.
+          for attempt in {1..10}; do
+            if grep -q '/hr-catalyst/assets/' /tmp/pages-home.html; then
+              break
+            fi
+            if [[ "${attempt}" -eq 10 ]]; then
+              echo "Published home page did not propagate the expected project asset base path."
+              exit 1
+            fi
+            sleep 6
+            curl --fail --silent --show-error --location "${PAGES_URL}" -o /tmp/pages-home.html
+          done
 
           # GitHub Pages serves the copied index.html as a 404 fallback for SPA routes.
-          route_status="$(curl --silent --show-error --location --output /tmp/pages-spa-route.html --write-out '%{http_code}' "${PAGES_URL%/}/__pages_spa_smoke_test__")"
-          if [[ "${route_status}" != "404" ]]; then
-            echo "Expected the SPA fallback route to return GitHub Pages' 404 status; got ${route_status}."
-            exit 1
-          fi
-
-          if ! grep -q '/hr-catalyst/assets/' /tmp/pages-spa-route.html; then
-            echo "The SPA fallback response does not contain the built application entrypoint."
-            exit 1
-          fi
+          for attempt in {1..10}; do
+            route_status="$(curl --silent --show-error --location --output /tmp/pages-spa-route.html --write-out '%{http_code}' "${PAGES_URL%/}/__pages_spa_smoke_test__")"
+            if [[ "${route_status}" == "404" ]] && grep -q '/hr-catalyst/assets/' /tmp/pages-spa-route.html; then
+              break
+            fi
+            if [[ "${attempt}" -eq 10 ]]; then
+              echo "SPA fallback did not propagate correctly (HTTP ${route_status})."
+              exit 1
+            fi
+            sleep 6
+          done
 
           echo "GitHub Pages home page and SPA fallback are serving the production application."
