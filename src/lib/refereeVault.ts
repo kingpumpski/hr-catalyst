@@ -10,7 +10,7 @@ export type Referee = {
 };
 
 const STORAGE_KEY = "hr-catalyst-referee-vault-v1";
-const storageKey = (userId?: string) => userId ? `${STORAGE_KEY}:${userId}` : STORAGE_KEY;
+export const refereeVaultStorageKey = (userId?: string) => userId ? `${STORAGE_KEY}:${userId}` : STORAGE_KEY;
 const ITERATIONS = 120_000;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -59,7 +59,7 @@ const deriveKey = async (password: string, salt: Uint8Array<ArrayBuffer>) => {
 
 export const hasRefereeVault = (userId?: string) => {
   if (typeof window === "undefined") return false;
-  return Boolean(localStorage.getItem(storageKey(userId)) || (userId && localStorage.getItem(STORAGE_KEY)));
+  return Boolean(localStorage.getItem(refereeVaultStorageKey(userId)) || (userId && localStorage.getItem(STORAGE_KEY)));
 };
 
 export const saveRefereeVault = async (referees: Referee[], password: string, userId?: string) => {
@@ -77,12 +77,12 @@ export const saveRefereeVault = async (referees: Referee[], password: string, us
     ciphertext: toBase64(new Uint8Array(ciphertext)),
   };
 
-  localStorage.setItem(storageKey(userId), JSON.stringify(stored));
+  localStorage.setItem(refereeVaultStorageKey(userId), JSON.stringify(stored));
   if (userId) localStorage.removeItem(STORAGE_KEY);
 };
 
 export const unlockRefereeVault = async (password: string, userId?: string): Promise<Referee[]> => {
-  const key = storageKey(userId);
+  const key = refereeVaultStorageKey(userId);
   const raw = localStorage.getItem(key) ?? (userId ? localStorage.getItem(STORAGE_KEY) : null);
   if (!raw) return [];
 
@@ -105,6 +105,6 @@ export const unlockRefereeVault = async (password: string, userId?: string): Pro
 };
 
 export const clearRefereeVault = (userId?: string) => {
-  localStorage.removeItem(storageKey(userId));
+  localStorage.removeItem(refereeVaultStorageKey(userId));
   if (!userId) localStorage.removeItem(STORAGE_KEY);
 };
