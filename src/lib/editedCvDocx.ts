@@ -75,7 +75,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 };
 
 /** Word export mirrors the live editor preview: same sections, order, labels and single-column reading flow. */
-export const downloadEditedCvDocx = async (data: CvEditorData, kind: "cv" | "resume") => {
+export const createEditedCvDocxBlob = async (data: CvEditorData, kind: "cv" | "resume" = "cv"): Promise<Blob> => {
   const settings = loadDocumentSettings();
   const format = getCvFormatProfile(settings.targetMarket);
   const pageSize = PAGE_SIZES[format.paperSize] ?? PAGE_SIZES.A4;
@@ -138,7 +138,11 @@ export const downloadEditedCvDocx = async (data: CvEditorData, kind: "cv" | "res
     styles, numbering,
     sections: [{ properties: { page: { size: pageSize, margin: PAGE_MARGIN } }, children }],
   });
-  const blob = await Packer.toBlob(doc);
+  return Packer.toBlob(doc);
+};
+
+export const downloadEditedCvDocx = async (data: CvEditorData, kind: "cv" | "resume") => {
+  const blob = await createEditedCvDocxBlob(data, kind);
   const safeName = data.profile.name.trim().replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "Candidate";
   const month = new Date().toISOString().slice(0, 7);
   downloadBlob(blob, safeName + "_" + kind.toUpperCase() + "_" + month + ".docx");
