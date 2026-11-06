@@ -33,7 +33,7 @@ const setupClient = (responses: Record<string, Result[]>) => {
   const client = {
     from: (table: string) => {
       const result = responses[table]?.shift() ?? { data: null, error: null };
-      const builder: Record<string, any> = {};
+      const builder: Record<string, (...args: unknown[]) => unknown> = {};
       for (const method of ["select", "insert", "update", "eq", "is", "order", "limit"]) {
         builder[method] = (...args: unknown[]) => {
           calls.push({ table, method, args });
