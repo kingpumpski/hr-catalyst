@@ -144,7 +144,9 @@ This is the recruiter-side resolver integration only. It does **not** complete o
 
 The following items supersede the earlier "in progress" notes above:
 
-- Owner registration, sign-in, password recovery, session refresh, protected routes and a private workspace dashboard are implemented on PR #20.
+- Owner registration, sign-in, password recovery, password update, sign-out, protected routes and a private workspace dashboard are implemented on PR #20.
+- Browser authentication and session lifecycle now use the exact-pinned official `@supabase/supabase-js@2.119.0` client. Supabase Auth owns URL callback detection, local session persistence, automatic refresh and cross-tab auth events; the previous hand-written Auth REST/session implementation has been removed.
+- Workspace and share data operations still use explicit token-bound PostgREST requests; this is separate from the Auth/session layer and remains a candidate for typed SDK query migration.
 - CV/resume/cover-letter drafts are persisted in the owner's workspace. Owner workspace links reopen the matching editor and hydrate the saved content for that document.
 - Publishing now creates an immutable snapshot, updates the document status and records an audit event in one SECURITY INVOKER transaction.
 - Publishing also generates a DOCX artifact, uploads it to the private Storage bucket under `{workspace_id}/{document_id}/{random_file}.docx`, and stores that path on the immutable version. Failed publish attempts trigger best-effort cleanup of the uploaded artifact.
@@ -157,8 +159,9 @@ The following items supersede the earlier "in progress" notes above:
 
 ### Remaining release gates
 
-- Replace the custom REST/session implementation with the official pinned `@supabase/supabase-js` SDK and regenerate the npm lockfile through npm; do not hand-edit the lockfile.
-- Pass both Quality and CV Editor CI workflows on the final PR head, including lint, typecheck, unit tests and production build.
+- Pass both Quality and CV Editor CI workflows on the final PR head after the SDK migration, including lint, typecheck, unit tests and production build.
+- Complete browser/end-to-end testing for the SDK-managed callback, session refresh and cross-tab events; the current unit tests do not substitute for real browser verification.
+- Consider replacing the remaining explicit PostgREST wrappers with typed `supabase.from(...)` / `supabase.rpc(...)` calls and moving Storage uploads/removals to the SDK Storage client before declaring the browser data layer fully standardized.
 - Add browser/end-to-end tests for signup, email verification, recovery, sign-in/out, refresh and cross-tab synchronization; owner document save/publish; share create/edit/revoke; invited-email restriction; recruiter viewing and DOCX download; A4/Letter print.
 - Add automated cross-account RLS tests and authenticated/anonymous Storage authorization tests.
 - Verify Supabase Auth Site URL, redirect allow-list and production email delivery for GitHub Pages and Vercel.
