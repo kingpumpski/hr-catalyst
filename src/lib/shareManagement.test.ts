@@ -42,8 +42,10 @@ const setupClient = (responses: Record<string, Result[]>) => {
       }
       builder.maybeSingle = async () => result;
       builder.single = async () => result;
-      builder.then = (resolve: (value: Result) => unknown, reject?: (reason: unknown) => unknown) =>
-        Promise.resolve(result).then(resolve, reject);
+      builder.then = (...args: unknown[]) => {
+        const [resolve, reject] = args as [(value: Result) => unknown, ((reason: unknown) => unknown)?];
+        return Promise.resolve(result).then(resolve, reject);
+      };
       return builder;
     },
   };
