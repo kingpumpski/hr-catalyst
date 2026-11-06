@@ -11,7 +11,7 @@ const EditableCvDocument = ({ data }: { data: CvEditorData }) => {
     settings.showContactDetails ? data.profile.phone : "",
     settings.showContactDetails ? data.profile.email : "",
     settings.includeLinkedIn && settings.showContactDetails
-      ? data.profile.linkedin.replace(/^https?:\\/\\//, "")
+      ? data.profile.linkedin.replace(/^https?:\/\//, "")
       : "",
   ].map((item) => item.trim()).filter(Boolean);
   const listSection = (title: string, items: string[]) => {
