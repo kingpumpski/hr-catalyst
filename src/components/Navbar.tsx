@@ -131,7 +131,8 @@ const Navbar = () => {
     <header className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${scrolled ? "bg-background/90 backdrop-blur-md shadow-soft" : "bg-transparent"}`}>
       <nav className="container max-w-6xl mx-auto flex items-center justify-between gap-4 px-6 py-4" aria-label="Primary navigation">
         <button type="button" onClick={goHome} className={`font-semibold tracking-tight transition-smooth ${scrolled ? "text-foreground" : "text-primary-foreground"}`}>
-          Kingsley J. Norku
+          {/* Kingsley J. Norku */}
+          Kingsley Norku Jr.
         </button>
 
         <div className="hidden xl:flex items-center gap-1">
