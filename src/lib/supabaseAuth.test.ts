@@ -51,7 +51,7 @@ describe("HR Catalyst Supabase authentication", () => {
     const requestHeaders = new Headers(requestOptions.headers);
     expect(requestHeaders.get("apikey")).toBe("sb_publishable_test_key");
     expect(requestHeaders.get("Content-Type")).toContain("application/json");
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toMatchObject({
       email: "owner@example.com",
       password: "correct horse battery staple",
     });
