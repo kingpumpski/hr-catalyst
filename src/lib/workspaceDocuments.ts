@@ -15,6 +15,42 @@ export const listWorkspaceDocuments = (session: AuthSession, workspace: Workspac
     { accessToken: session.access_token },
   );
 
+export const getWorkspaceDocumentContent = async (
+  session: AuthSession,
+  workspace: Workspace,
+  slug: string,
+): Promise<{ content: unknown } | null> => {
+  const rows = await requestSupabase<Array<{ content: unknown }>>(
+    `/rest/v1/documents?select=content&workspace_id=eq.${encodeURIComponent(workspace.id)}&slug=eq.${encodeURIComponent(slug)}&limit=1`,
+    { accessToken: session.access_token },
+  );
+  return rows[0] ?? null;
+};
+
+export const getWorkspaceDocumentEditorPath = (document: Pick<WorkspaceDocument, "slug" | "document_type">) => {
+  const tab = document.document_type === "cover_letter" ? "letter" : document.document_type;
+  const suffix = document.document_type === "cover_letter" ? "letter" : document.document_type;
+  const editorSlug = document.slug.replace(new RegExp(`-${suffix}import { requestSupabase, type AuthSession, type Workspace } from "@/lib/supabaseAuth";
+
+export type WorkspaceDocument = {
+  id: string;
+  slug: string;
+  title: string;
+  document_type: "cv" | "resume" | "cover_letter" | "other";
+  status: "draft" | "published" | "archived";
+  updated_at: string;
+};
+
+export const listWorkspaceDocuments = (session: AuthSession, workspace: Workspace) =>
+  requestSupabase<WorkspaceDocument[]>(
+    `/rest/v1/documents?select=id,slug,title,document_type,status,updated_at&workspace_id=eq.${encodeURIComponent(workspace.id)}&order=updated_at.desc`,
+    { accessToken: session.access_token },
+  );
+
+), "");
+  return `/cv/${encodeURIComponent(editorSlug)}?tab=${tab}`;
+};
+
 export const saveWorkspaceDocument = async (
   session: AuthSession,
   workspace: Workspace,
