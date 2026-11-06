@@ -59,6 +59,16 @@ Deno.serve(async (request: Request) => {
     return json(404, { error: "share_not_found_or_expired" });
   }
 
+  const { data: withinRateLimit, error: rateLimitError } = await admin.rpc(
+    "allow_share_resolution",
+    { p_token_hash: tokenHash },
+  );
+  if (rateLimitError) {
+    console.error("Share resolver throttle failed", rateLimitError.message);
+    return json(503, { error: "service_unavailable" });
+  }
+  if (!withinRateLimit) return json(429, { error: "too_many_requests" });
+
   if (link.invited_email) {
     const authorization = request.headers.get("Authorization") ?? "";
     const jwt = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
