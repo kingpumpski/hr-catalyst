@@ -186,7 +186,7 @@ export const downloadCvDocx = async (version: CvVersion, documentType: "cv" | "r
 };
 
 /** Word export of the tailored cover letter. */
-export const downloadCoverLetterDocx = async (version: CvVersion, inputs: CoverLetterInputs = {}) => {
+export const createCoverLetterDocxBlob = async (version: CvVersion, inputs: CoverLetterInputs = {}): Promise<Blob> => {
   const letter = buildCoverLetter(version, inputs);
   const settings = loadDocumentSettings();
   const format = getCvFormatProfile(settings.targetMarket);
@@ -217,7 +217,12 @@ export const downloadCoverLetterDocx = async (version: CvVersion, inputs: CoverL
     sections: [{ properties: { page: { size, margin: MARGIN } }, children }],
   });
 
-  const blob = await Packer.toBlob(doc);
+  return Packer.toBlob(doc);
+};
+
+export const downloadCoverLetterDocx = async (version: CvVersion, inputs: CoverLetterInputs = {}) => {
+  const blob = await createCoverLetterDocxBlob(version, inputs);
+  const letter = buildCoverLetter(version, inputs);
   const employerSlug = letter.employerName.replace(/[^A-Za-z0-9 ]/g, "").trim() || "Application";
   downloadBlob(blob, `Kingsley Junior Norku - Cover Letter - ${employerSlug}.docx`);
 };
