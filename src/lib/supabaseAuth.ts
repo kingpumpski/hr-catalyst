@@ -148,8 +148,16 @@ export const updateAccountPassword = async (_session: AuthSession, password: str
 };
 
 export const signOutFromSupabase = async (_session: AuthSession | null) => {
-  const { error } = await getSupabaseClient().auth.signOut();
-  if (error) throw error;
+  const client = getSupabaseClient();
+  const { error } = await client.auth.signOut();
+  if (error) {
+    try {
+      await client.auth.signOut({ scope: "local" });
+    } catch {
+      // The local auth event still clears the application state; preserve the original server error.
+    }
+    throw error;
+  }
 };
 
 export const consumeAuthRedirect = async (): Promise<{ session: AuthSession | null; type: string | null }> => {
