@@ -76,3 +76,24 @@ export const revokeOwnerShareLink = async (
     },
   );
 };
+
+export const updateOwnerShareLink = async (
+  session: AuthSession,
+  workspace: Workspace,
+  shareId: string,
+  updates: { invitedEmail: string; allowDownload: boolean; expiresInDays: number | null },
+) => {
+  const email = updates.invitedEmail.trim().toLowerCase() || null;
+  const expiresAt = updates.expiresInDays == null
+    ? null
+    : new Date(Date.now() + updates.expiresInDays * 24 * 60 * 60 * 1000).toISOString();
+  await requestSupabase<unknown>(
+    `/rest/v1/share_links?id=eq.${encodeURIComponent(shareId)}&workspace_id=eq.${encodeURIComponent(workspace.id)}&revoked_at=is.null`,
+    {
+      method: "PATCH",
+      accessToken: session.access_token,
+      prefer: "return=minimal",
+      body: { invited_email: email, allow_download: updates.allowDownload, expires_at: expiresAt },
+    },
+  );
+};
