@@ -118,10 +118,9 @@ export const loadCvEditorData = (slug: string, version: CvVersion, userId?: stri
   const latestSource = createCvEditorData(version);
   if (typeof window === "undefined") return latestSource;
   try {
-    const currentRaw = userId
-      ? window.localStorage.getItem(cvEditorStorageKey(slug, userId)) ??
-        window.localStorage.getItem(cvEditorStorageKey(slug))
-      : window.localStorage.getItem(cvEditorStorageKey(slug));
+    // Never import anonymous/device-wide drafts into an authenticated account:
+    // browsers may be shared, so the previous local owner cannot be inferred safely.
+    const currentRaw = window.localStorage.getItem(cvEditorStorageKey(slug, userId));
     if (currentRaw) {
       const parsed: unknown = JSON.parse(currentRaw);
       if (isRecord(parsed) && parsed.schemaVersion === STORAGE_VERSION &&
@@ -131,6 +130,9 @@ export const loadCvEditorData = (slug: string, version: CvVersion, userId?: stri
       return latestSource;
     }
 
+    // Legacy v1 drafts are device-wide and cannot be attributed to an account.
+    // Keep legacy migration available only for the unauthenticated editor context.
+    if (userId) return latestSource;
     const legacyRaw = window.localStorage.getItem(legacyStorageKey(slug));
     if (!legacyRaw) return latestSource;
     const legacy: unknown = JSON.parse(legacyRaw);
