@@ -67,26 +67,10 @@ export const toAuthSession = (value: Session | null, fallbackUser?: AuthUser): A
   };
 };
 
-export const persistSession = (session: AuthSession | null) => {
-  if (typeof window === "undefined") return;
-  if (!session) {
-    window.localStorage.removeItem(SESSION_KEY);
-    return;
-  }
-  window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-};
-
-export const readPersistedSession = (): AuthSession | null => {
-  if (typeof window === "undefined") return null;
-  try {
-    const value: unknown = JSON.parse(window.localStorage.getItem(SESSION_KEY) ?? "null");
-    if (!value || typeof value !== "object") return null;
-    const candidate = value as Partial<AuthSession>;
-    return candidate.access_token && candidate.refresh_token && candidate.user?.id &&
-      Number.isFinite(candidate.expires_at) ? candidate as AuthSession : null;
-  } catch {
-    return null;
-  }
+export const readPersistedSession = async (): Promise<AuthSession | null> => {
+  const { data, error } = await getSupabaseClient().auth.getSession();
+  if (error) throw error;
+  return toAuthSession(data.session);
 };
 
 export const requestSupabase = async <T>(
@@ -143,7 +127,6 @@ export const refreshAuthSession = async (session: AuthSession, persist = true) =
   if (error) throw error;
   const next = toAuthSession(data.session, session.user);
   if (!next) throw new Error("Your session could not be refreshed. Please sign in again.");
-  if (persist) persistSession(next);
   return next;
 };
 
@@ -166,7 +149,6 @@ export const updateAccountPassword = async (_session: AuthSession, password: str
 
 export const signOutFromSupabase = async (_session: AuthSession | null) => {
   const { error } = await getSupabaseClient().auth.signOut();
-  persistSession(null);
   if (error) throw error;
 };
 
