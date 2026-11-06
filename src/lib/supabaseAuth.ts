@@ -99,7 +99,7 @@ export const signUpWithPassword = async (email: string, password: string, fullNa
 };
 
 export const signInWithPassword = async (email: string, password: string) => {
-  const result = await request<AuthResponse>("/auth/v1/token?grant_type=password", {
+  const result = await requestSupabase<AuthResponse>("/auth/v1/token?grant_type=password", {
     method: "POST",
     body: { email: email.trim().toLowerCase(), password },
   });
@@ -110,7 +110,7 @@ export const signInWithPassword = async (email: string, password: string) => {
 };
 
 export const refreshAuthSession = async (session: AuthSession) => {
-  const result = await request<AuthResponse>("/auth/v1/token?grant_type=refresh_token", {
+  const result = await requestSupabase<AuthResponse>("/auth/v1/token?grant_type=refresh_token", {
     method: "POST",
     body: { refresh_token: session.refresh_token },
   });
@@ -121,18 +121,18 @@ export const refreshAuthSession = async (session: AuthSession) => {
 };
 
 export const getAuthenticatedUser = async (session: AuthSession) =>
-  request<AuthUser>("/auth/v1/user", { accessToken: session.access_token });
+  requestSupabase<AuthUser>("/auth/v1/user", { accessToken: session.access_token });
 
 export const requestPasswordReset = async (email: string) => {
   const redirectTo = `${window.location.origin}${import.meta.env.BASE_URL}auth?mode=recovery`;
-  await request<unknown>("/auth/v1/recover", {
+  await requestSupabase<unknown>("/auth/v1/recover", {
     method: "POST",
     body: { email: email.trim().toLowerCase(), redirect_to: redirectTo },
   });
 };
 
 export const updateAccountPassword = async (session: AuthSession, password: string) => {
-  await request<AuthUser>("/auth/v1/user", {
+  await requestSupabase<AuthUser>("/auth/v1/user", {
     method: "PUT",
     accessToken: session.access_token,
     body: { password },
@@ -141,7 +141,7 @@ export const updateAccountPassword = async (session: AuthSession, password: stri
 
 export const signOutFromSupabase = async (session: AuthSession | null) => {
   try {
-    if (session) await request<unknown>("/auth/v1/logout", { method: "POST", accessToken: session.access_token });
+    if (session) await requestSupabase<unknown>("/auth/v1/logout", { method: "POST", accessToken: session.access_token });
   } finally {
     persistSession(null);
   }
@@ -154,7 +154,7 @@ export const consumeAuthRedirect = async (): Promise<{ session: AuthSession | nu
   const refreshToken = params.get("refresh_token");
   const type = params.get("type");
   if (!accessToken || !refreshToken) return { session: null, type };
-  const user = await request<AuthUser>("/auth/v1/user", { accessToken });
+  const user = await requestSupabase<AuthUser>("/auth/v1/user", { accessToken });
   const expiresIn = Number(params.get("expires_in") ?? 3600);
   const session: AuthSession = {
     access_token: accessToken,
@@ -171,9 +171,9 @@ export const consumeAuthRedirect = async (): Promise<{ session: AuthSession | nu
 
 export const getOrCreateWorkspace = async (session: AuthSession): Promise<Workspace> => {
   const query = `/rest/v1/workspaces?select=id,name&owner_id=eq.${encodeURIComponent(session.user.id)}&limit=1`;
-  const existing = await request<Workspace[]>(query, { accessToken: session.access_token });
+  const existing = await requestSupabase<Workspace[]>(query, { accessToken: session.access_token });
   if (existing[0]) return existing[0];
-  const created = await request<Workspace[]>("/rest/v1/workspaces", {
+  const created = await requestSupabase<Workspace[]>("/rest/v1/workspaces", {
     method: "POST",
     accessToken: session.access_token,
     prefer: "return=representation",
