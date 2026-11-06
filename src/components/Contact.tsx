@@ -58,7 +58,7 @@ const Contact = () => {
               <div>
                 <p className="font-semibold text-foreground mb-1">Website</p>
                 {/* <Link to="/cv" className="text-muted-foreground hover:text-primary transition-smooth">View CVs and cover letters</Link> */}
-                <Link to="/https://hr-catalyst.onrender.com/" className="text-muted-foreground hover:text-primary transition-smooth">View CVs and cover letters</Link>
+                <Link to="https://hr-catalyst.onrender.com" className="text-muted-foreground hover:text-primary transition-smooth">View CVs and cover letters</Link>
               </div>
             </div>
             <div className="flex items-start gap-4">
