@@ -41,7 +41,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [editorData, setEditorData] = useState<CvEditorData>(() => loadCvEditorData(version.slug, version));
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useEffect(() => {
-    saveCvEditorData(version.slug, editorData);
+    saveCvEditorData(version.slug, editorData, version);
   }, [version.slug, editorData]);
 
   useSeo({
