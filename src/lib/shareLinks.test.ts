@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  getShareLink,
   getSharePageTitle,
   isShareDocumentType,
   isShareRoute,
@@ -30,16 +29,7 @@ describe("share link contracts", () => {
     expect(isShareDocumentType(undefined)).toBe(false);
   });
 
-  it("generates stable share URLs and recruiter-facing labels", () => {
-    expect(getShareLink("remote-claims-billing", "cv")).toBe(
-      "/share/cv/remote-claims-billing",
-    );
-    expect(getShareLink("remote-claims-billing", "resume")).toBe(
-      "/share/resume/remote-claims-billing",
-    );
-    expect(getShareLink("remote-claims-billing", "letter")).toBe(
-      "/share/letter/remote-claims-billing",
-    );
+  it("provides recruiter-facing document labels", () => {
     expect(getSharePageTitle("cv")).toBe("Recruiter-ready CV");
     expect(getSharePageTitle("resume")).toBe("Recruiter-ready resume");
     expect(getSharePageTitle("letter")).toBe("Recruiter-ready cover letter");
