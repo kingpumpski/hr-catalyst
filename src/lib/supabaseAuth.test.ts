@@ -21,8 +21,10 @@ describe("HR Catalyst Supabase authentication", () => {
     vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test_key");
     vi.resetModules();
     vi.stubGlobal("window", {
-      location: { origin: "https://hr-catalyst.example", pathname: "/auth", search: "" },
+      location: { origin: "https://hr-catalyst.example", pathname: "/auth", search: "", hash: "", href: "https://hr-catalyst.example/auth", protocol: "https:", hostname: "hr-catalyst.example" },
       history: { replaceState: vi.fn() },
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
       localStorage: {
         getItem: (key: string) => storage.get(key) ?? null,
         setItem: (key: string, value: string) => storage.set(key, value),
