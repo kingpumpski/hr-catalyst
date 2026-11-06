@@ -54,7 +54,7 @@ describe("owner recruiter share management", () => {
     expect(result.versionNumber).toBe(9);
     expect(result.token).toHaveLength(64);
     const insertCall = vi.mocked(requestSupabase).mock.calls[1];
-    expect(insertCall[0]).toBe("/rest/v1/share_links");
+    expect(insertCall[0]).toContain("/rest/v1/share_links?select=id,document_id,document_version_id");
     const insertOptions = insertCall[1] as { body: Record<string, unknown>; accessToken: string; method: string };
     expect(insertOptions.method).toBe("POST");
     expect(insertOptions.accessToken).toBe("owner-access-token");
