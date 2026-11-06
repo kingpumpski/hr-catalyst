@@ -10,6 +10,7 @@ import {
   createOwnerShareLink,
   listOwnerShareLinks,
   revokeOwnerShareLink,
+  updateOwnerShareLink,
   type OwnerShareLink,
 } from "@/lib/shareManagement";
 import type { WorkspaceDocument } from "@/lib/workspaceDocuments";
@@ -23,6 +24,10 @@ const OwnerShareManager = ({ document }: { document: WorkspaceDocument }) => {
   const [allowDownload, setAllowDownload] = useState(false);
   const [busy, setBusy] = useState(false);
   const [oneTimeUrl, setOneTimeUrl] = useState("");
+  const [editingShareId, setEditingShareId] = useState<string | null>(null);
+  const [editEmail, setEditEmail] = useState("");
+  const [editExpiry, setEditExpiry] = useState("7");
+  const [editDownload, setEditDownload] = useState(false);
   const [error, setError] = useState("");
   const [now, setNow] = useState(0);
 
@@ -88,6 +93,37 @@ const OwnerShareManager = ({ document }: { document: WorkspaceDocument }) => {
     }
   };
 
+  const beginEdit = (share: OwnerShareLink) => {
+    setEditingShareId(share.id);
+    setEditEmail(share.invited_email ?? "");
+    setEditDownload(share.allow_download);
+    if (!share.expires_at) setEditExpiry("never");
+    else {
+      const remaining = Math.ceil((Date.parse(share.expires_at) - Date.now()) / (24 * 60 * 60 * 1000));
+      setEditExpiry(remaining <= 1 ? "1" : remaining <= 7 ? "7" : "30");
+    }
+  };
+
+  const saveEdit = async (shareId: string) => {
+    if (!session || !workspace) return;
+    setBusy(true);
+    setError("");
+    try {
+      await updateOwnerShareLink(session, workspace, shareId, {
+        invitedEmail: editEmail,
+        allowDownload: editDownload,
+        expiresInDays: editExpiry === "never" ? null : Number(editExpiry),
+      });
+      setEditingShareId(null);
+      await refresh();
+      toast({ title: "Recruiter link updated", description: "The link's access settings have been saved." });
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "The recruiter link settings could not be updated.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(oneTimeUrl);
@@ -122,7 +158,8 @@ const OwnerShareManager = ({ document }: { document: WorkspaceDocument }) => {
         const revoked = Boolean(share.revoked_at);
         return <li key={share.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-2">
           <div><p className="text-xs font-medium">{share.invited_email ?? "Anyone with the link"}</p><p className="text-[11px] text-muted-foreground">{share.allow_download ? "Download enabled" : "View only"} · {share.expires_at ? `Expires ${new Date(share.expires_at).toLocaleDateString()}` : "No expiry"}</p></div>
-          <div className="flex items-center gap-2"><Badge variant={revoked || expired ? "secondary" : "default"}>{revoked ? "Revoked" : expired ? "Expired" : "Active"}</Badge>{!revoked && !expired && <Button size="sm" variant="ghost" disabled={busy} onClick={() => void revoke(share.id)} aria-label="Revoke recruiter link"><ShieldOff className="h-4 w-4" /></Button>}</div>
+          <div className="flex items-center gap-2"><Badge variant={revoked || expired ? "secondary" : "default"}>{revoked ? "Revoked" : expired ? "Expired" : "Active"}</Badge>{!revoked && !expired && <><Button size="sm" variant="outline" disabled={busy} onClick={() => beginEdit(share)}>Edit</Button><Button size="sm" variant="ghost" disabled={busy} onClick={() => void revoke(share.id)} aria-label="Revoke recruiter link"><ShieldOff className="h-4 w-4" /></Button></>}</div>
+          {editingShareId === share.id && <div className="mt-3 grid w-full gap-2 sm:grid-cols-[1fr_130px_auto]"><Input aria-label="Invited recruiter email" type="email" value={editEmail} onChange={(event) => setEditEmail(event.target.value)} placeholder="Anyone with link" /><select aria-label="Updated link expiry" value={editExpiry} onChange={(event) => setEditExpiry(event.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm"><option value="1">1 day</option><option value="7">7 days</option><option value="30">30 days</option><option value="never">No expiry</option></select><div className="flex gap-2"><Button size="sm" disabled={busy} onClick={() => void saveEdit(share.id)}>Save</Button><Button size="sm" variant="ghost" disabled={busy} onClick={() => setEditingShareId(null)}>Cancel</Button></div><label className="sm:col-span-3 flex items-center gap-2 text-xs text-muted-foreground"><input type="checkbox" checked={editDownload} onChange={(event) => setEditDownload(event.target.checked)} />Allow downloads</label></div>}
         </li>;
       })}</ul>}
     </div>
