@@ -97,6 +97,8 @@ The following migrations are applied to the new project and stored under the mat
    - Adds indexes covering foreign-key columns to avoid unnecessary delete/update scans.
 4. `20261106103928_rate_limit_share_resolution.sql`
    - Adds a token-hash-only, transaction-locked throttle that limits a valid share link to 30 resolver attempts per minute; only the service role can call the throttle RPC.
+5. `20261106104016_deny_client_rate_limit_access.sql`
+   - Adds an explicit deny-all RLS policy for browser roles on the service-role-only throttle table.
 
 ### Share resolver contract
 
