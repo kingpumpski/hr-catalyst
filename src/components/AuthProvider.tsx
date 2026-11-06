@@ -3,13 +3,12 @@ import {
   consumeAuthRedirect,
   getAuthenticatedUser,
   getOrCreateWorkspace,
+  getSupabaseClient,
   readPersistedSession,
-  persistSession,
-  refreshAuthSession,
-  requestPasswordReset,
   signInWithPassword,
   signOutFromSupabase,
   signUpWithPassword,
+  toAuthSession,
   updateAccountPassword,
   type AuthSession,
   type AuthUser,
@@ -36,7 +35,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
   const [recoveryFlow, setRecoveryFlow] = useState(false);
-  const refreshInFlight = useRef(false);
   const authEpoch = useRef(0);
 
   const activateSession = useCallback(async (next: AuthSession) => {
@@ -53,21 +51,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let active = true;
     const bootstrapEpoch = authEpoch.current;
+    const { data: { subscription } } = getSupabaseClient().auth.onAuthStateChange((event, nextSession) => {
+      if (event === "PASSWORD_RECOVERY") setRecoveryFlow(true);
+      if (event === "SIGNED_OUT") {
+        ++authEpoch.current;
+        setSession(null);
+        setWorkspace(null);
+        setRecoveryFlow(false);
+        return;
+      }
+      if (!nextSession || event === "INITIAL_SESSION") return;
+      const mapped = toAuthSession(nextSession);
+      if (!mapped) return;
+      if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        setSession(mapped);
+        return;
+      }
+      queueMicrotask(() => {
+        if (!active) return;
+        void activateSession(mapped).catch(() => {
+          if (active) {
+            ++authEpoch.current;
+            setSession(null);
+            setWorkspace(null);
+          }
+        });
+      });
+    });
+
     const bootstrap = async () => {
       try {
         const redirect = await consumeAuthRedirect();
         if (redirect.type === "recovery") setRecoveryFlow(true);
-        let current = redirect.session ?? readPersistedSession();
-        if (current && current.expires_at <= Math.floor(Date.now() / 1000) + 60) {
-          current = await refreshAuthSession(current, false);
-        }
-        if (current) {
+        const current = redirect.session ?? readPersistedSession();
+        if (current && active && bootstrapEpoch === authEpoch.current) {
           const user = await getAuthenticatedUser(current);
-          current = { ...current, user };
           if (active && bootstrapEpoch === authEpoch.current) {
-            persistSession(current);
-            setSession(current);
-            const ownerWorkspace = await getOrCreateWorkspace(current);
+            const verifiedSession = { ...current, user };
+            setSession(verifiedSession);
+            const ownerWorkspace = await getOrCreateWorkspace(verifiedSession);
             if (active && bootstrapEpoch === authEpoch.current) setWorkspace(ownerWorkspace);
           }
         }
@@ -81,62 +103,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     void bootstrap();
-    const onStorage = (event: StorageEvent) => {
-      if (event.key !== "hr-catalyst:supabase-auth-session") return;
-      ++authEpoch.current;
-      if (!event.newValue) {
-        setSession(null);
-        setWorkspace(null);
-        return;
-      }
-      const next = readPersistedSession();
-      if (!next) {
-        setSession(null);
-        setWorkspace(null);
-        return;
-      }
-      void activateSession(next).catch(() => {
-        if (active) {
-          ++authEpoch.current;
-          setSession(null);
-          setWorkspace(null);
-        }
-      });
-    };
-    window.addEventListener("storage", onStorage);
+
     return () => {
       active = false;
-      window.removeEventListener("storage", onStorage);
+      subscription.unsubscribe();
     };
   }, [activateSession]);
-
-  useEffect(() => {
-    if (!session) return;
-    const refreshIfNeeded = async () => {
-      if (refreshInFlight.current || session.expires_at > Math.floor(Date.now() / 1000) + 120) return;
-      const epoch = authEpoch.current;
-      refreshInFlight.current = true;
-      try {
-        const refreshed = await refreshAuthSession(session, false);
-        if (epoch !== authEpoch.current) return;
-        persistSession(refreshed);
-        setSession(refreshed);
-        const currentUser = await getAuthenticatedUser(refreshed);
-        if (epoch === authEpoch.current) setSession({ ...refreshed, user: currentUser });
-      } catch {
-        if (epoch === authEpoch.current) {
-          ++authEpoch.current;
-          setSession(null);
-          setWorkspace(null);
-        }
-      } finally {
-        refreshInFlight.current = false;
-      }
-    };
-    const timer = window.setInterval(() => { void refreshIfNeeded(); }, 30_000);
-    void refreshIfNeeded();
-    return () => window.clearInterval(timer);
-  }, [session]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const next = await signInWithPassword(email, password);
@@ -160,7 +132,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [session]);
 
-  const reset = useCallback((email: string) => requestPasswordReset(email), []);
   const updatePassword = useCallback(async (password: string) => {
     if (!session) throw new Error("Open the password recovery link again to continue.");
     await updateAccountPassword(session, password);
@@ -168,9 +139,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [session]);
 
   const value = useMemo(() => ({
-    session, user: session?.user ?? null, workspace, loading, recoveryFlow,
-    signIn, signUp, signOut, requestPasswordReset: reset, updatePassword,
-  }), [session, workspace, loading, recoveryFlow, signIn, signUp, signOut, reset, updatePassword]);
+    session,
+    user: session?.user ?? null,
+    workspace,
+    loading,
+    recoveryFlow,
+    signIn,
+    signUp,
+    signOut,
+    requestPasswordReset: async (email: string) => {
+      const { requestPasswordReset } = await import("@/lib/supabaseAuth");
+      await requestPasswordReset(email);
+    },
+    updatePassword,
+  }), [session, workspace, loading, recoveryFlow, signIn, signUp, signOut, updatePassword]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
