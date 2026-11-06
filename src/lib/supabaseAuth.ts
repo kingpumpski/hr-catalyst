@@ -1,4 +1,5 @@
-import { createClient, type Session } from "@supabase/supabase-js";
+import { createClient, type Session, type SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 export type AuthUser = {
   id: string;
@@ -23,7 +24,7 @@ type AuthResponse = Partial<AuthSession> & { user?: AuthUser; msg?: string; mess
 const SESSION_KEY = "hr-catalyst:supabase-auth-session";
 const API_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/+$/, "");
 const API_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
-let supabaseClient: ReturnType<typeof createClient> | null = null;
+let supabaseClient: SupabaseClient<Database> | null = null;
 
 export const isSupabaseConfigured = () => Boolean(API_URL && API_KEY);
 
@@ -39,7 +40,7 @@ const getApiKey = () => {
 
 export const getSupabaseClient = () => {
   if (!supabaseClient) {
-    supabaseClient = createClient(getApiUrl(), getApiKey(), {
+    supabaseClient = createClient<Database>(getApiUrl(), getApiKey(), {
       auth: {
         storageKey: SESSION_KEY,
         persistSession: true,
@@ -174,20 +175,37 @@ export const consumeAuthRedirect = async (): Promise<{ session: AuthSession | nu
 };
 
 export const getOrCreateWorkspace = async (session: AuthSession): Promise<Workspace> => {
-  const query = `/rest/v1/workspaces?select=id,name&owner_id=eq.${encodeURIComponent(session.user.id)}&limit=1`;
-  const existing = await requestSupabase<Workspace[]>(query, { accessToken: session.access_token });
-  if (existing[0]) return existing[0];
-  const created = await requestSupabase<Workspace[]>("/rest/v1/workspaces", {
-    method: "POST",
-    accessToken: session.access_token,
-    prefer: "return=representation",
-    body: { owner_id: session.user.id, name: "My HR Catalyst workspace" },
-  });
-  if (!created[0]) throw new Error("Your account is active, but its private workspace could not be created.");
-  return created[0];
+  const client = getSessionClient(session);
+  const { data: existing, error: lookupError } = await client
+    .from("workspaces")
+    .select("id,name")
+    .eq("owner_id", session.user.id)
+    .maybeSingle();
+  if (lookupError) throw lookupError;
+  if (existing) return existing;
+
+  const { data: created, error: insertError } = await client
+    .from("workspaces")
+    .insert({ owner_id: session.user.id, name: "My HR Catalyst workspace" })
+    .select("id,name")
+    .single();
+  if (created) return created;
+
+  // Another browser tab may win the unique-owner insert after our initial lookup.
+  if (insertError?.code === "23505") {
+    const { data: concurrentWorkspace, error: retryError } = await client
+      .from("workspaces")
+      .select("id,name")
+      .eq("owner_id", session.user.id)
+      .maybeSingle();
+    if (!retryError && concurrentWorkspace) return concurrentWorkspace;
+    if (retryError) throw retryError;
+  }
+  if (insertError) throw insertError;
+  throw new Error("Your account is active, but its private workspace could not be created.");
 };
 
-const getSessionStorageClient = (session: AuthSession) => createClient(getApiUrl(), getApiKey(), {
+const getSessionClient = (session: AuthSession) => createClient<Database>(getApiUrl(), getApiKey(), {
   auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
   global: { headers: { Authorization: `Bearer ${session.access_token}` } },
 });
@@ -202,7 +220,7 @@ export const uploadPrivateStorageObject = async (
   if (!path || path.startsWith("/") || path.split("/").some((part) => !part || part === "." || part === "..")) {
     throw new Error("The private file path is invalid.");
   }
-  const { error } = await getSessionStorageClient(session).storage.from(bucket).upload(path, file, {
+  const { error } = await getSessionClient(session).storage.from(bucket).upload(path, file, {
     contentType,
     upsert: true,
     cacheControl: "3600",
