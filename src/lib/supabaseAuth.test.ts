@@ -43,16 +43,12 @@ describe("HR Catalyst Supabase authentication", () => {
     vi.stubGlobal("fetch", fetchMock);
     const result = await signInWithPassword(" Owner@Example.com ", "correct horse battery staple");
     expect(result.user.id).toBe("user-123");
-    expect(fetchMock).toHaveBeenCalledWith(
-      "https://project.supabase.co/auth/v1/token?grant_type=password",
-      expect.objectContaining({
-        method: "POST",
-        headers: expect.objectContaining({
-          apikey: "sb_publishable_test_key",
-          "Content-Type": "application/json",
-        }),
-      }),
-    );
+    const [requestUrl, requestOptions] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(requestUrl).toBe("https://project.supabase.co/auth/v1/token?grant_type=password");
+    expect(requestOptions.method).toBe("POST");
+    const requestHeaders = new Headers(requestOptions.headers);
+    expect(requestHeaders.get("apikey")).toBe("sb_publishable_test_key");
+    expect(requestHeaders.get("Content-Type")).toBe("application/json");
     expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
       email: "owner@example.com",
       password: "correct horse battery staple",
@@ -88,8 +84,9 @@ describe("HR Catalyst Supabase authentication", () => {
     const workspace = await getOrCreateWorkspace(session);
     expect(workspace.id).toBe("workspace-123");
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe("Bearer access-token");
-    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({
+    const createOptions = fetchMock.mock.calls[1][1] as RequestInit;
+    expect(new Headers(createOptions.headers).get("Authorization")).toBe("Bearer access-token");
+    expect(JSON.parse(String(createOptions.body))).toEqual({
       owner_id: "user-123",
       name: "My HR Catalyst workspace",
     });
