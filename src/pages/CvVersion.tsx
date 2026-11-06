@@ -16,7 +16,7 @@ import EditableCvDocument from "@/components/EditableCvDocument";
 import { loadCvEditorData, saveCvEditorData, type CvEditorData } from "@/lib/cvEditor";
 import { useAuth } from "@/components/AuthProvider";
 import { buildCoverLetter } from "@/lib/coverLetter";
-import { getWorkspaceDocumentContent, listWorkspaceDocuments, publishWorkspaceDocument, saveWorkspaceDocument } from "@/lib/workspaceDocuments";
+import { getWorkspaceDocumentContent, listWorkspaceDocuments, publishWorkspaceDocument, removeWorkspaceDocumentArtifact, saveWorkspaceDocument, uploadWorkspaceDocumentArtifact } from "@/lib/workspaceDocuments";
 
 const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 const AtsKeywordChecker = lazy(() => import("@/components/AtsKeywordChecker"));
@@ -90,6 +90,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
     if (!session || !workspace) return;
     setWorkspaceBusy(true);
     setWorkspaceFeedback("");
+    let uploadedArtifactPath: string | null = null;
     try {
       const documentType = tab === "letter" ? "cover_letter" : tab;
       const slug = `${version.slug}-${tab}`;
@@ -103,12 +104,20 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
         const snapshot = tab === "letter" && coverLetter
           ? { coverLetter: { opening: `${coverLetter.greeting} ${coverLetter.paragraphs[0]}`, body: coverLetter.paragraphs.slice(1, -2), closing: `${coverLetter.paragraphs.at(-2) ?? ""} ${coverLetter.paragraphs.at(-1) ?? ""} ${coverLetter.signOff}` } }
           : editorData;
-        const published = await publishWorkspaceDocument(session, workspace, saved, snapshot);
-        setWorkspaceFeedback(`Published immutable version ${published.version_number} to your private workspace.`);
+        const artifact = tab === "letter"
+          ? await import("@/lib/docxExport").then(({ createCoverLetterDocxBlob }) => createCoverLetterDocxBlob(version, letterInputs))
+          : await import("@/lib/editedCvDocx").then(({ createEditedCvDocxBlob }) => createEditedCvDocxBlob(editorData, tab));
+        uploadedArtifactPath = await uploadWorkspaceDocumentArtifact(session, workspace, saved, artifact);
+        const published = await publishWorkspaceDocument(session, workspace, saved, snapshot, uploadedArtifactPath);
+        uploadedArtifactPath = null;
+        setWorkspaceFeedback(`Published immutable version ${published.version_number} with a private Word download to your workspace.`);
       } else {
         setWorkspaceFeedback("Saved securely to your private workspace as a draft.");
       }
     } catch (reason) {
+      if (uploadedArtifactPath && session) {
+        await removeWorkspaceDocumentArtifact(session, uploadedArtifactPath).catch(() => undefined);
+      }
       setWorkspaceFeedback(reason instanceof Error ? reason.message : "The document could not be saved to your workspace.");
     } finally {
       setWorkspaceBusy(false);
