@@ -36,7 +36,9 @@ const CvVersionPage = () => {
 const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab");
-  const [tab, setTab] = useState<DocumentTab>(initialTab === "resume" || initialTab === "letter" ? initialTab : "cv");
+  const workspaceMode = searchParams.get("workspace") === "1";
+  const [workspaceTab] = useState<DocumentTab>(initialTab === "resume" || initialTab === "letter" ? initialTab : "cv");
+  const [tab, setTab] = useState<DocumentTab>(workspaceTab);
   const [recipientName, setRecipientName] = useState("Hiring Manager");
   const [employerName, setEmployerName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
@@ -48,23 +50,19 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [workspaceFeedback, setWorkspaceFeedback] = useState("");
   const { session, workspace, user } = useAuth();
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
-  const loadedWorkspaceTabs = useRef(new Set<string>());
   useEffect(() => {
     saveCvEditorData(version.slug, editorData, version);
   }, [version, version.slug, editorData]);
   useEffect(() => {
-    if (!session || !workspace) return;
-    const documentSlug = `${version.slug}-${tab}`;
-    const loadKey = `${workspace.id}:${documentSlug}`;
-    if (loadedWorkspaceTabs.current.has(loadKey)) return;
+    if (!workspaceMode || !session || !workspace) return;
     let active = true;
-    getWorkspaceDocumentContent(session, workspace, documentSlug)
+    getWorkspaceDocumentContent(session, workspace, `${version.slug}-${workspaceTab}`)
       .then((saved) => {
         if (!active || !saved) return;
         const content = saved.content;
-        if (tab !== "letter" && content && typeof content === "object") {
+        if (workspaceTab !== "letter" && content && typeof content === "object") {
           setEditorData(content as CvEditorData);
-        } else if (tab === "letter" && content && typeof content === "object") {
+        } else if (workspaceTab === "letter" && content && typeof content === "object") {
           const inputs = (content as { letterInputs?: Partial<{ recipientName: string; employerName: string; jobTitle: string; jobReference: string; companyAddress: string }> }).letterInputs;
           if (inputs) {
             setRecipientName(inputs.recipientName ?? "Hiring Manager");
@@ -74,13 +72,12 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
             setCompanyAddress(inputs.companyAddress ?? "");
           }
         }
-        loadedWorkspaceTabs.current.add(loadKey);
       })
       .catch((reason: unknown) => {
         if (active) setWorkspaceFeedback(reason instanceof Error ? reason.message : "Saved workspace content could not be loaded.");
       });
     return () => { active = false; };
-  }, [session, workspace, version.slug, tab]);
+  }, [workspaceMode, session, workspace, version.slug, workspaceTab]);
 
   useSeo({
     title: getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv"),
