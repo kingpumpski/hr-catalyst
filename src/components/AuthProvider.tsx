@@ -38,16 +38,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [recoveryFlow, setRecoveryFlow] = useState(false);
   const authEpoch = useRef(0);
+  const activationInFlight = useRef<{ accessToken: string; promise: Promise<void> } | null>(null);
 
   const activateSession = useCallback(async (next: AuthSession) => {
+    if (activationInFlight.current?.accessToken === next.access_token) {
+      await activationInFlight.current.promise;
+      return;
+    }
     const epoch = ++authEpoch.current;
     setSession(next);
-    const currentUser = await getAuthenticatedUser(next);
-    if (epoch !== authEpoch.current) return;
-    const verifiedSession = { ...next, user: currentUser };
-    setSession(verifiedSession);
-    const ownerWorkspace = await getOrCreateWorkspace(verifiedSession);
-    if (epoch === authEpoch.current) setWorkspace(ownerWorkspace);
+    const activation = (async () => {
+      const currentUser = await getAuthenticatedUser(next);
+      if (epoch !== authEpoch.current) return;
+      const verifiedSession = { ...next, user: currentUser };
+      setSession(verifiedSession);
+      const ownerWorkspace = await getOrCreateWorkspace(verifiedSession);
+      if (epoch === authEpoch.current) setWorkspace(ownerWorkspace);
+    })();
+    activationInFlight.current = { accessToken: next.access_token, promise: activation };
+    try {
+      await activation;
+    } finally {
+      if (activationInFlight.current?.promise === activation) activationInFlight.current = null;
+    }
   }, []);
 
   useEffect(() => {
