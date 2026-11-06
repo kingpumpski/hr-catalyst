@@ -81,7 +81,7 @@ export const revokeOwnerShareLink = async (
   workspace: Workspace,
   shareId: string,
 ) => {
-  const updated = await requestSupabase<OwnerShareLink[]>(
+  const updated = await requestSupabase<Array<{ id: string }>>(
     `/rest/v1/share_links?id=eq.${encodeURIComponent(shareId)}&workspace_id=eq.${encodeURIComponent(workspace.id)}&revoked_at=is.null&select=id`,
     {
       method: "PATCH",
