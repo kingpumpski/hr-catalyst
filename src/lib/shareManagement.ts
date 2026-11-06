@@ -6,7 +6,6 @@ export type OwnerShareLink = {
   id: string;
   document_id: string;
   document_version_id: string;
-  token_hash: string;
   invited_email: string | null;
   allow_download: boolean;
   expires_at: string | null;
@@ -29,6 +28,7 @@ export const createOwnerShareLink = async (
   document: WorkspaceDocument,
   options: { invitedEmail?: string; allowDownload?: boolean; expiresInDays?: number | null },
 ) => {
+  if (document.status !== "published") throw new Error("Publish this document before creating a recruiter link.");
   const versions = await requestSupabase<Array<{ id: string; version_number: number }>>(
     `/rest/v1/document_versions?select=id,version_number&workspace_id=eq.${encodeURIComponent(workspace.id)}&document_id=eq.${encodeURIComponent(document.id)}&order=version_number.desc&limit=1`,
     { accessToken: session.access_token },
@@ -42,7 +42,7 @@ export const createOwnerShareLink = async (
     ? null
     : new Date(Date.now() + options.expiresInDays * 24 * 60 * 60 * 1000).toISOString();
 
-  const rows = await requestSupabase<OwnerShareLink[]>("/rest/v1/share_links", {
+  const rows = await requestSupabase<OwnerShareLink[]>("/rest/v1/share_links?select=id,document_id,document_version_id,invited_email,allow_download,expires_at,revoked_at,created_at", {
     method: "POST",
     accessToken: session.access_token,
     prefer: "return=representation",
