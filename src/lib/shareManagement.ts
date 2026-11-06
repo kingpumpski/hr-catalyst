@@ -2,6 +2,22 @@ import { requestSupabase, type AuthSession, type Workspace } from "@/lib/supabas
 import { createShareCredentials } from "@/lib/shareResolver";
 import type { WorkspaceDocument } from "@/lib/workspaceDocuments";
 
+const normalizeInvitedEmail = (value?: string | null) => {
+  const email = value?.trim().toLowerCase() || null;
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("Enter a valid invited recruiter email address or leave it blank.");
+  }
+  return email;
+};
+
+const buildShareExpiry = (days: number | null | undefined) => {
+  if (days == null) return null;
+  if (!Number.isInteger(days) || days < 1 || days > 365) {
+    throw new Error("Choose a valid expiry between 1 and 365 days, or no expiry.");
+  }
+  return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+};
+
 export type OwnerShareLink = {
   id: string;
   document_id: string;
@@ -38,10 +54,8 @@ export const createOwnerShareLink = async (
   if (options.allowDownload && !latest.storage_path) throw new Error("Re-publish this document to create a private Word download before enabling downloads.");
 
   const { token, tokenHash } = await createShareCredentials();
-  const email = options.invitedEmail?.trim().toLowerCase() || null;
-  const expiresAt = options.expiresInDays == null
-    ? null
-    : new Date(Date.now() + options.expiresInDays * 24 * 60 * 60 * 1000).toISOString();
+  const email = normalizeInvitedEmail(options.invitedEmail);
+  const expiresAt = buildShareExpiry(options.expiresInDays);
 
   const rows = await requestSupabase<OwnerShareLink[]>("/rest/v1/share_links?select=id,document_id,document_version_id,invited_email,allow_download,expires_at,revoked_at,created_at", {
     method: "POST",
@@ -96,10 +110,8 @@ export const updateOwnerShareLink = async (
     );
     if (!versions[0]?.storage_path) throw new Error("Re-publish this document to create a private Word download before enabling downloads.");
   }
-  const email = updates.invitedEmail.trim().toLowerCase() || null;
-  const expiresAt = updates.expiresInDays == null
-    ? null
-    : new Date(Date.now() + updates.expiresInDays * 24 * 60 * 60 * 1000).toISOString();
+  const email = normalizeInvitedEmail(updates.invitedEmail);
+  const expiresAt = buildShareExpiry(updates.expiresInDays);
   await requestSupabase<unknown>(
     `/rest/v1/share_links?id=eq.${encodeURIComponent(shareId)}&workspace_id=eq.${encodeURIComponent(workspace.id)}&revoked_at=is.null`,
     {
