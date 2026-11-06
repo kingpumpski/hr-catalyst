@@ -81,15 +81,16 @@ export const revokeOwnerShareLink = async (
   workspace: Workspace,
   shareId: string,
 ) => {
-  await requestSupabase<unknown>(
-    `/rest/v1/share_links?id=eq.${encodeURIComponent(shareId)}&workspace_id=eq.${encodeURIComponent(workspace.id)}&revoked_at=is.null`,
+  const updated = await requestSupabase<OwnerShareLink[]>(
+    `/rest/v1/share_links?id=eq.${encodeURIComponent(shareId)}&workspace_id=eq.${encodeURIComponent(workspace.id)}&revoked_at=is.null&select=id`,
     {
       method: "PATCH",
       accessToken: session.access_token,
-      prefer: "return=minimal",
+      prefer: "return=representation",
       body: { revoked_at: new Date().toISOString() },
     },
   );
+  if (!updated[0]) throw new Error("This recruiter link is already revoked or is not available in your workspace.");
 };
 
 export const updateOwnerShareLink = async (
@@ -112,13 +113,14 @@ export const updateOwnerShareLink = async (
   }
   const email = normalizeInvitedEmail(updates.invitedEmail);
   const expiresAt = buildShareExpiry(updates.expiresInDays);
-  await requestSupabase<unknown>(
-    `/rest/v1/share_links?id=eq.${encodeURIComponent(shareId)}&workspace_id=eq.${encodeURIComponent(workspace.id)}&revoked_at=is.null`,
+  const updated = await requestSupabase<Array<{ id: string }>>(
+    `/rest/v1/share_links?id=eq.${encodeURIComponent(shareId)}&workspace_id=eq.${encodeURIComponent(workspace.id)}&revoked_at=is.null&select=id`,
     {
       method: "PATCH",
       accessToken: session.access_token,
-      prefer: "return=minimal",
+      prefer: "return=representation",
       body: { invited_email: email, allow_download: updates.allowDownload, expires_at: expiresAt },
     },
   );
+  if (!updated[0]) throw new Error("This recruiter link was revoked or changed before the update could be saved.");
 };
