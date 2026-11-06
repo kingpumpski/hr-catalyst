@@ -14,7 +14,8 @@ const CvEditorPanel = ({ value, onChange }: Props) => {
     update({ profile: { ...value.profile, [field]: next } });
   const tabs = [
     ["profile", "Profile"], ["summary", "Summary"], ["skills", "Skills"],
-    ["experience", "Experience"], ["education", "Education"], ["highlights", "Highlights"],
+    ["experience", "Experience"], ["education", "Education"],
+    ["highlights", "Highlights"], ["additional", "Additional"],
   ];
 
   return (

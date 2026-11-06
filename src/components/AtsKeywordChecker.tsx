@@ -29,7 +29,7 @@ const AtsKeywordChecker = ({ version, editorData, onApply }: Props) => {
         Paste the job advert to compare it with the CV or resume currently shown and exported below.
       </p>
       <Textarea className="mt-3" rows={6} value={jobDescription}
-        onChange={(event) => { setJobDescription(event.target.value); setProposal(null); }}
+        onChange={(event) => { setJobDescription(event.target.value); setSubmitted(""); setProposal(null); }}
         placeholder="Paste the full job description here…" aria-label="Job description" />
       <div className="mt-3 flex flex-wrap gap-2">
         <Button onClick={() => { setSubmitted(jobDescription); setProposal(null); }} disabled={!jobDescription.trim()}>
