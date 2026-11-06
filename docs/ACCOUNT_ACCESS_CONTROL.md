@@ -92,6 +92,9 @@ The following migrations are applied to the new project and stored under the mat
    - Auth user profile creation trigger.
 2. `20261106103540_enforce_document_workspace_integrity.sql`
    - Composite foreign key prevents a document version from being attached to a different workspace's document.
+3. `20261106103724_lock_down_trigger_and_index_foreign_keys.sql`
+   - Revokes direct API execution of the SECURITY DEFINER auth trigger helper while preserving trigger invocation.
+   - Adds indexes covering foreign-key columns to avoid unnecessary delete/update scans.
 
 ### Share resolver contract
 
