@@ -190,7 +190,7 @@ export const getOrCreateWorkspace = async (session: AuthSession): Promise<Worksp
 const encodeStoragePath = (path: string) => path.split("/").map(encodeURIComponent).join("/");
 
 export const uploadPrivateStorageObject = async (
-  session: AuthSession,
+  _session: AuthSession,
   bucket: string,
   path: string,
   file: Blob,
@@ -199,40 +199,22 @@ export const uploadPrivateStorageObject = async (
   if (!path || path.startsWith("/") || path.split("/").some((part) => !part || part === "." || part === "..")) {
     throw new Error("The private file path is invalid.");
   }
-  const response = await fetch(`${getApiUrl()}/storage/v1/object/${encodeURIComponent(bucket)}/${encodeStoragePath(path)}`, {
-    method: "POST",
-    headers: {
-      apikey: getApiKey(),
-      Authorization: `Bearer ${session.access_token}`,
-      "Content-Type": contentType,
-      "x-upsert": "true",
-    },
-    body: file,
-    cache: "no-store",
+  const { error } = await getSupabaseClient().storage.from(bucket).upload(path, file, {
+    contentType,
+    upsert: true,
+    cacheControl: "3600",
   });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => null) as { message?: string; error?: string } | null;
-    throw new Error(payload?.message ?? payload?.error ?? `Private file upload failed (${response.status}).`);
-  }
+  if (error) throw new Error(error.message || "Private file upload failed.");
 };
 
 export const removePrivateStorageObject = async (
-  session: AuthSession,
+  _session: AuthSession,
   bucket: string,
   path: string,
 ) => {
-  const response = await fetch(`${getApiUrl()}/storage/v1/object/${encodeURIComponent(bucket)}`, {
-    method: "DELETE",
-    headers: {
-      apikey: getApiKey(),
-      Authorization: `Bearer ${session.access_token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ prefixes: [path] }),
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    const payload = await response.json().catch(() => null) as { message?: string; error?: string } | null;
-    throw new Error(payload?.message ?? payload?.error ?? `Private file cleanup failed (${response.status}).`);
+  if (!path || path.startsWith("/") || path.split("/").some((part) => !part || part === "." || part === "..")) {
+    throw new Error("The private file path is invalid.");
   }
+  const { error } = await getSupabaseClient().storage.from(bucket).remove([path]);
+  if (error) throw new Error(error.message || "Private file cleanup failed.");
 };
