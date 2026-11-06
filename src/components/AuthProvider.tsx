@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const redirect = await consumeAuthRedirect();
         if (redirect.type === "recovery") setRecoveryFlow(true);
-        const current = redirect.session ?? readPersistedSession();
+        const current = redirect.session ?? await readPersistedSession();
         if (current && active && bootstrapEpoch === authEpoch.current) {
           const user = await getAuthenticatedUser(current);
           if (active && bootstrapEpoch === authEpoch.current) {
