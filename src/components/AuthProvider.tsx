@@ -36,18 +36,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [recoveryFlow, setRecoveryFlow] = useState(false);
   const refreshInFlight = useRef(false);
+  const authEpoch = useRef(0);
 
   const activateSession = useCallback(async (next: AuthSession) => {
+    const epoch = ++authEpoch.current;
     setSession(next);
     const currentUser = await getAuthenticatedUser(next);
+    if (epoch !== authEpoch.current) return;
     const verifiedSession = { ...next, user: currentUser };
     setSession(verifiedSession);
     const ownerWorkspace = await getOrCreateWorkspace(verifiedSession);
-    setWorkspace(ownerWorkspace);
+    if (epoch === authEpoch.current) setWorkspace(ownerWorkspace);
   }, []);
 
   useEffect(() => {
     let active = true;
+    const bootstrapEpoch = authEpoch.current;
     const bootstrap = async () => {
       try {
         const redirect = await consumeAuthRedirect();
@@ -59,14 +63,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (current) {
           const user = await getAuthenticatedUser(current);
           current = { ...current, user };
-          if (active) {
+          if (active && bootstrapEpoch === authEpoch.current) {
             setSession(current);
             const ownerWorkspace = await getOrCreateWorkspace(current);
-            if (active) setWorkspace(ownerWorkspace);
+            if (active && bootstrapEpoch === authEpoch.current) setWorkspace(ownerWorkspace);
           }
         }
       } catch {
-        if (active) {
+        if (active && bootstrapEpoch === authEpoch.current) {
           setSession(null);
           setWorkspace(null);
         }
@@ -77,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     void bootstrap();
     const onStorage = (event: StorageEvent) => {
       if (event.key !== "hr-catalyst:supabase-auth-session") return;
+      ++authEpoch.current;
       if (!event.newValue) {
         setSession(null);
         setWorkspace(null);
@@ -90,6 +95,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       void activateSession(next).catch(() => {
         if (active) {
+          ++authEpoch.current;
           setSession(null);
           setWorkspace(null);
         }
@@ -106,15 +112,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!session) return;
     const refreshIfNeeded = async () => {
       if (refreshInFlight.current || session.expires_at > Math.floor(Date.now() / 1000) + 120) return;
+      const epoch = authEpoch.current;
       refreshInFlight.current = true;
       try {
         const refreshed = await refreshAuthSession(session);
+        if (epoch !== authEpoch.current) return;
         setSession(refreshed);
         const currentUser = await getAuthenticatedUser(refreshed);
-        setSession({ ...refreshed, user: currentUser });
+        if (epoch === authEpoch.current) setSession({ ...refreshed, user: currentUser });
       } catch {
-        setSession(null);
-        setWorkspace(null);
+        if (epoch === authEpoch.current) {
+          ++authEpoch.current;
+          setSession(null);
+          setWorkspace(null);
+        }
       } finally {
         refreshInFlight.current = false;
       }
@@ -136,6 +147,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [activateSession]);
 
   const signOut = useCallback(async () => {
+    ++authEpoch.current;
     try {
       await signOutFromSupabase(session);
     } finally {
