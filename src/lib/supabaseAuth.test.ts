@@ -104,7 +104,8 @@ describe("HR Catalyst Supabase authentication", () => {
     expect(options.method).toBe("POST");
     expect(new Headers(options.headers).get("Authorization")).toBe("Bearer access-token");
     expect(new Headers(options.headers).get("x-upsert")).toBe("true");
-    expect(options.body).toBe(file);
+    expect(options.body).toBeInstanceOf(FormData);
+    expect((options.body as FormData).get("")).toBeInstanceOf(File);
   });
 
   it("rejects private storage paths that could escape the workspace folder", async () => {
