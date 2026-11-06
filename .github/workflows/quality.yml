@@ -8,7 +8,7 @@ on:
 
 jobs:
   pin-supabase-sdk-lock:
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.sha == 'b68c837a385fd40754609a88234437dac018116a'
+    if: github.event_name == 'pull_request' && github.head_ref == 'feat/supabase-auth-owner-workspace'
     runs-on: ubuntu-latest
     permissions:
       contents: write
