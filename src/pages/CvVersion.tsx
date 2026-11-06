@@ -70,7 +70,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
     if (storageOwnerRef.current === userId) return;
     storageOwnerRef.current = userId;
     setEditorData(loadCvEditorData(version.slug, version, userId));
-  }, [userId, version.slug]);
+  }, [userId, version, version.slug]);
   useEffect(() => {
     if (!workspaceMode || !session || !workspace) return;
     let active = true;
