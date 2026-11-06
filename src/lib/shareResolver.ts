@@ -66,7 +66,7 @@ export const resolveShare = async (
   options: { signal?: AbortSignal; accessToken?: string; fetcher?: Fetcher } = {},
 ): Promise<ResolvedShare> => {
   const normalizedToken = token.trim();
-  if (normalizedToken.length < 32 || normalizedToken.length > 256) {
+  if (!/^[a-f0-9]{64}$/.test(normalizedToken)) {
     throw new ShareResolutionError("This sharing link is invalid or incomplete.", 400, "invalid_token");
   }
 
