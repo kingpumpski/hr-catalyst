@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { cvVersions } from "@/data/cvVersions";
-import { createCvEditorData, cvEditorStorageKey } from "@/lib/cvEditor";
+import {
+  createCvEditorData,
+  cvEditorStorageKey,
+  migrateLegacyCvEditorData,
+  rebaseCvEditorData,
+} from "@/lib/cvEditor";
 
 describe("CV editor data", () => {
   it("creates an independent editable snapshot for each career track", () => {
@@ -16,8 +21,33 @@ describe("CV editor data", () => {
     expect(claims.languages).toContain("English — Fluent");
     expect(claims.references).toBe("Available on request");
   });
-  it("uses a version-specific, namespaced browser storage key", () => {
+
+  it("uses a versioned, career-track-specific browser storage key", () => {
     expect(cvEditorStorageKey("claims-manager")).not.toBe(cvEditorStorageKey("accounting-finance"));
-    expect(cvEditorStorageKey("claims-manager")).toContain(":v1:");
+    expect(cvEditorStorageKey("claims-manager")).toContain(":v2:");
+  });
+
+  it("refreshes source dates while preserving fields edited by the user", () => {
+    const previous = createCvEditorData(cvVersions[0]);
+    const saved = structuredClone(previous);
+    const latest = structuredClone(previous);
+    saved.experience[0].contributions[0] = "My manually revised achievement";
+    latest.experience[0].period = "May 2021 - Present";
+    latest.experience[0].contributions[0] = "Updated source achievement";
+
+    const rebased = rebaseCvEditorData(saved, previous, latest);
+    expect(rebased.experience[0].period).toBe("May 2021 - Present");
+    expect(rebased.experience[0].contributions[0]).toBe("My manually revised achievement");
+  });
+
+  it("migrates legacy browser data using current source dates", () => {
+    const latest = createCvEditorData(cvVersions[0]);
+    const legacy = structuredClone(latest);
+    legacy.experience[0].period = "April 2023 - Present";
+    legacy.experience[0].contributions[0] = "User-edited achievement";
+
+    const migrated = migrateLegacyCvEditorData(legacy, latest);
+    expect(migrated.experience[0].period).toBe(latest.experience[0].period);
+    expect(migrated.experience[0].contributions[0]).toBe("User-edited achievement");
   });
 });
