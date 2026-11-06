@@ -50,8 +50,8 @@ export const companies: Company[] = [
         title: "Claims Manager & IT Support",
         employmentType: "Full-time",
         location: "Accra, Ghana",
-        period: "April 2023 - Present",
-        duration: "3 yrs 8 mos",
+        period: "April 2021 - Present",
+        duration: "5 yrs 7 mos",
         summary:
           "Lead operational coordination across claims administration, finance, clinical teams, and technology support while helping management improve efficiency, reporting, and service delivery.",
         contributions: [
@@ -84,8 +84,8 @@ export const companies: Company[] = [
         title: "Accounts & Claims Officer",
         employmentType: "Full-time",
         location: "Accra, Ghana",
-        period: "February 2019 - March 2023",
-        duration: "3 yrs 9 mos",
+        period: "February 2019 - March 2021",
+        duration: "2 yrs 1 mo",
         summary:
           "Supported financial administration and healthcare claims operations by maintaining accurate accounting records, preparing reconciliations, and assisting management with financial reporting while coordinating claims processing, insurer follow-up, and reimbursement activities across a fast-paced hospital environment.",
         contributions: [
@@ -119,11 +119,11 @@ export const companies: Company[] = [
     totalPeriod: "June 2012 - August 2017",
     roles: [
       {
-        title: "Accounts Officer",
+        title: "Accounts & Warehouse Officer",
         employmentType: "Full-time",
         location: "Accra, Ghana",
-        period: "July 2013 - August 2017",
-        duration: "2 yrs 10 mos",
+        period: "July 2014 - August 2017",
+        duration: "3 yrs 1 mo",
         summary:
           "Supported financial administration through accurate bookkeeping, reconciliations, reporting, and financial record management.",
         contributions: [
@@ -144,8 +144,8 @@ export const companies: Company[] = [
         title: "Warehouse Officer",
         employmentType: "Full-time",
         location: "Accra, Ghana",
-        period: "June 2012 - June 2013",
-        duration: "1 yr",
+        period: "June 2012 - June 2014",
+        duration: "2 yrs 1 mo",
         summary:
           "Managed inventory operations while supporting procurement and warehouse efficiency.",
         contributions: [
@@ -155,7 +155,12 @@ export const companies: Company[] = [
           "Maintained inventory records and stock movement documentation.",
           "Supported procurement activities."
         ],
-        skills: ["Inventory Management", "Warehouse Operations", "Stock Control", "Safety"],
+        skills: [
+          "Inventory Management",
+          "Warehouse Operations",
+          "Stock Control",
+          "Safety"
+        ],
       },
     ],
   },
@@ -177,20 +182,26 @@ export const companies: Company[] = [
           "Worked collaboratively to meet operational deadlines.",
           "Developed strong understanding of supply chain and warehouse processes.",
         ],
-        skills: ["Logistics", "Inventory Management", "Operations", "Documentation", "Teamwork"],
+        skills: [
+          "Logistics", 
+          "Inventory Management", 
+          "Operations", 
+          "Documentation", 
+          "Teamwork"
+        ],
       },
     ],
   },
   {
     company: "Assemblies of God Proprietary School",
     location: "Mankessim, Central Region, Ghana",
-    totalPeriod: "January 2012 - August 2012",
+    totalPeriod: "October 2011 - May 2012",
     roles: [
       {
         title: "Teacher",
         employmentType: "Full-time",
         location: "Mankessim, Central Region, Ghana",
-        period: "January 2012 - August 2012",
+        period: "October 2011 - May 2012",
         duration: "8 mos",
         summary:
           "Provided classroom instruction while supporting students' academic development and helping maintain a positive learning environment.",
