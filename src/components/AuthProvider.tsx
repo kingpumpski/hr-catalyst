@@ -4,6 +4,7 @@ import {
   getAuthenticatedUser,
   getOrCreateWorkspace,
   readPersistedSession,
+  persistSession,
   refreshAuthSession,
   requestPasswordReset,
   signInWithPassword,
@@ -58,12 +59,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (redirect.type === "recovery") setRecoveryFlow(true);
         let current = redirect.session ?? readPersistedSession();
         if (current && current.expires_at <= Math.floor(Date.now() / 1000) + 60) {
-          current = await refreshAuthSession(current);
+          current = await refreshAuthSession(current, false);
         }
         if (current) {
           const user = await getAuthenticatedUser(current);
           current = { ...current, user };
           if (active && bootstrapEpoch === authEpoch.current) {
+            persistSession(current);
             setSession(current);
             const ownerWorkspace = await getOrCreateWorkspace(current);
             if (active && bootstrapEpoch === authEpoch.current) setWorkspace(ownerWorkspace);
@@ -115,8 +117,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const epoch = authEpoch.current;
       refreshInFlight.current = true;
       try {
-        const refreshed = await refreshAuthSession(session);
+        const refreshed = await refreshAuthSession(session, false);
         if (epoch !== authEpoch.current) return;
+        persistSession(refreshed);
         setSession(refreshed);
         const currentUser = await getAuthenticatedUser(refreshed);
         if (epoch === authEpoch.current) setSession({ ...refreshed, user: currentUser });
