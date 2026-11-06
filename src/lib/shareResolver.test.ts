@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { resolveShare, ShareResolutionError } from "./shareResolver";
+import { createShareCredentials, createShareUrl, resolveShare, ShareResolutionError } from "./shareResolver";
 
 const validResponse = {
   document: { title: "Accounting CV", type: "cv", content: { summary: "Validated experience" } },
@@ -10,6 +10,23 @@ describe("resolveShare", () => {
   beforeEach(() => {
     vi.stubEnv("VITE_SUPABASE_URL", "https://example-project.supabase.co");
     vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "public-test-key");
+  });
+
+  it("creates a random token and stores only its SHA-256 digest for persistence", async () => {
+    const first = await createShareCredentials();
+    const second = await createShareCredentials();
+    expect(first.token).toHaveLength(64);
+    expect(first.tokenHash).toHaveLength(64);
+    expect(first.token).not.toBe(first.tokenHash);
+    expect(first.token).not.toBe(second.token);
+    expect(first.tokenHash).not.toBe(second.tokenHash);
+  });
+
+  it("places the raw token in a URL fragment rather than the query string", () => {
+    const url = new URL(createShareUrl("finance-cv", "cv", "a".repeat(64), "https://hr-catalyst-five.vercel.app", "/"));
+    expect(url.pathname).toBe("/share/cv/finance-cv");
+    expect(url.search).toBe("");
+    expect(new URLSearchParams(url.hash.slice(1)).get("token")).toBe("a".repeat(64));
   });
 
   it("posts the token to the server-side resolver without caching", async () => {
