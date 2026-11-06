@@ -33,6 +33,7 @@ const RefereeVault = () => {
   const [hasVault, setHasVault] = useState(() => hasRefereeVault(userId));
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState("");
+  const [vaultPassword, setVaultPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [referees, setReferees] = useState<Referee[]>([]);
   const [message, setMessage] = useState("");
@@ -60,6 +61,7 @@ const RefereeVault = () => {
       setHasVault(true);
       setUnlocked(true);
       setReferees([]);
+      setVaultPassword(password);
       setPassword("");
       setConfirmPassword("");
       setMessage("Private referee vault created on this device.");
@@ -75,6 +77,7 @@ const RefereeVault = () => {
       const data = await unlockRefereeVault(password, userId);
       setReferees(data);
       setUnlocked(true);
+      setVaultPassword(password);
       setPassword("");
     } catch {
       setError("Unable to unlock the vault. Check your password.");
@@ -83,10 +86,14 @@ const RefereeVault = () => {
 
   const save = async () => {
     resetFeedback();
-    const savePassword = window.prompt("Enter your vault password to encrypt the updated referee list:");
-    if (!savePassword) return;
+    if (!vaultPassword) {
+      setError("Unlock the vault again before saving changes.");
+      return;
+    }
     try {
-      await saveRefereeVault(referees, savePassword, userId);
+      // Reuse the password that successfully unlocked this vault. Prompting for a
+      // fresh password here could silently replace the encryption key on a typo.
+      await saveRefereeVault(referees, vaultPassword, userId);
       setMessage("Referee information encrypted and saved locally.");
     } catch {
       setError("The referee information could not be saved.");
@@ -108,6 +115,7 @@ const RefereeVault = () => {
   const lock = () => {
     setUnlocked(false);
     setReferees([]);
+    setVaultPassword("");
     resetFeedback();
   };
 
@@ -118,6 +126,7 @@ const RefereeVault = () => {
     setUnlocked(false);
     setReferees([]);
     setPassword("");
+    setVaultPassword("");
     setConfirmPassword("");
     setMessage("The local referee vault has been deleted.");
   };
