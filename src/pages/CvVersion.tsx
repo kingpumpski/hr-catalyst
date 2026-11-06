@@ -128,6 +128,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
           <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
             <div><h1 className="text-3xl font-semibold text-foreground">{version.title}</h1><p className="text-sm text-muted-foreground">{version.targetRoles}</p></div>
             <div className="flex flex-wrap gap-2">
+              {user ? <><Button variant="outline" onClick={() => void saveToWorkspace(false)} disabled={workspaceBusy}>{workspaceBusy ? "Saving…" : "Save to workspace"}</Button><Button variant="secondary" onClick={() => void saveToWorkspace(true)} disabled={workspaceBusy}>{workspaceBusy ? "Publishing…" : "Publish snapshot"}</Button></> : <Button variant="outline" asChild><Link to={`/auth?next=${encodeURIComponent(`/cv/${version.slug}`)}`}>Sign in to save</Link></Button>}
               <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" />Download {documentLabels[tab]} as PDF</Button>
               <Button variant="outline" onClick={handleDocxDownload} disabled={isExporting}><FileDown className="mr-2 h-4 w-4" />{isExporting ? "Preparing…" : `Download ${documentLabels[tab]} as Word`}</Button>
             </div>
