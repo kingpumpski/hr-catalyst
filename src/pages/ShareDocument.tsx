@@ -61,11 +61,19 @@ const ShareDocumentContent = () => {
     const storageKey = `hr-catalyst:share-token:${window.location.pathname}`;
     const fragmentToken = new URLSearchParams(window.location.hash.slice(1)).get("token");
     if (fragmentToken) {
-      window.sessionStorage.setItem(storageKey, fragmentToken);
+      try {
+        window.sessionStorage.setItem(storageKey, fragmentToken);
+      } catch {
+        // The in-memory token still works if browser storage is unavailable.
+      }
       window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
       return fragmentToken;
     }
-    return window.sessionStorage.getItem(storageKey) ?? "";
+    try {
+      return window.sessionStorage.getItem(storageKey) ?? "";
+    } catch {
+      return "";
+    }
   });
   const [viewState, setViewState] = useState<ShareViewState>(() => ({
     share: null,
