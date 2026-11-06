@@ -171,3 +171,9 @@ The following items supersede the earlier "in progress" notes above:
 - Verify the canonical production hostname `hr-catalyst.vercel.app`; prior Vercel domain inventory showed `hr-catalyst-five.vercel.app`.
 - Confirm GitHub main-branch protection and required checks. The current GitHub connection has not yet confirmed the branch ruleset.
 - Do not mark the feature production-ready or merge PR #20 until these gates pass.
+
+### Follow-up hardening — recruiter share mutation concurrency
+
+Owner share-link mutations now request the updated row from PostgREST and verify that a row was actually changed. Revocation and settings changes fail closed with an explicit stale/already-revoked error if the active-link filter matches no row. This prevents the UI from reporting success when a link was revoked or otherwise changed between the owner's initial read and the final update. Unit coverage exercises successful revocation, already-revoked/missing links and concurrent revocation during settings updates.
+
+A fresh live schema inspection on 6 November 2026 reconfirmed that all eight public tables have RLS enabled, workspace ownership policies are based on auth.uid(), workspace_members.role is constrained to recruiter or viewer, and the only SECURITY DEFINER application helpers have an empty or explicitly constrained search_path. These are structural checks; they do not replace cross-account requests using real authenticated users or browser-level Storage tests.
