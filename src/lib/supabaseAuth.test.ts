@@ -76,6 +76,15 @@ describe("HR Catalyst Supabase authentication", () => {
   });
 
 
+  it("can defer refreshed-session persistence until the caller validates the auth generation", async () => {
+    const { refreshAuthSession, readPersistedSession } = await import("@/lib/supabaseAuth");
+    const refreshed = { ...session, access_token: "guarded-access", refresh_token: "guarded-refresh" };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response(refreshed)));
+    const result = await refreshAuthSession(session, false);
+    expect(result.refresh_token).toBe("guarded-refresh");
+    expect(readPersistedSession()).toBeNull();
+  });
+
   it("uploads generated documents to the private workspace folder using the owner session", async () => {
     const { uploadPrivateStorageObject } = await import("@/lib/supabaseAuth");
     const fetchMock = vi.fn().mockResolvedValue(response({ Key: "workspace-123/document-123/file.docx" }));
