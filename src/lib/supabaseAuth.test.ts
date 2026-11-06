@@ -1,12 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  getOrCreateWorkspace,
-  readPersistedSession,
-  refreshAuthSession,
-  signInWithPassword,
-  signUpWithPassword,
-  type AuthSession,
-} from "@/lib/supabaseAuth";
+import type { AuthSession } from "@/lib/supabaseAuth";
 
 const session: AuthSession = {
   access_token: "access-token",
@@ -26,6 +19,7 @@ describe("HR Catalyst Supabase authentication", () => {
   beforeEach(() => {
     vi.stubEnv("VITE_SUPABASE_URL", "https://project.supabase.co");
     vi.stubEnv("VITE_SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test_key");
+    vi.resetModules();
     vi.stubGlobal("window", {
       location: { origin: "https://hr-catalyst.example", pathname: "/auth", search: "" },
       history: { replaceState: vi.fn() },
@@ -44,6 +38,7 @@ describe("HR Catalyst Supabase authentication", () => {
   });
 
   it("sends the publishable key and password credentials to Supabase Auth", async () => {
+    const { signInWithPassword, readPersistedSession } = await import("@/lib/supabaseAuth");
     const fetchMock = vi.fn().mockResolvedValue(response(session));
     vi.stubGlobal("fetch", fetchMock);
     const result = await signInWithPassword(" Owner@Example.com ", "correct horse battery staple");
@@ -66,6 +61,7 @@ describe("HR Catalyst Supabase authentication", () => {
   });
 
   it("supports email-confirmation signup responses without inventing a session", async () => {
+    const { signUpWithPassword, readPersistedSession } = await import("@/lib/supabaseAuth");
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response({ user: { id: "pending-user", email: "new@example.com" } })));
     const result = await signUpWithPassword("new@example.com", "long-secure-password", "New Owner");
     expect(result.user?.id).toBe("pending-user");
@@ -74,6 +70,7 @@ describe("HR Catalyst Supabase authentication", () => {
   });
 
   it("rotates the refresh token when a session is refreshed", async () => {
+    const { refreshAuthSession, readPersistedSession } = await import("@/lib/supabaseAuth");
     const refreshed = { ...session, access_token: "new-access", refresh_token: "new-refresh" };
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response(refreshed)));
     const result = await refreshAuthSession(session);
@@ -83,6 +80,7 @@ describe("HR Catalyst Supabase authentication", () => {
   });
 
   it("creates a private workspace only after an authenticated lookup returns none", async () => {
+    const { getOrCreateWorkspace } = await import("@/lib/supabaseAuth");
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(response([]))
       .mockResolvedValueOnce(response([{ id: "workspace-123", name: "My HR Catalyst workspace" }]));
