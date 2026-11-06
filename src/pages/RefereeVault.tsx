@@ -1,5 +1,6 @@
 import "@/referee-vault-print.css";
 import { FormEvent, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Copy, LockKeyhole, Plus, Printer, Save, ShieldCheck, Trash2, UnlockKeyhole } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +28,9 @@ const emptyReferee = (): Referee => ({
 });
 
 const RefereeVault = () => {
-  const [hasVault, setHasVault] = useState(() => hasRefereeVault());
+  const { session } = useAuth();
+  const userId = session?.user.id;
+  const [hasVault, setHasVault] = useState(() => hasRefereeVault(userId));
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -53,7 +56,7 @@ const RefereeVault = () => {
     }
 
     try {
-      await saveRefereeVault([], password);
+      await saveRefereeVault([], password, userId);
       setHasVault(true);
       setUnlocked(true);
       setReferees([]);
@@ -69,7 +72,7 @@ const RefereeVault = () => {
     event.preventDefault();
     resetFeedback();
     try {
-      const data = await unlockRefereeVault(password);
+      const data = await unlockRefereeVault(password, userId);
       setReferees(data);
       setUnlocked(true);
       setPassword("");
@@ -83,7 +86,7 @@ const RefereeVault = () => {
     const savePassword = window.prompt("Enter your vault password to encrypt the updated referee list:");
     if (!savePassword) return;
     try {
-      await saveRefereeVault(referees, savePassword);
+      await saveRefereeVault(referees, savePassword, userId);
       setMessage("Referee information encrypted and saved locally.");
     } catch {
       setError("The referee information could not be saved.");
@@ -110,7 +113,7 @@ const RefereeVault = () => {
 
   const deleteVault = () => {
     if (!window.confirm("Delete the encrypted referee vault from this device? This cannot be undone.")) return;
-    clearRefereeVault();
+    clearRefereeVault(userId);
     setHasVault(false);
     setUnlocked(false);
     setReferees([]);
