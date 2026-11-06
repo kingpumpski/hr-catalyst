@@ -27,7 +27,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/cv" element={<CvLibrary />} />
-              <Route path="/cv/:slug" element={<CvVersionPage />} />
+              <Route path="/cv/:slug" element={<ProtectedRoute><CvVersionPage /></ProtectedRoute>} />
               <Route path="/share/:documentType/:slug" element={<ShareDocumentPage />} />
               <Route path="/owner" element={<ProtectedRoute><OwnerWorkspace /></ProtectedRoute>} />
               <Route path="/owner/referees" element={<ProtectedRoute><RefereeVault /></ProtectedRoute>} />
