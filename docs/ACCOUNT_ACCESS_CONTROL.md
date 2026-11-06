@@ -146,7 +146,7 @@ The following items supersede the earlier "in progress" notes above:
 
 - Owner registration, sign-in, password recovery, password update, sign-out, protected routes and a private workspace dashboard are implemented on PR #20.
 - Browser authentication and session lifecycle now use the exact-pinned official `@supabase/supabase-js@2.119.0` client. Supabase Auth owns URL callback detection, local session persistence, automatic refresh and cross-tab auth events; the previous hand-written Auth REST/session implementation has been removed.
-- The dedicated project's generated `Database` types are refreshed in `src/integrations/supabase/types.ts` and applied to the Supabase client. Workspace provisioning now uses typed SDK queries and retries safely when a second browser tab wins the unique-owner insert race. Document/share CRUD still uses explicit token-bound PostgREST requests pending its typed-query migration.
+- The dedicated project's generated `Database` types are refreshed in `src/integrations/supabase/types.ts` and applied to the Supabase client. Workspace provisioning now uses typed SDK queries and retries safely when a second browser tab wins the unique-owner insert race. Document and share CRUD now uses typed Supabase SDK queries and the typed publish RPC, with every client created using the exact owner access token supplied by the workflow.
 - Private Storage upload and removal now use the official Supabase SDK Storage client, scoped to the exact owner access token passed by the workflow. Unit tests cover upload, token binding, invalid path rejection and artifact removal.
 - CV/resume/cover-letter drafts are persisted in the owner's workspace. Owner workspace links reopen the matching editor and hydrate the saved content for that document.
 - Publishing now creates an immutable snapshot, updates the document status and records an audit event in one SECURITY INVOKER transaction.
@@ -157,14 +157,14 @@ The following items supersede the earlier "in progress" notes above:
 - Storage owner policies were corrected in migration `20261106114151_fix_private_storage_owner_policies.sql` to evaluate the first folder of `storage.objects.name` (workspace UUID). The previous policies incorrectly referenced `workspaces.name`.
 - Migration `20261106114318_publish_workspace_document_with_private_artifact.sql` replaces the earlier publish RPC signature with a four-argument SECURITY INVOKER RPC that persists the private artifact path. Only authenticated users can execute it; anonymous EXECUTE is denied.
 - Migration `20261106115025_audit_share_link_mutations.sql` adds an AFTER INSERT/UPDATE SECURITY INVOKER trigger that records share creation, settings changes and revocation in `audit_logs` in the same transaction; no invited email address or raw token is copied into audit metadata.
-- Migration `20261106115900_revoke_excess_authenticated_table_privileges.sql` removes `TRUNCATE`, `REFERENCES` and `TRIGGER` privileges from authenticated browser roles, removes direct update/delete rights from immutable audit/version tables, and denies all browser-role access to the resolver rate-limit table. Default privileges now keep future public-schema tables/sequences closed until a migration grants access explicitly.
+- Migration `20261106141032_revoke_excess_authenticated_table_privileges.sql` removes `TRUNCATE`, `REFERENCES` and `TRIGGER` privileges from authenticated browser roles, removes direct update/delete rights from immutable audit/version tables, and denies all browser-role access to the resolver rate-limit table. Default privileges now keep future public-schema tables/sequences closed until a migration grants access explicitly.
 - Live database verification confirmed RLS is enabled on all eight public tables; owner policies scope workspace/document/share access by `auth.uid()`, private Storage policies bind the first object-path folder to the owning workspace, and no anon/authenticated grants remain for `TRUNCATE`, `REFERENCES`, `TRIGGER`, audit/version UPDATE/DELETE or the rate-limit table. Supabase security and health advisors both returned zero lints.
 
 ### Remaining release gates
 
 - Pass both Quality and CV Editor CI workflows on the final PR head after the latest typed SDK and privilege-hardening changes, including lint, typecheck, unit tests and production build.
 - Complete browser/end-to-end testing for the SDK-managed callback, session refresh and cross-tab events; the current unit tests do not substitute for real browser verification.
-- Replace the remaining explicit document/share PostgREST wrappers with typed `supabase.from(...)` / `supabase.rpc(...)` calls before declaring the browser data layer fully standardized.
+- Re-run both Quality and CV Editor workflows on the final PR head after the typed SDK migration; verify all updated SDK query tests pass.
 - Add browser/end-to-end tests for signup, email verification, recovery, sign-in/out, refresh and cross-tab synchronization; owner document save/publish; share create/edit/revoke; invited-email restriction; recruiter viewing and DOCX download; A4/Letter print.
 - Add automated cross-account RLS tests and authenticated/anonymous Storage authorization tests.
 - Verify Supabase Auth Site URL, redirect allow-list and production email delivery for GitHub Pages and Vercel.
@@ -177,3 +177,16 @@ The following items supersede the earlier "in progress" notes above:
 Owner share-link mutations now request the updated row from PostgREST and verify that a row was actually changed. Revocation and settings changes fail closed with an explicit stale/already-revoked error if the active-link filter matches no row. This prevents the UI from reporting success when a link was revoked or otherwise changed between the owner's initial read and the final update. Unit coverage exercises successful revocation, already-revoked/missing links and concurrent revocation during settings updates.
 
 A fresh live schema inspection on 6 November 2026 reconfirmed that all eight public tables have RLS enabled, workspace ownership policies are based on auth.uid(), workspace_members.role is constrained to recruiter or viewer, and the only SECURITY DEFINER application helpers have an empty or explicitly constrained search_path. These are structural checks; they do not replace cross-account requests using real authenticated users or browser-level Storage tests.
+
+### Typed SDK data-layer completion — 6 November 2026
+
+The remaining owner document and recruiter-share data operations have been migrated from hand-built PostgREST URLs to generated-type-aware Supabase SDK queries:
+
+- Workspace document list and content hydration use scoped documents select queries.
+- Document save uses a typed upsert on the workspace/slug conflict key and returns the saved projection.
+- Publish uses the generated publish_workspace_document RPC signature.
+- Share list/create/revoke/update and published-version lookups use typed share_links and document_versions operations.
+- All these operations use getSupabaseClientForSession(session), which disables implicit session persistence/refresh and binds the exact owner access token in the client Authorization header.
+- Unit tests were migrated to exercise the typed RPC/query interfaces, including hash-only token persistence, owner/workspace scoping, invalid invited-email and expiry rejection, download-artifact checks, stale revocation and fail-closed mutation behavior.
+
+This completes the application-side migration of owner document/share CRUD to the typed Supabase SDK. It does not replace the outstanding live cross-account RLS, browser, auth-configuration and production deployment release gates.
