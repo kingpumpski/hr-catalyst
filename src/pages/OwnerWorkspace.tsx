@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/components/AuthProvider";
 import { listWorkspaceDocuments, type WorkspaceDocument } from "@/lib/workspaceDocuments";
+import OwnerShareManager from "@/components/OwnerShareManager";
 
 const OwnerWorkspace = () => {
   const { session, user, workspace, signOut } = useAuth();
@@ -78,7 +79,7 @@ const OwnerWorkspace = () => {
           {error && <p role="alert" className="mt-5 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-sm">{error}</p>}
           {loading && <div className="flex items-center gap-2 py-10 text-sm text-muted-foreground"><LoaderCircle className="h-4 w-4 animate-spin" />Loading private documents…</div>}
           {!loading && !error && documents.length === 0 && <div className="mt-6 rounded-xl border border-dashed border-border p-8 text-center"><FileText className="mx-auto h-8 w-8 text-muted-foreground" /><h3 className="mt-3 font-semibold">No private documents yet</h3><p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">Open a CV version and use Save to workspace to create your first private draft. You can publish a snapshot when it is ready to share.</p></div>}
-          {!loading && documents.length > 0 && <div className="mt-6 divide-y divide-border">{documents.map((document) => <div key={document.id} className="flex flex-wrap items-center justify-between gap-3 py-4"><div><p className="font-medium">{document.title}</p><p className="mt-1 text-xs text-muted-foreground">{document.document_type.replace("_", " ")} · Updated {new Date(document.updated_at).toLocaleDateString()}</p></div><div className="flex items-center gap-3"><Badge variant={document.status === "published" ? "default" : "secondary"}>{document.status}</Badge><Button size="sm" variant="outline" asChild><Link to={`/cv/${encodeURIComponent(document.slug)}`}>Open editor</Link></Button></div></div>)}</div>}
+          {!loading && documents.length > 0 && <div className="mt-6 divide-y divide-border">{documents.map((document) => <div key={document.id} className="py-4"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="font-medium">{document.title}</p><p className="mt-1 text-xs text-muted-foreground">{document.document_type.replace("_", " ")} · Updated {new Date(document.updated_at).toLocaleDateString()}</p></div><div className="flex items-center gap-3"><Badge variant={document.status === "published" ? "default" : "secondary"}>{document.status}</Badge><Button size="sm" variant="outline" asChild><Link to={`/cv/${encodeURIComponent(document.slug)}`}>Open editor</Link></Button></div></div><OwnerShareManager key={document.id} document={document} /></div>)}</div>}
           <div className="mt-5 flex justify-end"><Button variant="ghost" onClick={() => void refresh()} disabled={loading}>Refresh documents</Button></div>
         </section>
 
