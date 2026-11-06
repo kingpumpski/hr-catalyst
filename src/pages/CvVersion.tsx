@@ -48,7 +48,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useEffect(() => {
     saveCvEditorData(version.slug, editorData, version);
-  }, [version.slug, editorData]);
+  }, [version, version.slug, editorData]);
 
   useSeo({
     title: getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv"),
