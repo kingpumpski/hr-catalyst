@@ -4,9 +4,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, FileText, Search, X } from "lucide-react";
+import { ArrowLeft, FileText, Search, X, LockKeyhole } from "lucide-react";
 import { cvCatalog } from "@/data/cvCatalog";
-import { getShareLink } from "@/lib/shareLinks";
 import { useSeo } from "@/lib/seo";
 
 const CvLibrary = () => {
@@ -101,14 +100,8 @@ const CvLibrary = () => {
                   <Button asChild className="flex-1">
                     <Link to={`/cv/${v.slug}`}>Open full version</Link>
                   </Button>
-                  <Button variant="outline" asChild>
-                    <Link to={getShareLink(v.slug, "cv")}>Share CV</Link>
-                  </Button>
-                  <Button variant="outline" asChild>
-                    <Link to={getShareLink(v.slug, "resume")}>Share Resume</Link>
-                  </Button>
-                  <Button variant="outline" asChild>
-                    <Link to={getShareLink(v.slug, "letter")}>Share Letter</Link>
+                  <Button variant="outline" disabled title="Secure share links will be enabled from the authenticated owner workspace">
+                    <LockKeyhole className="mr-2 h-4 w-4" />Secure sharing in rollout
                   </Button>
                 </div>
               </Card>

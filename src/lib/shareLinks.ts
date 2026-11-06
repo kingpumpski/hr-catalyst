@@ -33,9 +33,6 @@ export const parseShareRoute = (pathname: string): ShareRouteMatch | undefined =
   return { documentType, slug };
 };
 
-export const getShareLink = (slug: string, documentType: ShareDocumentType) =>
-  `/share/${documentType}/${slug}`;
-
 export const getSharePageTitle = (documentType: ShareDocumentType) => {
   switch (documentType) {
     case "resume":
