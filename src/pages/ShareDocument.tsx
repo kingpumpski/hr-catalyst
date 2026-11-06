@@ -29,13 +29,14 @@ const isCoverLetterSnapshot = (value: unknown): value is { opening: string; body
 const ShareDocumentPage = () => {
   const { documentType } = useParams<{ documentType?: string }>();
   const [token] = useState(() => {
+    const storageKey = `hr-catalyst:share-token:${window.location.pathname}`;
     const fragmentToken = new URLSearchParams(window.location.hash.slice(1)).get("token");
     if (fragmentToken) {
-      window.sessionStorage.setItem("hr-catalyst:active-share-token", fragmentToken);
+      window.sessionStorage.setItem(storageKey, fragmentToken);
       window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
       return fragmentToken;
     }
-    return window.sessionStorage.getItem("hr-catalyst:active-share-token") ?? "";
+    return window.sessionStorage.getItem(storageKey) ?? "";
   });
   const [share, setShare] = useState<ResolvedShare | null>(null);
   const [error, setError] = useState("");
