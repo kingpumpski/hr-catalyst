@@ -65,3 +65,55 @@ Every table in an exposed schema must have RLS enabled and explicit least-privil
 ## Infrastructure boundary
 
 The connected Supabase account currently exposes a project named `harmony-health-hub` under the `Bredas Health` organization. That project is associated with a different product and must not be reused for HR Catalyst without an explicit decision. HR Catalyst should have its own isolated project, keys, database and storage bucket. Project creation may incur charges and requires the owner to select the organization and approve any quoted non-zero cost.
+
+
+## Dedicated Supabase project provisioned
+
+The isolated HR Catalyst project has been provisioned in the approved Supabase organization `pumpski6-9376's projects`:
+
+- Project: `hr-catalyst`
+- Project ref: `qmxpswxwdrjotidclmcz`
+- Region: `eu-west-1` (Ireland)
+- API origin: `https://qmxpswxwdrjotidclmcz.supabase.co`
+- Storage bucket: `hr-catalyst-private` (private; PDF and DOCX only; 10 MiB per object)
+- Edge Function: `resolve-share` (deployed, version 2; JWT verification is disabled at the gateway because the function validates the share token itself and requires a verified Supabase user for email-restricted shares).
+
+The project was created at the quoted $0/month project cost. It is isolated from the Harmony Health Hub Supabase project and its Vercel integration.
+
+### Applied database migrations
+
+The following migrations are applied to the new project and stored under the matching remote migration versions in this repository:
+
+1. `20261106103439_hr_catalyst_workspace_security.sql`
+   - Profiles, owner workspaces, recruiter/viewer invitations, structured documents, immutable document versions, hashed share links and audit logs.
+   - RLS enabled on all seven public tables.
+   - Owner-only data policies; no anonymous table read policies.
+   - Private Storage bucket and owner-scoped object policies.
+   - Auth user profile creation trigger.
+2. `20261106103540_enforce_document_workspace_integrity.sql`
+   - Composite foreign key prevents a document version from being attached to a different workspace's document.
+
+### Share resolver contract
+
+`POST /functions/v1/resolve-share` accepts a raw high-entropy share token and hashes it with SHA-256 before lookup. It rejects missing, revoked and expired links, returns only the published immutable document snapshot, enforces verified account identity for email-restricted links, and issues a 60-second signed Storage URL only when downloading is enabled and a file has been published. Responses use `Cache-Control: no-store`. The raw share token is never stored.
+
+### Runtime configuration
+
+Vercel project `hr-catalyst` has these public build-time variables configured for Production, Preview and Development:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+Only the publishable key is exposed to the browser. The Supabase service-role key remains server-side and is not configured as a Vite variable.
+
+### Remaining release work
+
+- Install and lock `@supabase/supabase-js` through a normal npm lockfile update before importing it in application code.
+- Implement sign-up, sign-in, password recovery, session handling and owner workspace UI.
+- Add owner-side document publishing, share creation (cryptographically random token generation and hash-only persistence), revocation and audit events.
+- Wire the recruiter share route to the deployed resolver.
+- Add integration tests for RLS isolation, email-restricted shares, expiry/revocation, download disabled/enabled, and signed URL expiry.
+- Configure Auth site URL and redirect allow-list for the production Vercel and GitHub Pages origins, and configure production email delivery.
+- Verify the live UX with browser tests before marking the owner/recruiter release gate complete.
+
+Do not use the dormant `supabase-cinnabar-clock` project until its ownership and data purpose are established. Do not modify the Harmony Health Hub project.
