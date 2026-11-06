@@ -11,11 +11,33 @@ import { resolveShare, ShareResolutionError, type ResolvedShare } from "@/lib/sh
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
 
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === "string");
+
 const isCvEditorData = (value: unknown): value is CvEditorData => {
   if (!isRecord(value) || !isRecord(value.profile)) return false;
-  return ["name", "address", "phone", "email", "linkedin"].every((key) => typeof value.profile[key] === "string") &&
+  const profileIsValid = ["name", "address", "phone", "email", "linkedin"]
+    .every((key) => typeof value.profile[key] === "string");
+  const experienceIsValid = Array.isArray(value.experience) && value.experience.every((item) =>
+    isRecord(item) &&
+    ["id", "company", "title", "location", "period"].every((key) => typeof item[key] === "string") &&
+    isStringArray(item.contributions),
+  );
+  const educationIsValid = Array.isArray(value.education) && value.education.every((item) =>
+    isRecord(item) &&
+    ["id", "school", "qualification", "field", "period", "location", "description"]
+      .every((key) => typeof item[key] === "string"),
+  );
+  return profileIsValid &&
     typeof value.summary === "string" &&
-    ["skills", "highlights", "experience", "education", "leadership", "professionalDevelopment", "professionalStrengths", "languages"].every((key) => Array.isArray(value[key])) &&
+    isStringArray(value.skills) &&
+    isStringArray(value.highlights) &&
+    experienceIsValid &&
+    educationIsValid &&
+    isStringArray(value.leadership) &&
+    isStringArray(value.professionalDevelopment) &&
+    isStringArray(value.professionalStrengths) &&
+    isStringArray(value.languages) &&
     typeof value.references === "string";
 };
 
