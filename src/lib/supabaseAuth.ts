@@ -29,7 +29,7 @@ const getApiKey = () => {
   return API_KEY;
 };
 
-const request = async <T>(
+export const requestSupabase = async <T>(
   path: string,
   options: { method?: string; body?: unknown; accessToken?: string; prefer?: string } = {},
 ): Promise<T> => {
@@ -89,7 +89,7 @@ export const readPersistedSession = (): AuthSession | null => {
 };
 
 export const signUpWithPassword = async (email: string, password: string, fullName: string) => {
-  const result = await request<AuthResponse>("/auth/v1/signup", {
+  const result = await requestSupabase<AuthResponse>("/auth/v1/signup", {
     method: "POST",
     body: { email: email.trim().toLowerCase(), password, data: { full_name: fullName.trim() } },
   });
