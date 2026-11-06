@@ -59,12 +59,16 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [selectedRefereeIds, setSelectedRefereeIds] = useState<Record<"cv" | "resume", string[]>>({ cv: [], resume: [] });
   const [includeReferees, setIncludeReferees] = useState<Record<"cv" | "resume", boolean>>({ cv: false, resume: false });
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
+  const storageOwnerRef = useRef(userId);
   useEffect(() => {
+    if (storageOwnerRef.current !== userId) return;
     if (!saveCvEditorData(version.slug, editorData, version, userId)) {
       toast({ title: "Changes were not saved", description: "Browser storage is unavailable. Download a copy before leaving this page.", variant: "destructive" });
     }
   }, [version, version.slug, editorData, userId]);
   useEffect(() => {
+    if (storageOwnerRef.current === userId) return;
+    storageOwnerRef.current = userId;
     setEditorData(loadCvEditorData(version.slug, version, userId));
   }, [userId, version.slug]);
   useEffect(() => {
