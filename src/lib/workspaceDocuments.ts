@@ -29,7 +29,7 @@ export const getWorkspaceDocumentContent = async (
 
 export const getWorkspaceDocumentEditorPath = (document: Pick<WorkspaceDocument, "slug" | "document_type">) => {
   const tab = document.document_type === "cover_letter" ? "letter" : document.document_type;
-  const suffix = document.document_type === "cover_letter" ? "letter" : document.document_type;
+  const suffix = tab;
   const editorSlug = document.slug.replace(new RegExp(`-${suffix}import { requestSupabase, type AuthSession, type Workspace } from "@/lib/supabaseAuth";
 
 export type WorkspaceDocument = {
