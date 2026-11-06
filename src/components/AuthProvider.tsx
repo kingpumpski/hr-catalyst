@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       active = false;
       window.removeEventListener("storage", onStorage);
     };
-  }, []);
+  }, [activateSession]);
 
   useEffect(() => {
     if (!session) return;
