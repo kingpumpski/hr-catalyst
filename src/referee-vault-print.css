@@ -1,0 +1,20 @@
+.referee-vault-print { display: none; }
+
+@media print {
+  body * { visibility: hidden !important; }
+  .referee-vault-print,
+  .referee-vault-print * { visibility: visible !important; }
+  .referee-vault-print {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    padding: 18mm;
+    color: #000;
+    background: #fff;
+    font: 11pt/1.35 Arial, sans-serif;
+  }
+  .referee-vault-print h1 { margin: 0 0 14pt; font-size: 18pt; }
+  .referee-vault-print article { margin: 0 0 12pt; break-inside: avoid; }
+  .referee-vault-print h2 { margin: 0 0 3pt; font-size: 12pt; }
+  .referee-vault-print p { margin: 2pt 0; }
+}
