@@ -161,3 +161,20 @@ describe("recruiter share revocation", () => {
       .rejects.toThrow("This recruiter link is already revoked or is not available in your workspace.");
   });
 });
+
+
+describe("stale recruiter share settings", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("does not report a successful settings update when the link was revoked concurrently", async () => {
+    vi.mocked(requestSupabase)
+      .mockResolvedValueOnce([{ document_version_id: "version-123" }])
+      .mockResolvedValueOnce([{ storage_path: "workspace-123/document-123/version-123.docx" }])
+      .mockResolvedValueOnce([]);
+    await expect(updateOwnerShareLink(session, workspace, "share-456", {
+      invitedEmail: "hiring@example.com",
+      allowDownload: true,
+      expiresInDays: 30,
+    })).rejects.toThrow("This recruiter link was revoked or changed before the update could be saved.");
+  });
+});
