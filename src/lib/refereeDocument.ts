@@ -5,7 +5,6 @@ export const formatRefereesForDocument = (referees: Referee[]): string =>
   referees.map((referee) => [
     referee.name.trim(),
     [referee.role.trim(), referee.organization.trim()].filter(Boolean).join(" — "),
-    referee.relationship.trim() ? `Relationship: ${referee.relationship.trim()}` : "",
     referee.email.trim(),
     referee.phone.trim(),
   ].filter(Boolean).join("\n")).filter(Boolean).join("\n\n");
