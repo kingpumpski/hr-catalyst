@@ -187,10 +187,13 @@ export const getOrCreateWorkspace = async (session: AuthSession): Promise<Worksp
   return created[0];
 };
 
-const encodeStoragePath = (path: string) => path.split("/").map(encodeURIComponent).join("/");
+const getSessionStorageClient = (session: AuthSession) => createClient(getApiUrl(), getApiKey(), {
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  global: { headers: { Authorization: `Bearer ${session.access_token}` } },
+});
 
 export const uploadPrivateStorageObject = async (
-  _session: AuthSession,
+  session: AuthSession,
   bucket: string,
   path: string,
   file: Blob,
@@ -199,7 +202,7 @@ export const uploadPrivateStorageObject = async (
   if (!path || path.startsWith("/") || path.split("/").some((part) => !part || part === "." || part === "..")) {
     throw new Error("The private file path is invalid.");
   }
-  const { error } = await getSupabaseClient().storage.from(bucket).upload(path, file, {
+  const { error } = await getSessionStorageClient(session).storage.from(bucket).upload(path, file, {
     contentType,
     upsert: true,
     cacheControl: "3600",
@@ -208,13 +211,13 @@ export const uploadPrivateStorageObject = async (
 };
 
 export const removePrivateStorageObject = async (
-  _session: AuthSession,
+  session: AuthSession,
   bucket: string,
   path: string,
 ) => {
   if (!path || path.startsWith("/") || path.split("/").some((part) => !part || part === "." || part === "..")) {
     throw new Error("The private file path is invalid.");
   }
-  const { error } = await getSupabaseClient().storage.from(bucket).remove([path]);
+  const { error } = await getSessionStorageClient(session).storage.from(bucket).remove([path]);
   if (error) throw new Error(error.message || "Private file cleanup failed.");
 };
