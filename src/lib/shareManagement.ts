@@ -18,7 +18,7 @@ export const listOwnerShareLinks = (
   workspace: Workspace,
   documentId: string,
 ) => requestSupabase<OwnerShareLink[]>(
-  `/rest/v1/share_links?select=id,document_id,document_version_id,token_hash,invited_email,allow_download,expires_at,revoked_at,created_at&workspace_id=eq.${encodeURIComponent(workspace.id)}&document_id=eq.${encodeURIComponent(documentId)}&order=created_at.desc`,
+  `/rest/v1/share_links?select=id,document_id,document_version_id,invited_email,allow_download,expires_at,revoked_at,created_at&workspace_id=eq.${encodeURIComponent(workspace.id)}&document_id=eq.${encodeURIComponent(documentId)}&order=created_at.desc`,
   { accessToken: session.access_token },
 );
 
