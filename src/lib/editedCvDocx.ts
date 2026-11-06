@@ -129,7 +129,7 @@ export const createEditedCvDocxBlob = async (data: CvEditorData): Promise<Blob> 
 };
 
 export const downloadEditedCvDocx = async (data: CvEditorData, kind: "cv" | "resume") => {
-  const blob = await createEditedCvDocxBlob(data, kind);
+  const blob = await createEditedCvDocxBlob(data);
   const safeName = data.profile.name.trim().replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "Candidate";
   const month = new Date().toISOString().slice(0, 7);
   downloadBlob(blob, safeName + "_" + kind.toUpperCase() + "_" + month + ".docx");
