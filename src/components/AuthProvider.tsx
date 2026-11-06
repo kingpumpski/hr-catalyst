@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   consumeAuthRedirect,
   getAuthenticatedUser,
@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
   const [recoveryFlow, setRecoveryFlow] = useState(false);
+  const refreshInFlight = useRef(false);
 
   const activateSession = useCallback(async (next: AuthSession) => {
     setSession(next);
@@ -75,10 +76,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
     void bootstrap();
     const onStorage = (event: StorageEvent) => {
-      if (event.key === "hr-catalyst:supabase-auth-session" && !event.newValue) {
+      if (event.key !== "hr-catalyst:supabase-auth-session") return;
+      if (!event.newValue) {
         setSession(null);
         setWorkspace(null);
+        return;
       }
+      const next = readPersistedSession();
+      if (!next) {
+        setSession(null);
+        setWorkspace(null);
+        return;
+      }
+      void activateSession(next).catch(() => {
+        if (active) {
+          setSession(null);
+          setWorkspace(null);
+        }
+      });
     };
     window.addEventListener("storage", onStorage);
     return () => {
@@ -89,16 +104,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!session) return;
-    const timer = window.setInterval(() => {
-      if (session.expires_at <= Math.floor(Date.now() / 1000) + 120) {
-        void refreshAuthSession(session)
-          .then(setSession)
-          .catch(() => {
-            setSession(null);
-            setWorkspace(null);
-          });
+    const refreshIfNeeded = async () => {
+      if (refreshInFlight.current || session.expires_at > Math.floor(Date.now() / 1000) + 120) return;
+      refreshInFlight.current = true;
+      try {
+        const refreshed = await refreshAuthSession(session);
+        setSession(refreshed);
+        const currentUser = await getAuthenticatedUser(refreshed);
+        setSession({ ...refreshed, user: currentUser });
+      } catch {
+        setSession(null);
+        setWorkspace(null);
+      } finally {
+        refreshInFlight.current = false;
       }
-    }, 30_000);
+    };
+    const timer = window.setInterval(() => { void refreshIfNeeded(); }, 30_000);
+    void refreshIfNeeded();
     return () => window.clearInterval(timer);
   }, [session]);
 
@@ -114,10 +136,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [activateSession]);
 
   const signOut = useCallback(async () => {
-    await signOutFromSupabase(session);
-    setSession(null);
-    setWorkspace(null);
-    setRecoveryFlow(false);
+    try {
+      await signOutFromSupabase(session);
+    } finally {
+      setSession(null);
+      setWorkspace(null);
+      setRecoveryFlow(false);
+    }
   }, [session]);
 
   const reset = useCallback((email: string) => requestPasswordReset(email), []);
