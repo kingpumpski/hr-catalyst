@@ -59,3 +59,13 @@ describe("atomic workspace document publishing", () => {
       .rejects.toThrow("The document version could not be published.");
   });
 });
+
+import { getWorkspaceDocumentEditorPath } from "@/lib/workspaceDocuments";
+
+describe("workspace document editor routes", () => {
+  it("opens the correct catalogue editor tab for each saved document type", () => {
+    expect(getWorkspaceDocumentEditorPath({ slug: "finance-cv", document_type: "cv" })).toBe("/cv/finance?tab=cv");
+    expect(getWorkspaceDocumentEditorPath({ slug: "finance-resume", document_type: "resume" })).toBe("/cv/finance?tab=resume");
+    expect(getWorkspaceDocumentEditorPath({ slug: "finance-letter", document_type: "cover_letter" })).toBe("/cv/finance?tab=letter");
+  });
+});
