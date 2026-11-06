@@ -75,7 +75,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 };
 
 /** Word export mirrors the live editor preview: same sections, order, labels and single-column reading flow. */
-export const createEditedCvDocxBlob = async (data: CvEditorData): Promise<Blob> => {
+export const downloadEditedCvDocx = async (data: CvEditorData, kind: "cv" | "resume") => {
   const settings = loadDocumentSettings();
   const format = getCvFormatProfile(settings.targetMarket);
   const pageSize = PAGE_SIZES[format.paperSize] ?? PAGE_SIZES.A4;
@@ -92,6 +92,10 @@ export const createEditedCvDocxBlob = async (data: CvEditorData): Promise<Blob> 
       children: [new TextRun({ text: data.profile.name.trim(), font: FONT, bold: true, size: 46 })],
     }),
     new Paragraph({
+      alignment: AlignmentType.CENTER, spacing: { after: 50 },
+      children: [new TextRun({ text: kind === "cv" ? "CURRICULUM VITAE" : "RESUME", font: FONT, bold: true, size: 18 })],
+    }),
+    new Paragraph({
       alignment: AlignmentType.CENTER, spacing: { after: 160 },
       border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: "777777", space: 4 } },
       children: [new TextRun({ text: contact.join(" | "), font: FONT, size: 18 })],
@@ -103,20 +107,29 @@ export const createEditedCvDocxBlob = async (data: CvEditorData): Promise<Blob> 
     if (visible.length) children.push(sectionHeading(title), ...visible.map(bullet));
   };
   if (data.summary.trim()) children.push(sectionHeading("SUMMARY"), body(data.summary.trim(), { after: 65 }));
-  appendListSection("SKILLS", data.skills);
+  const isResume = kind === "resume";
+  appendListSection("SKILLS", isResume ? data.skills.slice(0, 12) : data.skills);
   if (data.experience.length) {
     children.push(sectionHeading("EXPERIENCE"));
-    for (const item of data.experience) appendEntry(children, item.title, item.company, item.location, item.period, item.contributions);
+    for (const item of data.experience) appendEntry(
+      children, item.title, item.company, item.location, item.period,
+      isResume ? item.contributions.slice(0, 3) : item.contributions,
+    );
   }
   if (data.education.length) {
     children.push(sectionHeading("EDUCATION"));
-    for (const item of data.education) appendEntry(children, item.school, [item.qualification, item.field].filter(Boolean).join(" — "), item.location, item.period, item.description ? [item.description] : []);
+    for (const item of data.education) appendEntry(
+      children, item.school, [item.qualification, item.field].filter(Boolean).join(" — "),
+      item.location, item.period, !isResume && item.description ? [item.description] : [],
+    );
   }
-  appendListSection("SELECTED ACHIEVEMENTS", data.highlights);
-  appendListSection("LEADERSHIP & VOLUNTEERING", data.leadership);
-  appendListSection("PROFESSIONAL STRENGTHS", data.professionalStrengths);
-  appendListSection("PROFESSIONAL DEVELOPMENT", data.professionalDevelopment);
-  appendListSection("LANGUAGES", data.languages);
+  appendListSection(isResume ? "KEY ACHIEVEMENTS" : "SELECTED ACHIEVEMENTS", isResume ? data.highlights.slice(0, 3) : data.highlights);
+  if (!isResume) {
+    appendListSection("LEADERSHIP & VOLUNTEERING", data.leadership);
+    appendListSection("PROFESSIONAL STRENGTHS", data.professionalStrengths);
+    appendListSection("PROFESSIONAL DEVELOPMENT", data.professionalDevelopment);
+    appendListSection("LANGUAGES", data.languages);
+  }
   if (settings.showReferences && data.references.trim()) {
     children.push(sectionHeading("REFERENCES"), body(data.references.trim()));
   }
@@ -125,11 +138,7 @@ export const createEditedCvDocxBlob = async (data: CvEditorData): Promise<Blob> 
     styles, numbering,
     sections: [{ properties: { page: { size: pageSize, margin: PAGE_MARGIN } }, children }],
   });
-  return Packer.toBlob(doc);
-};
-
-export const downloadEditedCvDocx = async (data: CvEditorData, kind: "cv" | "resume") => {
-  const blob = await createEditedCvDocxBlob(data);
+  const blob = await Packer.toBlob(doc);
   const safeName = data.profile.name.trim().replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "") || "Candidate";
   const month = new Date().toISOString().slice(0, 7);
   downloadBlob(blob, safeName + "_" + kind.toUpperCase() + "_" + month + ".docx");
