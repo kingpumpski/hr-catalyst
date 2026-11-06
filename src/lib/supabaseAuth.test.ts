@@ -55,7 +55,7 @@ describe("HR Catalyst Supabase authentication", () => {
       email: "owner@example.com",
       password: "correct horse battery staple",
     });
-    expect(readPersistedSession()?.refresh_token).toBe("refresh-token");
+    expect((await readPersistedSession())?.refresh_token).toBe("refresh-token");
   });
 
   it("supports email-confirmation signup responses without inventing a session", async () => {
@@ -64,7 +64,7 @@ describe("HR Catalyst Supabase authentication", () => {
     const result = await signUpWithPassword("new@example.com", "long-secure-password", "New Owner");
     expect(result.user?.id).toBe("pending-user");
     expect(result.session).toBeNull();
-    expect(readPersistedSession()).toBeNull();
+    expect(await readPersistedSession()).toBeNull();
   });
 
   it("rotates the refresh token when a session is refreshed", async () => {
@@ -74,7 +74,7 @@ describe("HR Catalyst Supabase authentication", () => {
     const result = await refreshAuthSession(session);
     expect(result.access_token).toBe("new-access");
     expect(result.refresh_token).toBe("new-refresh");
-    expect(readPersistedSession()?.refresh_token).toBe("new-refresh");
+    expect((await readPersistedSession())?.refresh_token).toBe("new-refresh");
   });
 
 
