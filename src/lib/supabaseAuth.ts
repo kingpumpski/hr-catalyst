@@ -21,7 +21,7 @@ export type Workspace = { id: string; name: string };
 type AuthResponse = Partial<AuthSession> & { user?: AuthUser; msg?: string; message?: string; error_description?: string };
 
 const SESSION_KEY = "hr-catalyst:supabase-auth-session";
-const API_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\\/+$/, "");
+const API_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.replace(/\/+$/, "");
 const API_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
 let supabaseClient: ReturnType<typeof createClient> | null = null;
 
