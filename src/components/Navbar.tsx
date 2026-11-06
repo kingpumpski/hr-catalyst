@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
-import { Menu, Settings2, X } from "lucide-react";
+import { LockKeyhole, LogOut, Menu, Settings2, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/useAuth";
+import { toast } from "@/hooks/use-toast";
 
 const sections = [
   { id: "experience", label: "Experience" },
@@ -19,8 +21,21 @@ const Navbar = () => {
   const [activeSection, setActiveSection] = useState<string>("");
   const location = useLocation();
   const navigate = useNavigate();
-  const isOwnerMode = new URLSearchParams(location.search).get("mode") === "owner";
+  const { isOwner, signOut } = useAuth();
   const visibleActiveSection = location.pathname === "/" ? activeSection : "";
+
+  const handleSignOut = async () => {
+    try {
+      const error = await signOut();
+      if (error) toast({ title: "Sign out failed", description: error.message, variant: "destructive" });
+    } catch (error) {
+      toast({
+        title: "Sign out failed",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     let frame = 0;
@@ -142,21 +157,27 @@ const Navbar = () => {
             </button>
           ))}
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${linkClass}`}>Recruiter docs</Link>
-          {isOwnerMode && (
+          {isOwner && (
             <Link
-              to="/settings?mode=owner"
+              to="/settings"
               className={`inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm transition-smooth hover:bg-foreground/10 ${linkClass}`}
             >
               <Settings2 className="h-4 w-4" aria-hidden="true" />
               Settings
             </Link>
           )}
+          {isOwner ? (
+            <>
+              <Link to="/owner/referees" className={`inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm transition-smooth hover:bg-foreground/10 ${linkClass}`}><LockKeyhole className="h-4 w-4" aria-hidden="true" />Referees</Link>
+              <Button variant="ghost" size="sm" onClick={handleSignOut} className={linkClass}><LogOut className="mr-2 h-4 w-4" />Sign out</Button>
+            </>
+          ) : <Link to="/account" className={`px-3 py-2 text-sm rounded-md transition-smooth hover:bg-foreground/10 ${linkClass}`}>Owner sign-in</Link>}
         </div>
 
         <div className="hidden lg:flex xl:hidden items-center gap-2">
-          {isOwnerMode && (
+          {isOwner && (
             <Link
-              to="/settings?mode=owner"
+              to="/settings"
               aria-label="Open settings"
               className={`inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm ${linkClass}`}
             >
@@ -164,6 +185,12 @@ const Navbar = () => {
               Settings
             </Link>
           )}
+          {isOwner ? (
+            <>
+              <Link to="/owner/referees" aria-label="Open referee vault" className={`inline-flex items-center gap-1.5 rounded-md px-2 py-2 text-sm ${linkClass}`}><LockKeyhole className="h-4 w-4" aria-hidden="true" />Referees</Link>
+              <Button variant="ghost" size="icon" aria-label="Sign out" onClick={handleSignOut} className={linkClass}><LogOut className="h-4 w-4" /></Button>
+            </>
+          ) : <Link to="/account" className={`px-2 py-2 text-sm ${linkClass}`}>Owner sign-in</Link>}
           <Link to="/cv" className={`px-3 py-2 text-sm rounded-md ${linkClass}`}>CV</Link>
           <Button variant="ghost" size="icon" aria-label={open ? "Close menu" : "Open menu"} className={scrolled ? "text-foreground" : "text-primary-foreground hover:bg-white/20"} onClick={() => setOpen((v) => !v)}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -179,9 +206,9 @@ const Navbar = () => {
 
       {open && (
         <div className="lg:hidden bg-background/95 backdrop-blur-md border-t border-border px-6 py-3 space-y-2">
-          {isOwnerMode && (
+          {isOwner && (
             <Link
-              to="/settings?mode=owner"
+              to="/settings"
               onClick={() => setOpen(false)}
               className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-smooth"
             >
@@ -189,6 +216,12 @@ const Navbar = () => {
               Settings
             </Link>
           )}
+          {isOwner ? (
+            <>
+              <Link to="/owner/referees" onClick={() => setOpen(false)} className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-smooth"><LockKeyhole className="h-4 w-4" aria-hidden="true" />Referee vault</Link>
+              <button type="button" onClick={() => { setOpen(false); void handleSignOut(); }} className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm font-semibold text-foreground hover:bg-muted transition-smooth"><LogOut className="h-4 w-4" aria-hidden="true" />Sign out</button>
+            </>
+          ) : <Link to="/account" onClick={() => setOpen(false)} className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-smooth"><LockKeyhole className="h-4 w-4" aria-hidden="true" />Owner sign-in</Link>}
           {sections.map((s) => (
             <button type="button" key={s.id} onClick={() => go(s.id)} className={`block w-full text-left px-2 py-2 rounded-md text-sm hover:bg-muted transition-smooth ${visibleActiveSection === s.id ? "bg-muted font-semibold text-foreground" : "text-foreground"}`} aria-current={visibleActiveSection === s.id ? "location" : undefined}>{s.label}</button>
           ))}

@@ -25,6 +25,7 @@ describe("CV editor data", () => {
   it("uses a versioned, career-track-specific browser storage key", () => {
     expect(cvEditorStorageKey("claims-manager")).not.toBe(cvEditorStorageKey("accounting-finance"));
     expect(cvEditorStorageKey("claims-manager")).toContain(":v2:");
+    expect(cvEditorStorageKey("claims-manager", "owner-a")).not.toBe(cvEditorStorageKey("claims-manager", "owner-b"));
   });
 
   it("refreshes source dates while preserving fields edited by the user", () => {

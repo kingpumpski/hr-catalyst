@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, FileText, Search, X, LockKeyhole } from "lucide-react";
 import { cvCatalog } from "@/data/cvCatalog";
 import { useSeo } from "@/lib/seo";
+import { useAuth } from "@/contexts/useAuth";
 
 const CvLibrary = () => {
   const [query, setQuery] = useState("");
+  const { isOwner } = useAuth();
   useSeo({
     title: "CV Library | Kingsley Junior Norku",
     description:
@@ -97,9 +99,15 @@ const CvLibrary = () => {
                   ))}
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <Button asChild className="flex-1">
-                    <Link to={`/cv/${v.slug}`}>Open full version</Link>
-                  </Button>
+                  {isOwner ? (
+                    <Button asChild className="flex-1">
+                      <Link to={`/cv/${v.slug}`}>Open full version</Link>
+                    </Button>
+                  ) : (
+                    <Button asChild variant="outline" className="flex-1">
+                      <Link to="/account"><LockKeyhole className="mr-2 h-4 w-4" />Owner sign-in required</Link>
+                    </Button>
+                  )}
                   <Button variant="outline" disabled title="Secure share links will be enabled from the authenticated owner workspace">
                     <LockKeyhole className="mr-2 h-4 w-4" />Secure sharing in rollout
                   </Button>

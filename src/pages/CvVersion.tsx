@@ -14,6 +14,10 @@ import { toast } from "@/hooks/use-toast";
 import CvEditorPanel from "@/components/CvEditorPanel";
 import EditableCvDocument from "@/components/EditableCvDocument";
 import { loadCvEditorData, saveCvEditorData, type CvEditorData } from "@/lib/cvEditor";
+import { useAuth } from "@/contexts/useAuth";
+import { hasRefereeVault, unlockRefereeVault, type Referee } from "@/lib/refereeVault";
+import { loadDocumentSettings } from "@/lib/documentSettings";
+import { formatRefereesForDocument } from "@/lib/refereeDocument";
 
 const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 const AtsKeywordChecker = lazy(() => import("@/components/AtsKeywordChecker"));
@@ -38,11 +42,31 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [jobReference, setJobReference] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
   const [isExporting, setIsExporting] = useState(false);
-  const [editorData, setEditorData] = useState<CvEditorData>(() => loadCvEditorData(version.slug, version));
+  const { session } = useAuth();
+  const userId = session?.user.id;
+  const [editorData, setEditorData] = useState<CvEditorData>(() => loadCvEditorData(version.slug, version, userId));
+  const [referencePassword, setReferencePassword] = useState("");
+  const [vaultReferees, setVaultReferees] = useState<Referee[] | null>(null);
+  const [vaultError, setVaultError] = useState("");
+  const [selectedRefereeIds, setSelectedRefereeIds] = useState<Record<"cv" | "resume", string[]>>({ cv: [], resume: [] });
+  const [includeReferees, setIncludeReferees] = useState<Record<"cv" | "resume", boolean>>({ cv: false, resume: false });
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useEffect(() => {
-    saveCvEditorData(version.slug, editorData, version);
-  }, [version.slug, editorData]);
+    if (!userId) return;
+    if (!saveCvEditorData(version.slug, editorData, version, userId)) {
+      toast({ title: "Changes were not saved", description: "Browser storage is unavailable. Download a copy before leaving this page.", variant: "destructive" });
+    }
+  }, [version.slug, version, editorData, userId]);
+
+  const activeDocumentKind = tab === "resume" ? "resume" : "cv";
+  const selectedReferees = vaultReferees?.filter((referee) =>
+    selectedRefereeIds[activeDocumentKind].includes(referee.id),
+  ) ?? [];
+  const includedReferenceText = formatRefereesForDocument(selectedReferees);
+  const documentData = tab !== "letter" && includeReferees[activeDocumentKind] && includedReferenceText
+    ? { ...editorData, references: includedReferenceText }
+    : editorData;
+  const showReferences = loadDocumentSettings().showReferences;
 
   useSeo({
     title: getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv"),
@@ -61,15 +85,41 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
       if (tab === "letter") {
         const { downloadCoverLetterDocx } = await import("@/lib/docxExport");
         await downloadCoverLetterDocx(version, letterInputs);
-      } else if (editorData) {
+      } else {
         const { downloadEditedCvDocx } = await import("@/lib/editedCvDocx");
-        await downloadEditedCvDocx(editorData, tab);
+        await downloadEditedCvDocx(documentData, tab);
       }
     } catch {
       toast({ title: "Word download failed", description: "Please try again.", variant: "destructive" });
     } finally {
       setIsExporting(false);
     }
+  };
+  const handleUnlockVault = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setVaultError("");
+    try {
+      const unlockedReferees = await unlockRefereeVault(referencePassword);
+      setVaultReferees(unlockedReferees);
+      setReferencePassword("");
+    } catch (error) {
+      setVaultError(error instanceof Error ? error.message : "The referee vault could not be unlocked.");
+    }
+  };
+  const lockVault = () => {
+    setVaultReferees(null);
+    setSelectedRefereeIds({ cv: [], resume: [] });
+    setIncludeReferees({ cv: false, resume: false });
+    setReferencePassword("");
+    setVaultError("");
+  };
+  const toggleReferee = (id: string, checked: boolean) => {
+    setSelectedRefereeIds((current) => ({
+      ...current,
+      [activeDocumentKind]: checked
+        ? [...current[activeDocumentKind], id]
+        : current[activeDocumentKind].filter((selectedId) => selectedId !== id),
+    }));
   };
   const handleTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     const currentIndex = documentTabs.indexOf(tab);
@@ -102,6 +152,36 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
           </div>
           <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
           {tab !== "letter" && <CvEditorPanel value={editorData} onChange={setEditorData} />}
+          {tab !== "letter" && <section className="mb-8 rounded-lg border border-border bg-muted/20 p-4" aria-labelledby="reference-inclusion-title">
+            <h2 id="reference-inclusion-title" className="text-sm font-semibold text-foreground">Optional references for this {documentLabels[tab]}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Referee details stay encrypted in the local vault until you unlock and select them. Selected details appear only in this private preview and its downloads, not in public share pages.</p>
+            {!hasRefereeVault() && vaultReferees === null ? (
+              <Button variant="outline" asChild className="mt-4"><Link to="/owner/referees">Create or manage referee vault</Link></Button>
+            ) : vaultReferees === null ? (
+              <form onSubmit={handleUnlockVault} className="mt-4 flex flex-wrap items-end gap-3">
+                <label className="min-w-56 flex-1 text-sm font-medium text-foreground">Vault password<Input className="mt-2" type="password" autoComplete="current-password" value={referencePassword} onChange={(event) => setReferencePassword(event.target.value)} required /></label>
+                <Button type="submit">Unlock referee vault</Button>
+              </form>
+            ) : (
+              <div className="mt-4 space-y-3">
+                {vaultReferees.length > 0 ? vaultReferees.map((referee) => (
+                  <label key={referee.id} className="flex items-start gap-3 rounded-md border border-border bg-background p-3 text-sm">
+                    <input type="checkbox" className="mt-1" checked={selectedRefereeIds[activeDocumentKind].includes(referee.id)} onChange={(event) => toggleReferee(referee.id, event.target.checked)} />
+                    <span><strong className="text-foreground">{referee.name || "Unnamed referee"}</strong><span className="block text-muted-foreground">{[referee.role, referee.organization].filter(Boolean).join(" · ")}</span></span>
+                  </label>
+                )) : <p className="text-sm text-muted-foreground">No referees are saved in the vault yet.</p>}
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="flex items-center gap-2 text-sm text-foreground">
+                    <input type="checkbox" checked={includeReferees[activeDocumentKind]} disabled={!selectedReferees.length || !showReferences} onChange={(event) => setIncludeReferees((current) => ({ ...current, [activeDocumentKind]: event.target.checked }))} />
+                    Include selected referees in this {documentLabels[tab]} preview and downloads
+                  </label>
+                  <Button variant="outline" size="sm" onClick={lockVault}>Lock vault</Button>
+                </div>
+                {!showReferences && <p className="text-xs text-muted-foreground">References are disabled in document settings. Enable “Show references” in Settings to print or export them.</p>}
+              </div>
+            )}
+            {vaultError && <p className="mt-3 text-sm text-destructive" role="alert">{vaultError}</p>}
+          </section>}
           {tab === "letter" && <div className="mb-8 rounded-lg border border-border bg-muted/20 p-4 no-print">
             <h2 className="text-sm font-semibold text-foreground">Tailor this cover letter</h2>
             <p className="text-sm text-muted-foreground mt-1">Enter the employer and job title — the letter below rewrites itself instantly.</p>
@@ -117,7 +197,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
         </div>
         <Suspense fallback={<DocumentFallback />}>
           <div id={`document-panel-${tab}`} role="tabpanel" aria-labelledby={`document-tab-${tab}`} tabIndex={-1}>
-            {tab === "letter" ? <CoverLetterDocument version={version} {...letterInputs} /> : <EditableCvDocument data={editorData} />}
+            {tab === "letter" ? <CoverLetterDocument version={version} {...letterInputs} /> : <EditableCvDocument data={documentData} kind={tab} />}
           </div>
         </Suspense>
       </div>

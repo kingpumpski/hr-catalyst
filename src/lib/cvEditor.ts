@@ -35,7 +35,8 @@ export const createCvEditorData = (version: CvVersion): CvEditorData => ({
   references: profile.references,
 });
 
-export const cvEditorStorageKey = (slug: string) => `hr-catalyst:cv-editor:v${STORAGE_VERSION}:${slug}`;
+export const cvEditorStorageKey = (slug: string, userId?: string) =>
+  `hr-catalyst:cv-editor:v${STORAGE_VERSION}:${userId ? `${userId}:` : ""}${slug}`;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -113,11 +114,14 @@ export const migrateLegacyCvEditorData = (saved: CvEditorData, latestSource: CvE
   };
 };
 
-export const loadCvEditorData = (slug: string, version: CvVersion): CvEditorData => {
+export const loadCvEditorData = (slug: string, version: CvVersion, userId?: string): CvEditorData => {
   const latestSource = createCvEditorData(version);
   if (typeof window === "undefined") return latestSource;
   try {
-    const currentRaw = window.localStorage.getItem(cvEditorStorageKey(slug));
+    const currentRaw = userId
+      ? window.localStorage.getItem(cvEditorStorageKey(slug, userId)) ??
+        window.localStorage.getItem(cvEditorStorageKey(slug))
+      : window.localStorage.getItem(cvEditorStorageKey(slug));
     if (currentRaw) {
       const parsed: unknown = JSON.parse(currentRaw);
       if (isRecord(parsed) && parsed.schemaVersion === STORAGE_VERSION &&
@@ -136,7 +140,7 @@ export const loadCvEditorData = (slug: string, version: CvVersion): CvEditorData
   }
 };
 
-export const saveCvEditorData = (slug: string, data: CvEditorData, version: CvVersion) => {
+export const saveCvEditorData = (slug: string, data: CvEditorData, version: CvVersion, userId?: string) => {
   if (typeof window === "undefined") return false;
   try {
     const envelope = {
@@ -144,8 +148,10 @@ export const saveCvEditorData = (slug: string, data: CvEditorData, version: CvVe
       data,
       sourceSnapshot: createCvEditorData(version),
     };
-    window.localStorage.setItem(cvEditorStorageKey(slug), JSON.stringify(envelope));
+    const key = cvEditorStorageKey(slug, userId);
+    window.localStorage.setItem(key, JSON.stringify(envelope));
     window.localStorage.removeItem(legacyStorageKey(slug));
+    if (userId) window.localStorage.removeItem(cvEditorStorageKey(slug));
     return true;
   } catch {
     return false;

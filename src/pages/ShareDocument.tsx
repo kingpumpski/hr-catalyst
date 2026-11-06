@@ -145,7 +145,7 @@ const ShareDocumentContent = () => {
           {!share.download.allowed && <p className="w-full text-xs text-muted-foreground">The owner has disabled document downloads for this share.</p>}
         </div>}
 
-        {share && cvData && <EditableCvDocument data={cvData} />}
+        {share && cvData && <EditableCvDocument data={cvData} kind={share.document.type === "resume" ? "resume" : "cv"} />}
         {share && canRenderLetter && isRecord(letter) && <article className="cv-doc mx-auto max-w-3xl">
           <header className="cv-header"><h1>{share.document.title}</h1></header>
           <section><p>{String(letter.opening)}</p></section>

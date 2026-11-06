@@ -22,6 +22,7 @@ A future **Collaborator** role may be added with narrowly scoped editing rights.
 ## Proposed authorization model
 
 - Use Supabase Auth for identity and PostgreSQL Row Level Security for data authorization.
+- The owner-only browser routes require the verified Supabase `app_metadata.role` claim to equal `owner`. User-editable metadata and URL parameters are never authorization inputs. Only a Supabase administrator may assign or remove this claim.
 - A workspace has one immutable owner identity for the first release.
 - Membership roles are stored in a protected database table, not user-editable Auth metadata.
 - Owner write policies must check both the authenticated user ID and workspace ownership.
@@ -115,11 +116,12 @@ Only the publishable key is exposed to the browser. The Supabase service-role ke
 
 ### Remaining release work
 
-- Install and lock `@supabase/supabase-js` through a normal npm lockfile update before importing it in application code.
-- Implement sign-up, sign-in, password recovery, session handling and owner workspace UI.
+- The frontend now supports password sign-in/session restoration and protects full CV editing, settings and the referee vault behind the administrator-assigned owner claim. There is intentionally no public sign-up or self-service role assignment.
+- Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` for local builds and as GitHub Actions repository variables for Pages deployments. Both are browser configuration; the publishable key is safe to expose. Never use a service-role or secret key.
+- Provision the owner identity in Supabase Auth, then assign `{"role":"owner"}` in that user's `raw_app_meta_data` through an administrator-controlled operation (for example, in the dedicated project's SQL editor for the exact owner account). Do not set `user_metadata.role`. The user must sign out and back in after a role change so the new claim is issued.
+- The current CV editor and referee vault continue to use browser-local persistence; CV edits are namespaced by authenticated user ID, and referee contacts remain locally encrypted. Migrating editable documents to the existing workspace/document tables remains future work.
 - Add owner-side document publishing, share creation (cryptographically random token generation and hash-only persistence), revocation and audit events.
-- Wire the recruiter share route to the deployed resolver.
-- Add integration tests for RLS isolation, email-restricted shares, expiry/revocation, download disabled/enabled, and signed URL expiry.
+- Add integration tests for RLS isolation, owner-role provisioning/revocation, email-restricted shares, expiry/revocation, download disabled/enabled, and signed URL expiry.
 - Configure Auth site URL and redirect allow-list for the production Vercel and GitHub Pages origins, and configure production email delivery.
 - Verify the live UX with browser tests before marking the owner/recruiter release gate complete.
 
