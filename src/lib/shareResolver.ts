@@ -55,7 +55,7 @@ export const createShareUrl = (
   basePath = import.meta.env.BASE_URL,
 ) => {
   const base = new URL(basePath, origin);
-  base.pathname = `${base.pathname.replace(/\\/+$/, "")}/share/${documentType}/${encodeURIComponent(slug)}`;
+  base.pathname = `${base.pathname.replace(/\/+$/, "")}/share/${documentType}/${encodeURIComponent(slug)}`;
   base.hash = new URLSearchParams({ token }).toString();
   return base.toString();
 };
