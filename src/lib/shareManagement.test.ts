@@ -31,7 +31,7 @@ describe("owner recruiter share management", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("persists only the token hash and binds the link to the latest published version", async () => {
-    const latestVersion = { id: "version-9", version_number: 9 };
+    const latestVersion = { id: "version-9", version_number: 9, storage_path: "workspace-123/document-123/version-9.docx" };
     const createdShare = {
       id: "share-123",
       document_id: document.id,
@@ -84,14 +84,17 @@ describe("recruiter share permission updates", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("updates only owner-controlled access settings on an active link", async () => {
-    vi.mocked(requestSupabase).mockResolvedValue(undefined);
+    vi.mocked(requestSupabase)
+      .mockResolvedValueOnce([{ document_version_id: "version-123" }])
+      .mockResolvedValueOnce([{ storage_path: "workspace-123/document-123/version-123.docx" }])
+      .mockResolvedValueOnce(undefined);
     await updateOwnerShareLink(session, workspace, "share-456", {
       invitedEmail: " Hiring@Example.com ",
       allowDownload: true,
       expiresInDays: 30,
     });
-    expect(requestSupabase).toHaveBeenCalledOnce();
-    const [path, options] = vi.mocked(requestSupabase).mock.calls[0];
+    expect(requestSupabase).toHaveBeenCalledTimes(3);
+    const [path, options] = vi.mocked(requestSupabase).mock.calls[2];
     expect(path).toContain("/rest/v1/share_links?id=eq.share-456");
     expect(path).toContain("workspace_id=eq.workspace-123");
     expect(path).toContain("revoked_at=is.null");
