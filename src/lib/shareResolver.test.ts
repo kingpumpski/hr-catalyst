@@ -31,7 +31,7 @@ describe("resolveShare", () => {
 
   it("posts the token to the server-side resolver without caching", async () => {
     const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify(validResponse), { status: 200 }));
-    const result = await resolveShare("a".repeat(48), { fetcher });
+    const result = await resolveShare("a".repeat(64), { fetcher });
 
     expect(result.document.title).toBe("Accounting CV");
     expect(fetcher).toHaveBeenCalledWith(
@@ -39,7 +39,7 @@ describe("resolveShare", () => {
       expect.objectContaining({
         method: "POST",
         cache: "no-store",
-        body: JSON.stringify({ token: "a".repeat(48) }),
+        body: JSON.stringify({ token: "a".repeat(64) }),
         headers: expect.objectContaining({ apikey: "public-test-key" }),
       }),
     );
@@ -54,11 +54,18 @@ describe("resolveShare", () => {
     expect(fetcher).not.toHaveBeenCalled();
   });
 
+  it("rejects tokens that are not exactly 64 lowercase hexadecimal characters", async () => {
+    const fetcher = vi.fn();
+    await expect(resolveShare("g".repeat(64), { fetcher })).rejects.toMatchObject({ code: "invalid_token", status: 400 });
+    await expect(resolveShare("a".repeat(63), { fetcher })).rejects.toMatchObject({ code: "invalid_token", status: 400 });
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it("does not expose revoked or expired links as documents", async () => {
     const fetcher = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ error: "share_not_found_or_expired" }), { status: 404 }),
     );
-    await expect(resolveShare("b".repeat(48), { fetcher })).rejects.toBeInstanceOf(ShareResolutionError);
+    await expect(resolveShare("b".repeat(64), { fetcher })).rejects.toBeInstanceOf(ShareResolutionError);
   });
 
 
@@ -66,7 +73,7 @@ describe("resolveShare", () => {
     const fetcher = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ error: "email_not_verified" }), { status: 403 }),
     );
-    await expect(resolveShare("d".repeat(48), { fetcher })).rejects.toMatchObject({
+    await expect(resolveShare("d".repeat(64), { fetcher })).rejects.toMatchObject({
       code: "email_not_verified",
       message: "Verify the invited email address before opening this document.",
     });
@@ -76,7 +83,7 @@ describe("resolveShare", () => {
     const fetcher = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ error: "share_recipient_mismatch" }), { status: 403 }),
     );
-    await expect(resolveShare("e".repeat(48), { fetcher })).rejects.toMatchObject({
+    await expect(resolveShare("e".repeat(64), { fetcher })).rejects.toMatchObject({
       code: "share_recipient_mismatch",
       message: "This link is restricted to a different email address.",
     });
@@ -87,7 +94,7 @@ describe("resolveShare", () => {
       ...validResponse,
       download: { allowed: true, url: "https://attacker.example/file.pdf" },
     }), { status: 200 }));
-    await expect(resolveShare("c".repeat(48), { fetcher })).rejects.toMatchObject({
+    await expect(resolveShare("c".repeat(64), { fetcher })).rejects.toMatchObject({
       code: "unsafe_download_url",
       status: 502,
     });
