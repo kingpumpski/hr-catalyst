@@ -30,7 +30,7 @@ export const getWorkspaceDocumentContent = async (
 export const getWorkspaceDocumentEditorPath = (document: Pick<WorkspaceDocument, "slug" | "document_type">) => {
   const tab = document.document_type === "cover_letter" ? "letter" : document.document_type;
   const editorSlug = document.slug.replace(new RegExp("-" + tab + "$"), "");
-  return `/cv/${encodeURIComponent(editorSlug)}?tab=${tab}`;
+  return `/cv/${encodeURIComponent(editorSlug)}?tab=${tab}&workspace=1`;
 };
 
 export const saveWorkspaceDocument = async (
