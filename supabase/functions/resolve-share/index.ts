@@ -31,7 +31,7 @@ Deno.serve(async (request: Request) => {
   }
 
   const token = typeof body.token === "string" ? body.token.trim() : "";
-  if (token.length < 32 || token.length > 256) return json(404, { error: "share_not_found" });
+  if (!/^[a-f0-9]{64}$/.test(token)) return json(404, { error: "share_not_found" });
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
