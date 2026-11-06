@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { requestSupabase, type AuthSession, type Workspace } from "@/lib/supabaseAuth";
-import { publishWorkspaceDocument, type WorkspaceDocument } from "@/lib/workspaceDocuments";
+import { getWorkspaceDocumentEditorPath, publishWorkspaceDocument, type WorkspaceDocument } from "@/lib/workspaceDocuments";
 
 vi.mock("@/lib/supabaseAuth", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/lib/supabaseAuth")>();
@@ -60,7 +60,6 @@ describe("atomic workspace document publishing", () => {
   });
 });
 
-import { getWorkspaceDocumentEditorPath } from "@/lib/workspaceDocuments";
 
 describe("workspace document editor routes", () => {
   it("opens the correct catalogue editor tab for each saved document type", () => {
