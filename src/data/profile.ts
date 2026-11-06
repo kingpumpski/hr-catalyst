@@ -54,15 +54,26 @@ export const companies: Company[] = [
         duration: "5 yrs 7 mos",
         summary:
           "Lead operational coordination across claims administration, finance, clinical teams, and technology support while helping management improve efficiency, reporting, and service delivery.",
+        // contributions: [
+        //   "Coordinate daily operational activities involving multiple departments to ensure timely execution of business priorities.",
+        //   "Support leadership by preparing operational reports and monitoring departmental performance.",
+        //   "Improve internal workflows that strengthen claims processing and organizational efficiency.",
+        //   "Collaborate with insurers, healthcare providers, finance teams, and administrative staff to resolve operational issues.",
+        //   "Provide IT support that enables uninterrupted business operations and improves staff productivity.",
+        //   "Maintain confidential operational and financial information with professionalism and discretion.",
+        //   "Support implementation of technology solutions that improve organizational effectiveness.",
+        //   "Take ownership of operational challenges and drive practical solutions from identification through resolution."
+        // ],
         contributions: [
-          "Coordinate daily operational activities involving multiple departments to ensure timely execution of business priorities.",
-          "Support leadership by preparing operational reports and monitoring departmental performance.",
-          "Improve internal workflows that strengthen claims processing and organizational efficiency.",
-          "Collaborate with insurers, healthcare providers, finance teams, and administrative staff to resolve operational issues.",
-          "Provide IT support that enables uninterrupted business operations and improves staff productivity.",
-          "Maintain confidential operational and financial information with professionalism and discretion.",
-          "Support implementation of technology solutions that improve organizational effectiveness.",
-          "Take ownership of operational challenges and drive practical solutions from identification through resolution."
+          "Oversee End-to-End Claims Processing: Direct daily processing of NHIS and private insurance claims across multiple departments, ensuring accuracy, completeness, and strict compliance with payer requirements.",
+          "Vet and Reconcile Claims: Systematically vet claims prior to submission and reconcile submitted claims against reimbursements received to ensure financial accuracy and minimize revenue leakage.",
+          "Resolve Rejections: Monitor and analyze rejected claims, implementing targeted corrective measures and liaising directly with insurers and healthcare providers to resolve disputes and recover funds.",
+          "Team Leadership & Cross-Functional Collaboration",
+          "Lead and Supervise: Train, mentor, and supervise claims and administrative staff to ensure high performance and timely execution of departmental goals.",
+          "Liaise with Clinical Departments: Collaborate closely with clinical teams, finance, and administrative staff to resolve operational bottlenecks and ensure accurate documentation for claims processing.",
+          "Reporting: Support senior leadership by preparing comprehensive operational and financial reports, monitoring departmental performance metrics, and maintaining strict confidentiality.",
+          "Streamline Workflows: Improve internal workflows and implement technology solutions that strengthen claims processing speed, organizational efficiency, and overall productivity.",
+          "Operational Problem Solving: Take ownership of complex operational challenges, driving practical, tech-enabled solutions from identification through to full resolution to ensure uninterrupted business operations."
         ],
         skills: [
           "Claims Management",
