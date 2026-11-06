@@ -29,25 +29,7 @@ export const getWorkspaceDocumentContent = async (
 
 export const getWorkspaceDocumentEditorPath = (document: Pick<WorkspaceDocument, "slug" | "document_type">) => {
   const tab = document.document_type === "cover_letter" ? "letter" : document.document_type;
-  const suffix = tab;
-  const editorSlug = document.slug.replace(new RegExp(`-${suffix}import { requestSupabase, type AuthSession, type Workspace } from "@/lib/supabaseAuth";
-
-export type WorkspaceDocument = {
-  id: string;
-  slug: string;
-  title: string;
-  document_type: "cv" | "resume" | "cover_letter" | "other";
-  status: "draft" | "published" | "archived";
-  updated_at: string;
-};
-
-export const listWorkspaceDocuments = (session: AuthSession, workspace: Workspace) =>
-  requestSupabase<WorkspaceDocument[]>(
-    `/rest/v1/documents?select=id,slug,title,document_type,status,updated_at&workspace_id=eq.${encodeURIComponent(workspace.id)}&order=updated_at.desc`,
-    { accessToken: session.access_token },
-  );
-
-), "");
+  const editorSlug = document.slug.replace(new RegExp("-" + tab + "$"), "");
   return `/cv/${encodeURIComponent(editorSlug)}?tab=${tab}`;
 };
 
