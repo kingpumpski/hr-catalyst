@@ -37,6 +37,29 @@ const isResolvedShare = (value: unknown): value is ResolvedShare => {
     (download.url == null || typeof download.url === "string");
 };
 
+/** Create a high-entropy bearer token. Only its SHA-256 hash belongs in share_links. */
+export const createShareCredentials = async () => {
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+  const tokenHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return { token, tokenHash };
+};
+
+/** Put bearer tokens in the URL fragment, not the query string, to keep them out of HTTP requests and referrer headers. */
+export const createShareUrl = (
+  slug: string,
+  documentType: "cv" | "resume" | "letter",
+  token: string,
+  origin = window.location.origin,
+  basePath = import.meta.env.BASE_URL,
+) => {
+  const base = new URL(basePath, origin);
+  base.pathname = `${base.pathname.replace(/\\/+$/, "")}/share/${documentType}/${encodeURIComponent(slug)}`;
+  base.hash = new URLSearchParams({ token }).toString();
+  return base.toString();
+};
+
 /** Resolve a high-entropy share token without exposing private tables to anonymous clients. */
 export const resolveShare = async (
   token: string,
