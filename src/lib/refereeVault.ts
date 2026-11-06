@@ -10,6 +10,7 @@ export type Referee = {
 };
 
 const STORAGE_KEY = "hr-catalyst-referee-vault-v1";
+const storageKey = (userId?: string) => userId ? `${STORAGE_KEY}:${userId}` : STORAGE_KEY;
 const ITERATIONS = 120_000;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -56,12 +57,12 @@ const deriveKey = async (password: string, salt: Uint8Array<ArrayBuffer>) => {
   );
 };
 
-export const hasRefereeVault = () => {
+export const hasRefereeVault = (userId?: string) => {
   if (typeof window === "undefined") return false;
-  return Boolean(localStorage.getItem(STORAGE_KEY));
+  return Boolean(localStorage.getItem(storageKey(userId)) || (userId && localStorage.getItem(STORAGE_KEY)));
 };
 
-export const saveRefereeVault = async (referees: Referee[], password: string) => {
+export const saveRefereeVault = async (referees: Referee[], password: string, userId?: string) => {
   if (!password) throw new Error("A vault password is required.");
 
   const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -76,11 +77,13 @@ export const saveRefereeVault = async (referees: Referee[], password: string) =>
     ciphertext: toBase64(new Uint8Array(ciphertext)),
   };
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  localStorage.setItem(storageKey(userId), JSON.stringify(stored));
+  if (userId) localStorage.removeItem(STORAGE_KEY);
 };
 
-export const unlockRefereeVault = async (password: string): Promise<Referee[]> => {
-  const raw = localStorage.getItem(STORAGE_KEY);
+export const unlockRefereeVault = async (password: string, userId?: string): Promise<Referee[]> => {
+  const key = storageKey(userId);
+  const raw = localStorage.getItem(key) ?? (userId ? localStorage.getItem(STORAGE_KEY) : null);
   if (!raw) return [];
 
   try {
@@ -91,12 +94,17 @@ export const unlockRefereeVault = async (password: string): Promise<Referee[]> =
     const key = await deriveKey(password, salt);
     const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext);
     const parsed = JSON.parse(decoder.decode(plaintext)) as Referee[];
+    if (Array.isArray(parsed) && userId && !localStorage.getItem(key)) {
+      localStorage.setItem(key, raw);
+      localStorage.removeItem(STORAGE_KEY);
+    }
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     throw new Error("Unable to unlock the referee vault. Check the password.");
   }
 };
 
-export const clearRefereeVault = () => {
-  localStorage.removeItem(STORAGE_KEY);
+export const clearRefereeVault = (userId?: string) => {
+  localStorage.removeItem(storageKey(userId));
+  if (!userId) localStorage.removeItem(STORAGE_KEY);
 };
