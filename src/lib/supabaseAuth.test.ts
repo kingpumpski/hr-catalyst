@@ -138,7 +138,7 @@ describe("HR Catalyst Supabase authentication", () => {
     const { getOrCreateWorkspace } = await import("@/lib/supabaseAuth");
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(response([]))
-      .mockResolvedValueOnce(response([{ id: "workspace-123", name: "My HR Catalyst workspace" }]));
+      .mockResolvedValueOnce(response({ id: "workspace-123", name: "My HR Catalyst workspace" }));
     vi.stubGlobal("fetch", fetchMock);
     const workspace = await getOrCreateWorkspace(session);
     expect(workspace.id).toBe("workspace-123");
