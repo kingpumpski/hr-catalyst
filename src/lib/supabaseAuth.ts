@@ -236,6 +236,6 @@ export const removePrivateStorageObject = async (
   if (!path || path.startsWith("/") || path.split("/").some((part) => !part || part === "." || part === "..")) {
     throw new Error("The private file path is invalid.");
   }
-  const { error } = await getSessionStorageClient(session).storage.from(bucket).remove([path]);
+  const { error } = await getSessionClient(session).storage.from(bucket).remove([path]);
   if (error) throw new Error(error.message || "Private file cleanup failed.");
 };
