@@ -14,6 +14,9 @@ import { toast } from "@/hooks/use-toast";
 import CvEditorPanel from "@/components/CvEditorPanel";
 import EditableCvDocument from "@/components/EditableCvDocument";
 import { loadCvEditorData, saveCvEditorData, type CvEditorData } from "@/lib/cvEditor";
+import { useAuth } from "@/components/AuthProvider";
+import { buildCoverLetter } from "@/lib/coverLetter";
+import { listWorkspaceDocuments, publishWorkspaceDocument, saveWorkspaceDocument } from "@/lib/workspaceDocuments";
 
 const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 const AtsKeywordChecker = lazy(() => import("@/components/AtsKeywordChecker"));
@@ -39,6 +42,9 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [companyAddress, setCompanyAddress] = useState("");
   const [isExporting, setIsExporting] = useState(false);
   const [editorData, setEditorData] = useState<CvEditorData>(() => loadCvEditorData(version.slug, version));
+  const [workspaceBusy, setWorkspaceBusy] = useState(false);
+  const [workspaceFeedback, setWorkspaceFeedback] = useState("");
+  const { session, workspace, user } = useAuth();
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   useEffect(() => {
     saveCvEditorData(version.slug, editorData, version);
@@ -51,6 +57,35 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   });
 
   const letterInputs = { recipientName, employerName, companyAddress, jobTitle, jobReference };
+  const saveToWorkspace = async (publish: boolean) => {
+    if (!session || !workspace) return;
+    setWorkspaceBusy(true);
+    setWorkspaceFeedback("");
+    try {
+      const documentType = tab === "letter" ? "cover_letter" : tab;
+      const slug = `${version.slug}-${tab}`;
+      const title = `${version.title} — ${documentType === "cover_letter" ? "Cover Letter" : documentType.toUpperCase()}`;
+      const existing = (await listWorkspaceDocuments(session, workspace)).find((item) => item.slug === slug);
+      if (existing && !window.confirm(`A private ${documentType.replace("_", " ")} already exists in your workspace. Replace its current draft with this browser version?`)) return;
+      const coverLetter = tab === "letter" ? buildCoverLetter(version, letterInputs) : null;
+      const content = tab === "letter" ? { coverLetter } : editorData;
+      const saved = await saveWorkspaceDocument(session, workspace, { slug, title, documentType, content });
+      if (publish) {
+        const snapshot = tab === "letter" && coverLetter
+          ? { coverLetter: { opening: `${coverLetter.greeting} ${coverLetter.paragraphs[0]}`, body: coverLetter.paragraphs.slice(1, -2), closing: `${coverLetter.paragraphs.at(-2) ?? ""} ${coverLetter.paragraphs.at(-1) ?? ""} ${coverLetter.signOff}` } }
+          : editorData;
+        const published = await publishWorkspaceDocument(session, workspace, saved, snapshot);
+        setWorkspaceFeedback(`Published immutable version ${published.version_number} to your private workspace.`);
+      } else {
+        setWorkspaceFeedback("Saved securely to your private workspace as a draft.");
+      }
+    } catch (reason) {
+      setWorkspaceFeedback(reason instanceof Error ? reason.message : "The document could not be saved to your workspace.");
+    } finally {
+      setWorkspaceBusy(false);
+    }
+  };
+
   const handlePrint = () => {
     if (tab !== "letter") document.title = getRecruiterDocumentTitle(tab);
     window.print();
@@ -100,7 +135,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
           <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Career document type">
             {documentTabs.map((documentTab) => <Button key={documentTab} ref={(element) => { tabRefs.current[documentTab] = element; }} variant={tab === documentTab ? "default" : "outline"} id={`document-tab-${documentTab}`} role="tab" aria-selected={tab === documentTab} aria-controls={`document-panel-${documentTab}`} tabIndex={tab === documentTab ? 0 : -1} onClick={() => setTab(documentTab)} onKeyDown={handleTabKeyDown}>{documentLabels[documentTab]}</Button>)}
           </div>
-          <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
+          {workspaceFeedback && <p role="status" className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm">{workspaceFeedback}</p>}\n          <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
           {tab !== "letter" && <CvEditorPanel value={editorData} onChange={setEditorData} />}
           {tab === "letter" && <div className="mb-8 rounded-lg border border-border bg-muted/20 p-4 no-print">
             <h2 className="text-sm font-semibold text-foreground">Tailor this cover letter</h2>
