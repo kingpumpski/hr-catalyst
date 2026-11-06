@@ -4,6 +4,7 @@ import {
   getAuthenticatedUser,
   getOrCreateWorkspace,
   getSupabaseClient,
+  isSupabaseConfigured,
   readPersistedSession,
   requestPasswordReset,
   signInWithPassword,
@@ -52,6 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let active = true;
     const bootstrapEpoch = authEpoch.current;
+    if (!isSupabaseConfigured()) {
+      setLoading(false);
+      return;
+    }
     const { data: { subscription } } = getSupabaseClient().auth.onAuthStateChange((event, nextSession) => {
       if (event === "PASSWORD_RECOVERY") setRecoveryFlow(true);
       if (event === "SIGNED_OUT") {
