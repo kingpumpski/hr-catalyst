@@ -5,6 +5,7 @@ import {
   getOrCreateWorkspace,
   getSupabaseClient,
   readPersistedSession,
+  requestPasswordReset,
   signInWithPassword,
   signOutFromSupabase,
   signUpWithPassword,
@@ -132,6 +133,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [session]);
 
+  const reset = useCallback((email: string) => requestPasswordReset(email), []);
+
   const updatePassword = useCallback(async (password: string) => {
     if (!session) throw new Error("Open the password recovery link again to continue.");
     await updateAccountPassword(session, password);
@@ -147,12 +150,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signIn,
     signUp,
     signOut,
-    requestPasswordReset: async (email: string) => {
-      const { requestPasswordReset } = await import("@/lib/supabaseAuth");
-      await requestPasswordReset(email);
-    },
+    requestPasswordReset: reset,
     updatePassword,
-  }), [session, workspace, loading, recoveryFlow, signIn, signUp, signOut, updatePassword]);
+  }), [session, workspace, loading, recoveryFlow, signIn, signUp, signOut, reset, updatePassword]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
