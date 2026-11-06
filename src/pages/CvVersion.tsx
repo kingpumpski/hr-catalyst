@@ -231,7 +231,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
           {workspaceFeedback && <p role="status" className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm">{workspaceFeedback}</p>}
           <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
           {tab !== "letter" && <CvEditorPanel value={editorData} onChange={setEditorData} />}
-          {tab !== "letter" && <section className="mb-8 rounded-lg border border-border bg-muted/20 p-4" aria-labelledby="reference-inclusion-title">
+          {userId && tab !== "letter" && <section className="mb-8 rounded-lg border border-border bg-muted/20 p-4" aria-labelledby="reference-inclusion-title">
             <h2 id="reference-inclusion-title" className="text-sm font-semibold text-foreground">Optional references for this {documentLabels[tab]}</h2>
             <p className="mt-1 text-sm text-muted-foreground">Referee details remain encrypted in your private local vault. Selected details are included only in this private preview and its downloads, never in public recruiter shares or published snapshots.</p>
             {!hasRefereeVault(userId) && vaultReferees === null ? (
