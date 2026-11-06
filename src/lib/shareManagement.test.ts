@@ -36,7 +36,6 @@ describe("owner recruiter share management", () => {
       id: "share-123",
       document_id: document.id,
       document_version_id: latestVersion.id,
-      token_hash: "a".repeat(64),
       invited_email: "recruiter@example.com",
       allow_download: false,
       expires_at: null,
@@ -54,8 +53,6 @@ describe("owner recruiter share management", () => {
     expect(result.share.id).toBe("share-123");
     expect(result.versionNumber).toBe(9);
     expect(result.token).toHaveLength(64);
-    expect(result.share.token_hash).toHaveLength(64);
-    expect(result.share.token_hash).not.toBe(result.token);
     const insertCall = vi.mocked(requestSupabase).mock.calls[1];
     expect(insertCall[0]).toBe("/rest/v1/share_links");
     const insertOptions = insertCall[1] as { body: Record<string, unknown>; accessToken: string; method: string };
@@ -69,8 +66,10 @@ describe("owner recruiter share management", () => {
       allow_download: false,
       created_by: "owner-123",
     });
-    expect(insertOptions.body.token_hash).toBe(result.share.token_hash);
+    expect(insertOptions.body.token_hash).toMatch(/^[a-f0-9]{64}$/);
+    expect(insertOptions.body.token_hash).not.toBe(result.token);
     expect(insertOptions.body).not.toHaveProperty("token");
+    expect(insertCall[0]).toContain("select=id,document_id,document_version_id");
   });
 
   it("refuses to create a share link before the document has a published version", async () => {
