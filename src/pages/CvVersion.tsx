@@ -65,7 +65,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
         if (tab !== "letter" && content && typeof content === "object") {
           setEditorData(content as CvEditorData);
         } else if (tab === "letter" && content && typeof content === "object") {
-          const inputs = (content as { letterInputs?: Partial<typeof letterInputs> }).letterInputs;
+          const inputs = (content as { letterInputs?: Partial<{ recipientName: string; employerName: string; jobTitle: string; jobReference: string; companyAddress: string }> }).letterInputs;
           if (inputs) {
             setRecipientName(inputs.recipientName ?? "Hiring Manager");
             setEmployerName(inputs.employerName ?? "");
