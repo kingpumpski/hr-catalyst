@@ -124,3 +124,17 @@ Only the publishable key is exposed to the browser. The Supabase service-role ke
 - Verify the live UX with browser tests before marking the owner/recruiter release gate complete.
 
 Do not use the dormant `supabase-cinnabar-clock` project until its ownership and data purpose are established. Do not modify the Harmony Health Hub project.
+
+
+## Recruiter share viewer integration (in progress)
+
+The recruiter route now treats every share URL as a bearer-token-protected resource. It does not render the public CV catalogue as a substitute for a published private document.
+
+- The browser sends the raw high-entropy token only to `POST /functions/v1/resolve-share`; it never queries private workspace tables directly.
+- Share URLs place the token in the URL fragment (`#token=...`), not the query string. The fragment is not sent in HTTP requests or referrer headers. The viewer removes the fragment from the visible address bar after reading it and retains the token only in tab-scoped session storage for refresh support.
+- The resolver response is validated before rendering. Download URLs are accepted only when they use HTTPS and the configured HR Catalyst Supabase host.
+- The recruiter viewer honours the server's download permission: it only offers print/download controls when the resolver authorizes downloading.
+- CV/resume snapshots use the structured editable-CV document renderer. Cover-letter snapshots use the published opening/body/closing structure. Unknown snapshot shapes fail closed with a support message.
+- Resolver client tests cover token entropy/hash generation, fragment-based URLs, no-store requests, invalid/revoked tokens and signed-download host validation.
+
+This is the recruiter-side resolver integration only. It does **not** complete owner authentication, document publishing, share-link creation/revocation UI, invited-recipient sign-in, or end-to-end authorization testing. Those remain release blockers until the owner workflow is connected to the authenticated Supabase workspace.
