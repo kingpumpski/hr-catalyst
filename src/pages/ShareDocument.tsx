@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, Mail, Printer, ShieldAlert, ShieldCheck } from "lucide-react";
@@ -28,8 +28,15 @@ const isCoverLetterSnapshot = (value: unknown): value is { opening: string; body
 
 const ShareDocumentPage = () => {
   const { documentType } = useParams<{ documentType?: string }>();
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get("token") ?? "";
+  const [token] = useState(() => {
+    const fragmentToken = new URLSearchParams(window.location.hash.slice(1)).get("token");
+    if (fragmentToken) {
+      window.sessionStorage.setItem("hr-catalyst:active-share-token", fragmentToken);
+      window.history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+      return fragmentToken;
+    }
+    return window.sessionStorage.getItem("hr-catalyst:active-share-token") ?? "";
+  });
   const [share, setShare] = useState<ResolvedShare | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -68,7 +75,7 @@ const ShareDocumentPage = () => {
   }, [token, documentType]);
 
   const documentContent = share?.document.content;
-  const canRenderCv = isCvEditorData(documentContent);
+  const cvData = isCvEditorData(documentContent) ? documentContent : null;
   const canRenderLetter = isCoverLetterSnapshot(documentContent);
   const letter = canRenderLetter && isRecord(documentContent) && isRecord(documentContent.coverLetter)
     ? documentContent.coverLetter
@@ -102,14 +109,14 @@ const ShareDocumentPage = () => {
           {!share.download.allowed && <p className="w-full text-xs text-muted-foreground">The owner has disabled document downloads for this share.</p>}
         </div>}
 
-        {share && canRenderCv && <EditableCvDocument data={documentContent} />}
+        {share && cvData && <EditableCvDocument data={cvData} />}
         {share && canRenderLetter && isRecord(letter) && <article className="cv-doc mx-auto max-w-3xl">
           <header className="cv-header"><h1>{share.document.title}</h1></header>
           <section><p>{String(letter.opening)}</p></section>
           {(letter.body as string[]).map((paragraph, index) => <section key={index}><p>{paragraph}</p></section>)}
           <section><p>{String(letter.closing)}</p></section>
         </article>}
-        {share && !canRenderCv && !canRenderLetter && <section className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">The published snapshot format is not supported by this version of the recruiter viewer. Please contact the document owner for an updated link.</section>}
+        {share && !cvData && !canRenderLetter && <section className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">The published snapshot format is not supported by this version of the recruiter viewer. Please contact the document owner for an updated link.</section>}
 
         <footer className="mt-8 flex items-center justify-between gap-4 border-t border-border pt-5 no-print">
           <Button variant="ghost" asChild><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />Back to main profile</Link></Button>
