@@ -26,7 +26,28 @@ const OwnerWorkspace = () => {
     }
   }, [session, workspace]);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    if (!session || !workspace) return;
+    let active = true;
+
+    listWorkspaceDocuments(session, workspace)
+      .then((result) => {
+        if (active) {
+          setDocuments(result);
+          setError("");
+        }
+      })
+      .catch((reason: unknown) => {
+        if (active) setError(reason instanceof Error ? reason.message : "Your documents could not be loaded.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [session, workspace]);
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 text-foreground sm:px-6">
