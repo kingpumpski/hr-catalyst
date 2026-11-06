@@ -75,6 +75,41 @@ describe("HR Catalyst Supabase authentication", () => {
     expect(readPersistedSession()?.refresh_token).toBe("new-refresh");
   });
 
+
+  it("uploads generated documents to the private workspace folder using the owner session", async () => {
+    const { uploadPrivateStorageObject } = await import("@/lib/supabaseAuth");
+    const fetchMock = vi.fn().mockResolvedValue(response({ Key: "workspace-123/document-123/file.docx" }));
+    vi.stubGlobal("fetch", fetchMock);
+    const file = new Blob(["docx-content"]);
+    await uploadPrivateStorageObject(
+      session,
+      "hr-catalyst-private",
+      "workspace-123/document-123/file.docx",
+      file,
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    );
+    const [url, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://project.supabase.co/storage/v1/object/hr-catalyst-private/workspace-123/document-123/file.docx");
+    expect(options.method).toBe("POST");
+    expect(new Headers(options.headers).get("Authorization")).toBe("Bearer access-token");
+    expect(new Headers(options.headers).get("x-upsert")).toBe("true");
+    expect(options.body).toBe(file);
+  });
+
+  it("rejects private storage paths that could escape the workspace folder", async () => {
+    const { uploadPrivateStorageObject } = await import("@/lib/supabaseAuth");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(uploadPrivateStorageObject(
+      session,
+      "hr-catalyst-private",
+      "../another-workspace/file.docx",
+      new Blob(["x"]),
+      "application/octet-stream",
+    )).rejects.toThrow("The private file path is invalid.");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("creates a private workspace only after an authenticated lookup returns none", async () => {
     const { getOrCreateWorkspace } = await import("@/lib/supabaseAuth");
     const fetchMock = vi.fn()
