@@ -153,6 +153,7 @@ The following items supersede the earlier "in progress" notes above:
 - Invited-email access now requires both a matching authenticated email and a verified email address. Resolver version 4 is deployed with this check.
 - Storage owner policies were corrected in migration `20261106114151_fix_private_storage_owner_policies.sql` to evaluate the first folder of `storage.objects.name` (workspace UUID). The previous policies incorrectly referenced `workspaces.name`.
 - Migration `20261106114318_publish_workspace_document_with_private_artifact.sql` replaces the earlier publish RPC signature with a four-argument SECURITY INVOKER RPC that persists the private artifact path. Only authenticated users can execute it; anonymous EXECUTE is denied.
+- Migration `20261106115025_audit_share_link_mutations.sql` adds an AFTER INSERT/UPDATE SECURITY INVOKER trigger that records share creation, settings changes and revocation in `audit_logs` in the same transaction; no invited email address or raw token is copied into audit metadata.
 
 ### Remaining release gates
 
