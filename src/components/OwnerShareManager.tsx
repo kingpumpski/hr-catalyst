@@ -24,6 +24,14 @@ const OwnerShareManager = ({ document }: { document: WorkspaceDocument }) => {
   const [busy, setBusy] = useState(false);
   const [oneTimeUrl, setOneTimeUrl] = useState("");
   const [error, setError] = useState("");
+  const [now, setNow] = useState(0);
+
+  useEffect(() => {
+    const updateNow = () => setNow(Date.now());
+    updateNow();
+    const timer = window.setInterval(updateNow, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const refresh = useCallback(async () => {
     if (!session || !workspace) return;
@@ -89,7 +97,7 @@ const OwnerShareManager = ({ document }: { document: WorkspaceDocument }) => {
     }
   };
 
-  const activeShares = shares.filter((share) => !share.revoked_at && (!share.expires_at || Date.parse(share.expires_at) > Date.now()));
+  const activeShares = shares.filter((share) => !share.revoked_at && (!share.expires_at || (now === 0 || Date.parse(share.expires_at) > now)));
 
   return (
     <div className="mt-3 w-full rounded-lg border border-border bg-muted/20 p-4">
@@ -110,7 +118,7 @@ const OwnerShareManager = ({ document }: { document: WorkspaceDocument }) => {
       {oneTimeUrl && <div className="mt-3 rounded-md border border-primary/30 bg-background p-3"><p className="text-xs font-semibold text-foreground">Copy this link now — it will not be shown again.</p><div className="mt-2 flex flex-wrap gap-2"><Input readOnly value={oneTimeUrl} aria-label="New recruiter share link" /><Button size="sm" variant="outline" onClick={() => void copy()}><Copy className="mr-2 h-4 w-4" />Copy</Button></div></div>}
       {error && <p role="alert" className="mt-3 text-xs text-destructive">{error}</p>}
       {shares.length > 0 && <ul className="mt-3 space-y-2">{shares.map((share) => {
-        const expired = Boolean(share.expires_at && Date.parse(share.expires_at) <= Date.now());
+        const expired = Boolean(share.expires_at && (now !== 0 && Date.parse(share.expires_at) <= now));
         const revoked = Boolean(share.revoked_at);
         return <li key={share.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-background px-3 py-2">
           <div><p className="text-xs font-medium">{share.invited_email ?? "Anyone with the link"}</p><p className="text-[11px] text-muted-foreground">{share.allow_download ? "Download enabled" : "View only"} · {share.expires_at ? `Expires ${new Date(share.expires_at).toLocaleDateString()}` : "No expiry"}</p></div>
