@@ -99,7 +99,7 @@ const OwnerShareManager = ({ document }: { document: WorkspaceDocument }) => {
     setEditDownload(share.allow_download);
     if (!share.expires_at) setEditExpiry("never");
     else {
-      const remaining = Math.ceil((Date.parse(share.expires_at) - (now || 0)) / (24 * 60 * 60 * 1000));
+      const remaining = Math.ceil((Date.parse(share.expires_at) - Date.now()) / (24 * 60 * 60 * 1000));
       setEditExpiry(remaining <= 1 ? "1" : remaining <= 7 ? "7" : "30");
     }
   };
