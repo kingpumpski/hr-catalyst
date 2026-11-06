@@ -1,4 +1,4 @@
-import { requestSupabase, type AuthSession, type Workspace } from "@/lib/supabaseAuth";
+import { removePrivateStorageObject, requestSupabase, uploadPrivateStorageObject, type AuthSession, type Workspace } from "@/lib/supabaseAuth";
 
 export type WorkspaceDocument = {
   id: string;
@@ -54,11 +54,34 @@ export const saveWorkspaceDocument = async (
   return rows[0];
 };
 
+export const uploadWorkspaceDocumentArtifact = async (
+  session: AuthSession,
+  workspace: Workspace,
+  document: WorkspaceDocument,
+  file: Blob,
+) => {
+  const path = `${workspace.id}/${document.id}/${crypto.randomUUID()}.docx`;
+  await uploadPrivateStorageObject(
+    session,
+    "hr-catalyst-private",
+    path,
+    file,
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  );
+  return path;
+};
+
+export const removeWorkspaceDocumentArtifact = (
+  session: AuthSession,
+  path: string,
+) => removePrivateStorageObject(session, "hr-catalyst-private", path);
+
 export const publishWorkspaceDocument = async (
   session: AuthSession,
   workspace: Workspace,
   document: WorkspaceDocument,
   snapshot: unknown,
+  storagePath: string,
 ) => {
   const published = await requestSupabase<Array<{ version_id: string; version_number: number }>>(
     "/rest/v1/rpc/publish_workspace_document",
@@ -69,6 +92,7 @@ export const publishWorkspaceDocument = async (
         p_workspace_id: workspace.id,
         p_document_id: document.id,
         p_content_snapshot: snapshot,
+        p_storage_path: storagePath,
       },
     },
   );
