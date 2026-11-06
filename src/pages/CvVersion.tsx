@@ -136,7 +136,8 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
           <div className="flex flex-wrap gap-2 mb-4" role="tablist" aria-label="Career document type">
             {documentTabs.map((documentTab) => <Button key={documentTab} ref={(element) => { tabRefs.current[documentTab] = element; }} variant={tab === documentTab ? "default" : "outline"} id={`document-tab-${documentTab}`} role="tab" aria-selected={tab === documentTab} aria-controls={`document-panel-${documentTab}`} tabIndex={tab === documentTab ? 0 : -1} onClick={() => setTab(documentTab)} onKeyDown={handleTabKeyDown}>{documentLabels[documentTab]}</Button>)}
           </div>
-          {workspaceFeedback && <p role="status" className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm">{workspaceFeedback}</p>}\n          <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
+          {workspaceFeedback && <p role="status" className="mb-4 rounded-lg border border-border bg-muted/30 p-3 text-sm">{workspaceFeedback}</p>}
+          <div className="flex flex-wrap gap-2 mb-8">{version.keywords.map((k) => <Badge key={k} variant="secondary" className="text-xs">{k}</Badge>)}</div>
           {tab !== "letter" && <CvEditorPanel value={editorData} onChange={setEditorData} />}
           {tab === "letter" && <div className="mb-8 rounded-lg border border-border bg-muted/20 p-4 no-print">
             <h2 className="text-sm font-semibold text-foreground">Tailor this cover letter</h2>
