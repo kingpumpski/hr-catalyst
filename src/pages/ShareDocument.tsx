@@ -7,6 +7,7 @@ import EditableCvDocument from "@/components/EditableCvDocument";
 import type { CvEditorData } from "@/lib/cvEditor";
 import { getEmailHref } from "@/lib/contactLinks";
 import { resolveShare, ShareResolutionError, type ResolvedShare } from "@/lib/shareResolver";
+import { useAuth } from "@/components/AuthProvider";
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -59,6 +60,8 @@ type ShareViewState = { share: ResolvedShare | null; error: string; loading: boo
 
 const ShareDocumentContent = () => {
   const { documentType } = useParams<{ documentType?: string }>();
+  const location = useLocation();
+  const { session } = useAuth();
   const [token] = useState(() => {
     const storageKey = `hr-catalyst:share-token:${window.location.pathname}`;
     const fragmentToken = new URLSearchParams(window.location.hash.slice(1)).get("token");
@@ -88,7 +91,7 @@ const ShareDocumentContent = () => {
     if (!token) return;
     const controller = new AbortController();
 
-    resolveShare(token, { signal: controller.signal })
+    resolveShare(token, { signal: controller.signal, accessToken: session?.access_token })
       .then((result) => {
         if (documentType === "letter" && result.document.type !== "cover_letter") {
           throw new ShareResolutionError("This link does not contain a cover letter.", 404, "document_type_mismatch");
@@ -108,7 +111,7 @@ const ShareDocumentContent = () => {
       });
 
     return () => controller.abort();
-  }, [token, documentType]);
+  }, [token, documentType, session?.access_token]);
 
   const documentContent = share?.document.content;
   const cvData = isCvEditorData(documentContent) ? documentContent : null;
@@ -136,7 +139,7 @@ const ShareDocumentContent = () => {
 
         {loading && <section className="rounded-xl border border-border bg-card p-8 text-center" role="status"><ShieldCheck className="mx-auto h-8 w-8 text-primary" /><p className="mt-3 font-medium">Verifying secure sharing link…</p><p className="mt-1 text-sm text-muted-foreground">The document is not displayed until the server confirms access.</p></section>}
 
-        {!loading && error && <section className="rounded-xl border border-border bg-card p-8 text-center" role="alert"><ShieldAlert className="mx-auto h-9 w-9 text-destructive" /><h2 className="mt-3 text-xl font-semibold">Document unavailable</h2><p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{error}</p><Button variant="outline" asChild className="mt-6"><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />Back to main profile</Link></Button></section>}
+        {!loading && error && <section className="rounded-xl border border-border bg-card p-8 text-center" role="alert"><ShieldAlert className="mx-auto h-9 w-9 text-destructive" /><h2 className="mt-3 text-xl font-semibold">Document unavailable</h2><p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">{error}</p>{error.includes("Sign in with the invited email address") && <Button asChild className="mt-5"><Link to={`/auth?next=${encodeURIComponent(location.pathname)}`}>Sign in with invited email</Link></Button>}<Button variant="outline" asChild className="mt-6"><Link to="/"><ArrowLeft className="mr-2 h-4 w-4" />Back to main profile</Link></Button></section>}
 
         {share && <div className="mb-6 flex flex-wrap items-center gap-2 no-print">
           <Badge>{share.document.type === "cover_letter" ? "Cover letter" : share.document.type.toUpperCase()}</Badge>
