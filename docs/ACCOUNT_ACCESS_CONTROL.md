@@ -76,7 +76,7 @@ The isolated HR Catalyst project has been provisioned in the approved Supabase o
 - Region: `eu-west-1` (Ireland)
 - API origin: `https://qmxpswxwdrjotidclmcz.supabase.co`
 - Storage bucket: `hr-catalyst-private` (private; PDF and DOCX only; 10 MiB per object)
-- Edge Function: `resolve-share` (deployed, version 3; JWT verification is disabled at the gateway because the function validates the share token itself and requires a verified Supabase user for email-restricted shares).
+- Edge Function: `resolve-share` (deployed, version 5; JWT verification is disabled at the gateway because the function validates the share token itself and requires a verified Supabase user for email-restricted shares).
 
 The project was created at the quoted $0/month project cost. It is isolated from the Harmony Health Hub Supabase project and its Vercel integration.
 
@@ -153,7 +153,7 @@ The following items supersede the earlier "in progress" notes above:
 - Publishing also generates a DOCX artifact, uploads it to the private Storage bucket under `{workspace_id}/{document_id}/{random_file}.docx`, and stores that path on the immutable version. Failed publish attempts trigger best-effort cleanup of the uploaded artifact.
 - Owner recruiter-link UI supports creation, listing, editing expiry/email/download permissions and revocation. Raw 256-bit tokens are shown once; only SHA-256 hashes are stored and token hashes are not returned in owner API projections.
 - Download permission is enabled only when the published version has a stored DOCX artifact. The resolver issues a 60-second signed URL from the private bucket.
-- Invited-email access now requires both a matching authenticated email and a verified email address. Resolver version 4 is deployed with this check.
+- Invited-email access now requires both a matching authenticated email and a verified email address. Resolver version 5 is deployed with this check and canonical 64-character hexadecimal token validation.
 - Storage owner policies were corrected in migration `20261106114151_fix_private_storage_owner_policies.sql` to evaluate the first folder of `storage.objects.name` (workspace UUID). The previous policies incorrectly referenced `workspaces.name`.
 - Migration `20261106114318_publish_workspace_document_with_private_artifact.sql` replaces the earlier publish RPC signature with a four-argument SECURITY INVOKER RPC that persists the private artifact path. Only authenticated users can execute it; anonymous EXECUTE is denied.
 - Migration `20261106115025_audit_share_link_mutations.sql` adds an AFTER INSERT/UPDATE SECURITY INVOKER trigger that records share creation, settings changes and revocation in `audit_logs` in the same transaction; no invited email address or raw token is copied into audit metadata.
@@ -206,3 +206,8 @@ The browser resolver and `resolve-share` Edge Function now accept only the exact
 ### Least-privilege browser mutation grants — 6 November 2026
 
 Live grants inspection found that authenticated users still had DELETE privileges on documents, profiles, share links and workspaces, plus full browser privileges on `workspace_members`, although the current UI uses document archival, share soft-revocation and auth-trigger profile creation and does not implement workspace membership administration. Applied migration `20261106144632_revoke_unsupported_browser_delete_and_membership_access.sql` and committed it with the exact remote migration version. It removes browser DELETE rights from those owner tables, removes profile INSERT/DELETE rights, and denies all browser-role access to `workspace_members` until a separately reviewed member-management feature is implemented. Rechecked live grants: authenticated now has only the SELECT/INSERT/UPDATE rights needed by current document/share/workspace flows, and SELECT/UPDATE on self-scoped profiles; no anon table grants remain. Supabase security advisor continues to report zero lints.
+
+
+### Live resolver deployment — 6 November 2026
+
+Deployed the updated `supabase/functions/resolve-share/index.ts` and its `deno.json` import map to the dedicated HR Catalyst Supabase project. Live function inventory confirms `resolve-share` is ACTIVE at version 5 with gateway JWT verification disabled because the function handles public share tokens itself and validates Supabase user JWTs for invited-email links. The deployed function now rejects all tokens except the exact 64-character lowercase hexadecimal format before hashing or database lookup. The source is committed in the PR branch; the matching remote function is active.
