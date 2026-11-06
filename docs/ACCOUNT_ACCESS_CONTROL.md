@@ -138,3 +138,29 @@ The recruiter route now treats every share URL as a bearer-token-protected resou
 - Resolver client tests cover token entropy/hash generation, fragment-based URLs, no-store requests, invalid/revoked tokens and signed-download host validation.
 
 This is the recruiter-side resolver integration only. It does **not** complete owner authentication, document publishing, share-link creation/revocation UI, invited-recipient sign-in, or end-to-end authorization testing. Those remain release blockers until the owner workflow is connected to the authenticated Supabase workspace.
+
+
+## Implementation status — 6 November 2026
+
+The following items supersede the earlier "in progress" notes above:
+
+- Owner registration, sign-in, password recovery, session refresh, protected routes and a private workspace dashboard are implemented on PR #20.
+- CV/resume/cover-letter drafts are persisted in the owner's workspace. Owner workspace links reopen the matching editor and hydrate the saved content for that document.
+- Publishing now creates an immutable snapshot, updates the document status and records an audit event in one SECURITY INVOKER transaction.
+- Publishing also generates a DOCX artifact, uploads it to the private Storage bucket under `{workspace_id}/{document_id}/{random_file}.docx`, and stores that path on the immutable version. Failed publish attempts trigger best-effort cleanup of the uploaded artifact.
+- Owner recruiter-link UI supports creation, listing, editing expiry/email/download permissions and revocation. Raw 256-bit tokens are shown once; only SHA-256 hashes are stored and token hashes are not returned in owner API projections.
+- Download permission is enabled only when the published version has a stored DOCX artifact. The resolver issues a 60-second signed URL from the private bucket.
+- Invited-email access now requires both a matching authenticated email and a verified email address. Resolver version 4 is deployed with this check.
+- Storage owner policies were corrected in migration `20261106114151_fix_private_storage_owner_policies.sql` to evaluate the first folder of `storage.objects.name` (workspace UUID). The previous policies incorrectly referenced `workspaces.name`.
+- Migration `20261106114318_publish_workspace_document_with_private_artifact.sql` replaces the earlier publish RPC signature with a four-argument SECURITY INVOKER RPC that persists the private artifact path. Only authenticated users can execute it; anonymous EXECUTE is denied.
+
+### Remaining release gates
+
+- Replace the custom REST/session implementation with the official pinned `@supabase/supabase-js` SDK and regenerate the npm lockfile through npm; do not hand-edit the lockfile.
+- Pass both Quality and CV Editor CI workflows on the final PR head, including lint, typecheck, unit tests and production build.
+- Add browser/end-to-end tests for signup, email verification, recovery, sign-in/out, refresh and cross-tab synchronization; owner document save/publish; share create/edit/revoke; invited-email restriction; recruiter viewing and DOCX download; A4/Letter print.
+- Add automated cross-account RLS tests and authenticated/anonymous Storage authorization tests.
+- Verify Supabase Auth Site URL, redirect allow-list and production email delivery for GitHub Pages and Vercel.
+- Verify the canonical production hostname `hr-catalyst.vercel.app`; prior Vercel domain inventory showed `hr-catalyst-five.vercel.app`.
+- Confirm GitHub main-branch protection and required checks. The current GitHub connection has not yet confirmed the branch ruleset.
+- Do not mark the feature production-ready or merge PR #20 until these gates pass.
