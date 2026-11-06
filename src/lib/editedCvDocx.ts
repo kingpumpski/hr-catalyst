@@ -75,7 +75,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 };
 
 /** Word export mirrors the live editor preview: same sections, order, labels and single-column reading flow. */
-export const createEditedCvDocxBlob = async (data: CvEditorData, kind: "cv" | "resume"): Promise<Blob> => {
+export const createEditedCvDocxBlob = async (data: CvEditorData): Promise<Blob> => {
   const settings = loadDocumentSettings();
   const format = getCvFormatProfile(settings.targetMarket);
   const pageSize = PAGE_SIZES[format.paperSize] ?? PAGE_SIZES.A4;
