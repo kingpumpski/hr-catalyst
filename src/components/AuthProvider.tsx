@@ -35,7 +35,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isSupabaseConfigured());
   const [recoveryFlow, setRecoveryFlow] = useState(false);
   const authEpoch = useRef(0);
   const activationInFlight = useRef<{ accessToken: string; promise: Promise<void> } | null>(null);
@@ -66,10 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let active = true;
     const bootstrapEpoch = authEpoch.current;
-    if (!isSupabaseConfigured()) {
-      setLoading(false);
-      return;
-    }
+    if (!isSupabaseConfigured()) return;
     const { data: { subscription } } = getSupabaseClient().auth.onAuthStateChange((event, nextSession) => {
       if (event === "PASSWORD_RECOVERY") setRecoveryFlow(true);
       if (event === "SIGNED_OUT") {
