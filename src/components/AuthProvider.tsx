@@ -71,6 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (event === "PASSWORD_RECOVERY") setRecoveryFlow(true);
       if (event === "SIGNED_OUT") {
         ++authEpoch.current;
+        activationInFlight.current = null;
         setSession(null);
         setWorkspace(null);
         setRecoveryFlow(false);
@@ -139,6 +140,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = useCallback(async () => {
     ++authEpoch.current;
+    activationInFlight.current = null;
     try {
       await signOutFromSupabase(session);
     } finally {
