@@ -108,6 +108,18 @@ describe("HR Catalyst Supabase authentication", () => {
     expect((options.body as FormData).get("")).toBeInstanceOf(File);
   });
 
+  it("removes private artifacts through the SDK using the supplied owner token", async () => {
+    const { removePrivateStorageObject } = await import("@/lib/supabaseAuth");
+    const fetchMock = vi.fn().mockResolvedValue(response([]));
+    vi.stubGlobal("fetch", fetchMock);
+    await removePrivateStorageObject(session, "hr-catalyst-private", "workspace-123/document-123/version-9.docx");
+    const [url, options] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe("https://project.supabase.co/storage/v1/object/hr-catalyst-private");
+    expect(options.method).toBe("DELETE");
+    expect(new Headers(options.headers).get("Authorization")).toBe("Bearer access-token");
+    expect(JSON.parse(String(options.body))).toEqual({ prefixes: ["workspace-123/document-123/version-9.docx"] });
+  });
+
   it("rejects private storage paths that could escape the workspace folder", async () => {
     const { uploadPrivateStorageObject } = await import("@/lib/supabaseAuth");
     const fetchMock = vi.fn();
