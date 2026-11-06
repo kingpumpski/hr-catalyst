@@ -123,7 +123,7 @@ const RefereeVault = () => {
       <main className="min-h-screen bg-background px-6 py-12">
         <div className="container mx-auto max-w-2xl">
           <Button variant="ghost" asChild className="mb-6">
-            <Link to="/?mode=owner"><ArrowLeft className="mr-2 h-4 w-4" /> Back to owner controls</Link>
+            <Link to="/owner"><ArrowLeft className="mr-2 h-4 w-4" /> Back to owner controls</Link>
           </Button>
           <Card className="p-8 shadow-soft">
             <div className="flex items-center gap-3">
@@ -153,7 +153,7 @@ const RefereeVault = () => {
       <main className="min-h-screen bg-background px-6 py-12">
         <div className="container mx-auto max-w-md">
           <Button variant="ghost" asChild className="mb-6">
-            <Link to="/?mode=owner"><ArrowLeft className="mr-2 h-4 w-4" /> Back to owner controls</Link>
+            <Link to="/owner"><ArrowLeft className="mr-2 h-4 w-4" /> Back to owner controls</Link>
           </Button>
           <Card className="p-8 shadow-soft">
             <div className="text-center">
@@ -178,7 +178,7 @@ const RefereeVault = () => {
       <div className="container mx-auto max-w-5xl">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>
-            <Button variant="ghost" asChild className="mb-3 -ml-3"><Link to="/?mode=owner"><ArrowLeft className="mr-2 h-4 w-4" /> Owner controls</Link></Button>
+            <Button variant="ghost" asChild className="mb-3 -ml-3"><Link to="/owner"><ArrowLeft className="mr-2 h-4 w-4" /> Owner controls</Link></Button>
             <div className="flex items-center gap-2"><Badge>Private</Badge><Badge variant="secondary">Encrypted</Badge></div>
             <h1 className="mt-2 text-3xl font-bold text-foreground">Referee vault</h1>
             <p className="mt-1 text-muted-foreground">Keep trusted professional referee information ready for applications.</p>
