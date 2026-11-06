@@ -109,14 +109,14 @@ export const signInWithPassword = async (email: string, password: string) => {
   return session;
 };
 
-export const refreshAuthSession = async (session: AuthSession) => {
+export const refreshAuthSession = async (session: AuthSession, persist = true) => {
   const result = await requestSupabase<AuthResponse>("/auth/v1/token?grant_type=refresh_token", {
     method: "POST",
     body: { refresh_token: session.refresh_token },
   });
   const next = normalizeSession(result, session.user);
   if (!next) throw new Error("Your session could not be refreshed. Please sign in again.");
-  persistSession(next);
+  if (persist) persistSession(next);
   return next;
 };
 
