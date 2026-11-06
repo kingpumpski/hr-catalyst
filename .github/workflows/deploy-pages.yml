@@ -86,3 +86,46 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Verify published site and SPA fallback
+        shell: bash
+        env:
+          PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PAGES_URL}" ]]; then
+            echo "GitHub Pages deployment did not return a page URL."
+            exit 1
+          fi
+
+          # GitHub Pages can take a short time to serve a newly deployed artifact.
+          for attempt in {1..10}; do
+            if curl --fail --silent --show-error --location "${PAGES_URL}" -o /tmp/pages-home.html; then
+              break
+            fi
+            if [[ "${attempt}" -eq 10 ]]; then
+              echo "Published GitHub Pages home page did not become reachable."
+              exit 1
+            fi
+            sleep 6
+          done
+
+          if ! grep -q '/hr-catalyst/assets/' /tmp/pages-home.html; then
+            echo "Published home page is missing the expected project asset base path."
+            exit 1
+          fi
+
+          # GitHub Pages serves the copied index.html as a 404 fallback for SPA routes.
+          route_status="$(curl --silent --show-error --location --output /tmp/pages-spa-route.html --write-out '%{http_code}' "${PAGES_URL%/}/__pages_spa_smoke_test__")"
+          if [[ "${route_status}" != "404" ]]; then
+            echo "Expected the SPA fallback route to return GitHub Pages' 404 status; got ${route_status}."
+            exit 1
+          fi
+
+          if ! grep -q '/hr-catalyst/assets/' /tmp/pages-spa-route.html; then
+            echo "The SPA fallback response does not contain the built application entrypoint."
+            exit 1
+          fi
+
+          echo "GitHub Pages home page and SPA fallback are serving the production application."
