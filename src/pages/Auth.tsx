@@ -15,7 +15,7 @@ const safeNextPath = (value: string | null) =>
 const AuthPage = () => {
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const { user, loading, recoveryFlow, signIn, signUp, requestPasswordReset, updatePassword } = useAuth();
+  const { user, loading, signIn, signUp, requestPasswordReset, updatePassword } = useAuth();
   const requestedMode = params.get("mode");
   const [mode, setMode] = useState<Mode>(requestedMode === "recovery" ? "recovery" : "signin");
   const [email, setEmail] = useState("");
