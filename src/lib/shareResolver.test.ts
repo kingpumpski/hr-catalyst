@@ -61,6 +61,27 @@ describe("resolveShare", () => {
     await expect(resolveShare("b".repeat(48), { fetcher })).rejects.toBeInstanceOf(ShareResolutionError);
   });
 
+
+  it("explains when the invited email address has not been verified", async () => {
+    const fetcher = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ error: "email_not_verified" }), { status: 403 }),
+    );
+    await expect(resolveShare("d".repeat(48), { fetcher })).rejects.toMatchObject({
+      code: "email_not_verified",
+      message: "Verify the invited email address before opening this document.",
+    });
+  });
+
+  it("explains when a recruiter signs in with the wrong email address", async () => {
+    const fetcher = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ error: "share_recipient_mismatch" }), { status: 403 }),
+    );
+    await expect(resolveShare("e".repeat(48), { fetcher })).rejects.toMatchObject({
+      code: "share_recipient_mismatch",
+      message: "This link is restricted to a different email address.",
+    });
+  });
+
   it("rejects download URLs outside the configured Supabase origin", async () => {
     const fetcher = vi.fn().mockResolvedValue(new Response(JSON.stringify({
       ...validResponse,
