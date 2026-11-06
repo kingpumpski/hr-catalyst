@@ -1,6 +1,7 @@
+import "@/referee-vault-print.css";
 import { FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Copy, LockKeyhole, Plus, Save, ShieldCheck, Trash2, UnlockKeyhole } from "lucide-react";
+import { ArrowLeft, Copy, LockKeyhole, Plus, Printer, Save, ShieldCheck, Trash2, UnlockKeyhole } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -120,10 +121,10 @@ const RefereeVault = () => {
 
   if (!hasVault) {
     return (
-      <main className="min-h-screen bg-background px-6 py-12">
+      <main className="referee-vault-main min-h-screen bg-background px-6 py-12">
         <div className="container mx-auto max-w-2xl">
           <Button variant="ghost" asChild className="mb-6">
-            <Link to="/owner"><ArrowLeft className="mr-2 h-4 w-4" /> Back to owner controls</Link>
+            <Link to="/settings"><ArrowLeft className="mr-2 h-4 w-4" /> Back to owner controls</Link>
           </Button>
           <Card className="p-8 shadow-soft">
             <div className="flex items-center gap-3">
@@ -150,10 +151,10 @@ const RefereeVault = () => {
 
   if (!unlocked) {
     return (
-      <main className="min-h-screen bg-background px-6 py-12">
+      <main className="referee-vault-main min-h-screen bg-background px-6 py-12">
         <div className="container mx-auto max-w-md">
           <Button variant="ghost" asChild className="mb-6">
-            <Link to="/owner"><ArrowLeft className="mr-2 h-4 w-4" /> Back to owner controls</Link>
+            <Link to="/settings"><ArrowLeft className="mr-2 h-4 w-4" /> Back to owner controls</Link>
           </Button>
           <Card className="p-8 shadow-soft">
             <div className="text-center">
@@ -174,16 +175,16 @@ const RefereeVault = () => {
   }
 
   return (
-    <main className="min-h-screen bg-background px-6 py-12">
+    <main className="referee-vault-main min-h-screen bg-background px-6 py-12">
       <div className="container mx-auto max-w-5xl">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>
-            <Button variant="ghost" asChild className="mb-3 -ml-3"><Link to="/owner"><ArrowLeft className="mr-2 h-4 w-4" /> Owner controls</Link></Button>
+            <Button variant="ghost" asChild className="mb-3 -ml-3"><Link to="/settings"><ArrowLeft className="mr-2 h-4 w-4" /> Owner controls</Link></Button>
             <div className="flex items-center gap-2"><Badge>Private</Badge><Badge variant="secondary">Encrypted</Badge></div>
             <h1 className="mt-2 text-3xl font-bold text-foreground">Referee vault</h1>
             <p className="mt-1 text-muted-foreground">Keep trusted professional referee information ready for applications.</p>
           </div>
-          <div className="flex gap-2"><Button variant="outline" onClick={lock}><LockKeyhole className="mr-2 h-4 w-4" /> Lock</Button><Button onClick={save}><Save className="mr-2 h-4 w-4" /> Save encrypted</Button></div>
+          <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" /> Print references</Button><Button variant="outline" onClick={lock}><LockKeyhole className="mr-2 h-4 w-4" /> Lock</Button><Button onClick={save}><Save className="mr-2 h-4 w-4" /> Save encrypted</Button></div>
         </div>
 
         <Card className="mb-6 border-primary/20 bg-primary/5 p-4">
@@ -215,6 +216,17 @@ const RefereeVault = () => {
           <Button onClick={save}><Save className="mr-2 h-4 w-4" /> Save encrypted vault</Button>
           <Button variant="ghost" className="text-destructive" onClick={deleteVault}>Delete vault</Button>
         </div>
+        <section className="referee-vault-print" aria-label="Printable referee list">
+          <h1>Professional References</h1>
+          {referees.map((referee) => (
+            <article key={referee.id}>
+              <h2>{referee.name}</h2>
+              <p>{[referee.role, referee.organization].filter(Boolean).join(" — ")}</p>
+              {referee.relationship && <p>Relationship: {referee.relationship}</p>}
+              {[referee.email, referee.phone].filter(Boolean).map((value) => <p key={value}>{value}</p>)}
+            </article>
+          ))}
+        </section>
       </div>
     </main>
   );
