@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ import EditableCvDocument from "@/components/EditableCvDocument";
 import { loadCvEditorData, saveCvEditorData, type CvEditorData } from "@/lib/cvEditor";
 import { useAuth } from "@/components/AuthProvider";
 import { buildCoverLetter } from "@/lib/coverLetter";
-import { listWorkspaceDocuments, publishWorkspaceDocument, saveWorkspaceDocument } from "@/lib/workspaceDocuments";
+import { getWorkspaceDocumentContent, listWorkspaceDocuments, publishWorkspaceDocument, saveWorkspaceDocument } from "@/lib/workspaceDocuments";
 
 const CoverLetterDocument = lazy(() => import("@/components/CoverLetterDocument"));
 const AtsKeywordChecker = lazy(() => import("@/components/AtsKeywordChecker"));
@@ -34,7 +34,9 @@ const CvVersionPage = () => {
 };
 
 const CvVersionContent = ({ version }: { version: CvVersion }) => {
-  const [tab, setTab] = useState<DocumentTab>("cv");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab");
+  const [tab, setTab] = useState<DocumentTab>(initialTab === "resume" || initialTab === "letter" ? initialTab : "cv");
   const [recipientName, setRecipientName] = useState("Hiring Manager");
   const [employerName, setEmployerName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
@@ -46,9 +48,39 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [workspaceFeedback, setWorkspaceFeedback] = useState("");
   const { session, workspace, user } = useAuth();
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
+  const loadedWorkspaceTabs = useRef(new Set<string>());
   useEffect(() => {
     saveCvEditorData(version.slug, editorData, version);
   }, [version, version.slug, editorData]);
+  useEffect(() => {
+    if (!session || !workspace) return;
+    const documentSlug = `${version.slug}-${tab}`;
+    const loadKey = `${workspace.id}:${documentSlug}`;
+    if (loadedWorkspaceTabs.current.has(loadKey)) return;
+    let active = true;
+    getWorkspaceDocumentContent(session, workspace, documentSlug)
+      .then((saved) => {
+        if (!active || !saved) return;
+        const content = saved.content;
+        if (tab !== "letter" && content && typeof content === "object") {
+          setEditorData(content as CvEditorData);
+        } else if (tab === "letter" && content && typeof content === "object") {
+          const inputs = (content as { letterInputs?: Partial<typeof letterInputs> }).letterInputs;
+          if (inputs) {
+            setRecipientName(inputs.recipientName ?? "Hiring Manager");
+            setEmployerName(inputs.employerName ?? "");
+            setJobTitle(inputs.jobTitle ?? "");
+            setJobReference(inputs.jobReference ?? "");
+            setCompanyAddress(inputs.companyAddress ?? "");
+          }
+        }
+        loadedWorkspaceTabs.current.add(loadKey);
+      })
+      .catch((reason: unknown) => {
+        if (active) setWorkspaceFeedback(reason instanceof Error ? reason.message : "Saved workspace content could not be loaded.");
+      });
+    return () => { active = false; };
+  }, [session, workspace, version.slug, tab]);
 
   useSeo({
     title: getRecruiterDocumentTitle(tab === "resume" ? "resume" : "cv"),
@@ -68,7 +100,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
       const existing = (await listWorkspaceDocuments(session, workspace)).find((item) => item.slug === slug);
       if (existing && !window.confirm(`A private ${documentType.replace("_", " ")} already exists in your workspace. Replace its current draft with this browser version?`)) return;
       const coverLetter = tab === "letter" ? buildCoverLetter(version, letterInputs) : null;
-      const content = tab === "letter" ? { coverLetter } : editorData;
+      const content = tab === "letter" ? { coverLetter, letterInputs } : editorData;
       const saved = await saveWorkspaceDocument(session, workspace, { slug, title, documentType, content });
       if (publish) {
         const snapshot = tab === "letter" && coverLetter
