@@ -66,3 +66,10 @@ test("canonical, Open Graph, and structured-data URLs use the verified productio
   expect(JSON.parse(structuredData ?? "{}").url).toBe("https://hr-catalyst-five.vercel.app");
   assertNoBrowserFailures();
 });
+
+test("platform administration is protected and unauthenticated visitors are sent to sign-in", async ({ page }) => {
+  const response = await page.goto("/admin");
+  expect(response?.status()).toBe(200);
+  await expect(page).toHaveURL(/\/auth\?next=%2Fadmin/);
+  await expect(page.getByRole("heading", { name: "Sign in to HR Catalyst" })).toBeVisible();
+});
