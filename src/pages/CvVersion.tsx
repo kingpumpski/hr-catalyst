@@ -66,7 +66,7 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
     setVaultStatusLoading(true);
     hasRefereeVaultForSession(session)
       .then((exists) => { if (active) setVaultExists(exists); })
-      .catch(() => { if (active) setVaultError("Your encrypted referee vault could not be checked. Please try again."); })
+      .catch(() => { if (active) { setVaultExists(true); setVaultError("Your encrypted referee vault could not be checked. Please try again."); } })
       .finally(() => { if (active) setVaultStatusLoading(false); });
     return () => { active = false; };
   }, [session, tab]);
