@@ -147,28 +147,35 @@ Deno.serve(async (request: Request) => {
       );
       if (error) return json(502, { error: "administrator_grant_failed" });
     } else {
-      const { count, error: countError } = await admin
-        .from("platform_admins")
-        .select("user_id", { count: "exact", head: true });
-      if (countError) return json(502, { error: "administrator_count_failed" });
-      if ((count ?? 0) <= 1) return json(409, { error: "cannot_remove_last_administrator" });
-      const { error } = await admin.from("platform_admins").delete().eq("user_id", targetUserId);
-      if (error) return json(502, { error: "administrator_revoke_failed" });
+      // The database function serializes removals and writes the audit row
+      // atomically, so concurrent revocations cannot remove every admin.
+      const { data: revoked, error } = await admin.rpc("revoke_platform_admin_safely", {
+        p_actor_id: actor.id,
+        p_target_user_id: targetUserId,
+      });
+      if (error) {
+        console.error("Platform administrator revocation failed", error.message);
+        return json(502, { error: "administrator_revoke_failed" });
+      }
+      if (!revoked) return json(409, { error: "cannot_remove_last_administrator_or_user_is_not_admin" });
     }
     response = { updated: true };
   } else {
     return json(400, { error: "unsupported_action" });
   }
 
-  const { error: auditError } = await admin.from("platform_admin_audit").insert({
-    actor_id: actor.id,
-    action,
-    target_user_id: targetUserId,
-    metadata: auditMetadata,
-  });
-  if (auditError) {
-    console.error("Platform admin audit insert failed", auditError.message);
-    return json(500, { error: "audit_write_failed" });
+  // revoke-admin is audited atomically inside its database transaction.
+  if (action !== "revoke-admin") {
+    const { error: auditError } = await admin.from("platform_admin_audit").insert({
+      actor_id: actor.id,
+      action,
+      target_user_id: targetUserId,
+      metadata: auditMetadata,
+    });
+    if (auditError) {
+      console.error("Platform admin audit insert failed", auditError.message);
+      return json(500, { error: "audit_write_failed" });
+    }
   }
 
   return json(200, response);
