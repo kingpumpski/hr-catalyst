@@ -3,6 +3,7 @@ create table if not exists public.private_referee_vaults (
   salt text not null,
   iv text not null,
   ciphertext text not null,
+  iterations integer not null default 120000 check (iterations between 100000 and 1000000),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint private_referee_vaults_payload_size check (
