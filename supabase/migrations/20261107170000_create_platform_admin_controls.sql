@@ -11,7 +11,7 @@ create table if not exists public.platform_admins (
 
 create table if not exists public.platform_admin_audit (
   id bigint generated always as identity primary key,
-  actor_id uuid not null references auth.users(id) on delete restrict,
+  actor_id uuid references auth.users(id) on delete set null,
   action text not null check (length(trim(action)) between 1 and 80),
   target_user_id uuid references auth.users(id) on delete set null,
   metadata jsonb not null default '{}'::jsonb,
