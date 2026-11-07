@@ -46,7 +46,7 @@ const encryptVault = async (referees: Referee[], password: string): Promise<Stor
   if (password.length < 8) throw new Error("A vault password with at least 8 characters is required.");
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const key = await deriveKey(password, salt);
+  const key = await deriveKey(password, salt, ITERATIONS);
   const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoder.encode(JSON.stringify(referees)));
   return { salt: toBase64(salt), iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(ciphertext)), iterations: ITERATIONS };
 };
