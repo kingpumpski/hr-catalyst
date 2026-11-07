@@ -181,6 +181,12 @@ export type Database = {
         }
         Relationships: []
       }
+      private_referee_vaults: {
+        Row: { user_id: string; salt: string; iv: string; ciphertext: string; created_at: string; updated_at: string }
+        Insert: { user_id: string; salt: string; iv: string; ciphertext: string; created_at?: string; updated_at?: string }
+        Update: { user_id?: string; salt?: string; iv?: string; ciphertext?: string; created_at?: string; updated_at?: string }
+        Relationships: []
+      }
       share_links: {
         Row: {
           allow_download: boolean
