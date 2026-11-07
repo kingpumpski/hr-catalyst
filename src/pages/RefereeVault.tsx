@@ -1,5 +1,5 @@
 import "@/referee-vault-print.css";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Copy, LockKeyhole, Plus, Printer, Save, ShieldCheck, Trash2, UnlockKeyhole } from "lucide-react";
@@ -9,10 +9,10 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  clearRefereeVault,
-  hasRefereeVault,
-  saveRefereeVault,
-  unlockRefereeVault,
+  clearRefereeVaultForSession,
+  hasRefereeVaultForSession,
+  saveRefereeVaultForSession,
+  unlockRefereeVaultForSession,
   type Referee,
 } from "@/lib/refereeVault";
 
@@ -29,8 +29,19 @@ const emptyReferee = (): Referee => ({
 
 const RefereeVault = () => {
   const { session } = useAuth();
-  const userId = session?.user.id;
-  const [hasVault, setHasVault] = useState(() => hasRefereeVault(userId));
+  const [hasVault, setHasVault] = useState(false);
+  const [vaultStatusLoading, setVaultStatusLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    if (!session) { setHasVault(false); setVaultStatusLoading(false); return; }
+    setVaultStatusLoading(true);
+    hasRefereeVaultForSession(session)
+      .then((exists) => { if (active) setHasVault(exists); })
+      .catch(() => { if (active) setError("The encrypted vault status could not be checked. Check your connection and try again."); })
+      .finally(() => { if (active) setVaultStatusLoading(false); });
+    return () => { active = false; };
+  }, [session]);
   const [unlocked, setUnlocked] = useState(false);
   const [password, setPassword] = useState("");
   const [vaultPassword, setVaultPassword] = useState("");
@@ -57,14 +68,15 @@ const RefereeVault = () => {
     }
 
     try {
-      await saveRefereeVault([], password, userId);
+      if (!session) throw new Error("Sign in again to create your private vault.");
+      await saveRefereeVaultForSession([], password, session);
       setHasVault(true);
       setUnlocked(true);
       setReferees([]);
       setVaultPassword(password);
       setPassword("");
       setConfirmPassword("");
-      setMessage("Private referee vault created on this device.");
+      setMessage("Private referee vault created and encrypted across your account.");
     } catch {
       setError("The vault could not be created in this browser.");
     }
@@ -74,7 +86,8 @@ const RefereeVault = () => {
     event.preventDefault();
     resetFeedback();
     try {
-      const data = await unlockRefereeVault(password, userId);
+      if (!session) throw new Error("Sign in again to unlock your private vault.");
+      const data = await unlockRefereeVaultForSession(password, session);
       setReferees(data);
       setUnlocked(true);
       setVaultPassword(password);
@@ -93,8 +106,9 @@ const RefereeVault = () => {
     try {
       // Reuse the password that successfully unlocked this vault. Prompting for a
       // fresh password here could silently replace the encryption key on a typo.
-      await saveRefereeVault(referees, vaultPassword, userId);
-      setMessage("Referee information encrypted and saved locally.");
+      if (!session) throw new Error("Sign in again before saving your private vault.");
+      await saveRefereeVaultForSession(referees, vaultPassword, session);
+      setMessage("Referee information encrypted and securely synced to your account.");
     } catch {
       setError("The referee information could not be saved.");
     }
@@ -119,17 +133,25 @@ const RefereeVault = () => {
     resetFeedback();
   };
 
-  const deleteVault = () => {
-    if (!window.confirm("Delete the encrypted referee vault from this device? This cannot be undone.")) return;
-    clearRefereeVault(userId);
-    setHasVault(false);
-    setUnlocked(false);
-    setReferees([]);
-    setPassword("");
-    setVaultPassword("");
-    setConfirmPassword("");
-    setMessage("The local referee vault has been deleted.");
+  const deleteVault = async () => {
+    if (!session || !window.confirm("Delete the encrypted referee vault from your account and this device? This cannot be undone.")) return;
+    try {
+      await clearRefereeVaultForSession(session);
+      setHasVault(false);
+      setUnlocked(false);
+      setReferees([]);
+      setPassword("");
+      setVaultPassword("");
+      setConfirmPassword("");
+      setMessage("The encrypted referee vault has been deleted from your account and this device.");
+    } catch {
+      setError("The encrypted referee vault could not be deleted. Please try again.");
+    }
   };
+
+  if (vaultStatusLoading) {
+    return <main className="referee-vault-main min-h-screen bg-background px-6 py-12"><div className="container mx-auto max-w-md"><Card className="p-8 text-center">Checking your encrypted referee vault…</Card></div></main>;
+  }
 
   if (!hasVault) {
     return (
@@ -147,7 +169,7 @@ const RefereeVault = () => {
               </div>
             </div>
             <p className="mt-4 text-sm leading-6 text-muted-foreground">
-              Store referee contacts separately from the public portfolio. Information is encrypted in this browser and is never rendered on recruiter-facing pages.
+              Store referee contacts separately from the public portfolio. Information is encrypted on your device before it is synced to your private account. It is never rendered on recruiter-facing pages.
             </p>
             <form onSubmit={createVault} className="mt-6 space-y-4">
               <label className="block text-sm font-medium text-foreground">Vault password<Input className="mt-2" type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" /></label>
@@ -171,9 +193,9 @@ const RefereeVault = () => {
           <Card className="p-8 shadow-soft">
             <div className="text-center">
               <div className="mx-auto mb-4 w-fit rounded-xl bg-primary/10 p-3"><LockKeyhole className="h-7 w-7 text-primary" /></div>
-              <Badge variant="secondary">Encrypted local vault</Badge>
+              <Badge variant="secondary">Encrypted cloud-synced vault</Badge>
               <h1 className="mt-3 text-2xl font-bold text-foreground">Unlock referees</h1>
-              <p className="mt-2 text-sm text-muted-foreground">Your referee data stays encrypted until you unlock it.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Your referee data stays encrypted on the server until you unlock it with your vault password.</p>
             </div>
             <form onSubmit={unlock} className="mt-6 space-y-4">
               <Input type="password" placeholder="Vault password" value={password} onChange={(e) => setPassword(e.target.value)} autoFocus autoComplete="current-password" />
