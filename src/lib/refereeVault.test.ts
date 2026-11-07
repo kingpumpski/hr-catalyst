@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { hasRefereeVault, refereeVaultStorageKey, unlockRefereeVault, saveRefereeVaultForSession, unlockRefereeVaultForSession } from "@/lib/refereeVault";
+import { clearRefereeVaultForSession, hasRefereeVault, hasRefereeVaultForSession, refereeVaultStorageKey, unlockRefereeVault, saveRefereeVaultForSession, unlockRefereeVaultForSession } from "@/lib/refereeVault";
 import { requestSupabase } from "@/lib/supabaseAuth";
 
 vi.mock("@/lib/supabaseAuth", () => ({ requestSupabase: vi.fn() }));
@@ -88,6 +88,48 @@ describe("encrypted cloud referee vault", () => {
 
     expect(restored).toEqual([referee]);
     expect(vi.mocked(requestSupabase).mock.calls[1][0]).toContain("user_id=eq.owner-123");
+    vi.unstubAllGlobals();
+  });
+
+  it("fails closed when the authenticated cloud vault cannot be checked", async () => {
+    vi.clearAllMocks();
+    vi.mocked(requestSupabase).mockRejectedValueOnce(new Error("network unavailable"));
+    const getItem = vi.fn(() => "cached-encrypted-data");
+    vi.stubGlobal("localStorage", { getItem });
+
+    await expect(hasRefereeVaultForSession(session)).rejects.toThrow("network unavailable");
+    expect(getItem).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it("keeps cloud saves successful when the encrypted device cache is unavailable", async () => {
+    vi.clearAllMocks();
+    vi.mocked(requestSupabase).mockResolvedValueOnce(null as never);
+    vi.stubGlobal("localStorage", {
+      setItem: vi.fn(() => { throw new Error("storage quota exceeded"); }),
+    });
+
+    await expect(saveRefereeVaultForSession([referee], "a-long-test-passphrase", session)).resolves.toBeUndefined();
+    expect(requestSupabase).toHaveBeenCalledTimes(1);
+    vi.unstubAllGlobals();
+  });
+
+  it("deletes only the signed-in owner's cloud vault before clearing that owner's cache", async () => {
+    vi.clearAllMocks();
+    vi.mocked(requestSupabase).mockResolvedValueOnce(null as never);
+    const removeItem = vi.fn();
+    vi.stubGlobal("localStorage", { removeItem });
+
+    await clearRefereeVaultForSession(session);
+
+    const [path, options] = vi.mocked(requestSupabase).mock.calls[0] as unknown as [
+      string,
+      { method: string; accessToken: string },
+    ];
+    expect(path).toContain("/rest/v1/private_referee_vaults?user_id=eq.owner-123");
+    expect(options.method).toBe("DELETE");
+    expect(options.accessToken).toBe(session.access_token);
+    expect(removeItem).toHaveBeenCalledWith(refereeVaultStorageKey(session.user.id));
     vi.unstubAllGlobals();
   });
 });
