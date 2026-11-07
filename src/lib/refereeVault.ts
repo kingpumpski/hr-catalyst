@@ -65,7 +65,11 @@ const encryptVault = async (referees: Referee[], password: string): Promise<Stor
 };
 
 const decryptVault = async (stored: StoredVault, password: string): Promise<Referee[]> => {
-  const key = await deriveKey(password, fromBase64(stored.salt), stored.iterations ?? 120_000);
+  const iterations = stored.iterations ?? 120_000;
+  if (!Number.isSafeInteger(iterations) || iterations < 100_000 || iterations > 1_000_000) {
+    throw new Error("The encrypted vault has invalid key-derivation settings.");
+  }
+  const key = await deriveKey(password, fromBase64(stored.salt), iterations);
   const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromBase64(stored.iv) }, key, fromBase64(stored.ciphertext));
   const parsed: unknown = JSON.parse(decoder.decode(plaintext));
   if (!Array.isArray(parsed)) throw new Error("The encrypted vault has an invalid format.");
