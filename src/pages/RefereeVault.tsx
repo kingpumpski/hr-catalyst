@@ -31,6 +31,7 @@ const RefereeVault = () => {
   const { session } = useAuth();
   const [hasVault, setHasVault] = useState(false);
   const [vaultStatusLoading, setVaultStatusLoading] = useState(true);
+  const [vaultStatusError, setVaultStatusError] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -38,7 +39,7 @@ const RefereeVault = () => {
     setVaultStatusLoading(true);
     hasRefereeVaultForSession(session)
       .then((exists) => { if (active) setHasVault(exists); })
-      .catch(() => { if (active) setError("The encrypted vault status could not be checked. Check your connection and try again."); })
+      .catch(() => { if (active) { setVaultStatusError(true); setError("The encrypted vault status could not be checked. Check your connection and try again."); } })
       .finally(() => { if (active) setVaultStatusLoading(false); });
     return () => { active = false; };
   }, [session]);
@@ -78,7 +79,7 @@ const RefereeVault = () => {
       setConfirmPassword("");
       setMessage("Private referee vault created and encrypted across your account.");
     } catch {
-      setError("The vault could not be created in this browser.");
+      setError("The encrypted vault could not be created or synced. Check your connection and try again.");
     }
   };
 
@@ -151,6 +152,10 @@ const RefereeVault = () => {
 
   if (vaultStatusLoading) {
     return <main className="referee-vault-main min-h-screen bg-background px-6 py-12"><div className="container mx-auto max-w-md"><Card className="p-8 text-center">Checking your encrypted referee vault…</Card></div></main>;
+  }
+
+  if (vaultStatusError) {
+    return <main className="referee-vault-main min-h-screen bg-background px-6 py-12"><div className="container mx-auto max-w-md"><Card className="p-8"><h1 className="text-xl font-semibold">Vault status unavailable</h1><p role="alert" className="mt-3 text-sm text-destructive">We could not verify whether an encrypted vault already exists. Creation is disabled to prevent overwriting your saved vault.</p><Button className="mt-5" onClick={() => window.location.reload()}>Retry</Button></Card></div></main>;
   }
 
   if (!hasVault) {
