@@ -33,6 +33,14 @@ const RefereeVault = () => {
   const [vaultStatusLoading, setVaultStatusLoading] = useState(true);
   const [vaultStatusError, setVaultStatusError] = useState(false);
 
+  const [unlocked, setUnlocked] = useState(false);
+  const [password, setPassword] = useState("");
+  const [vaultPassword, setVaultPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [referees, setReferees] = useState<Referee[]>([]);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
   useEffect(() => {
     let active = true;
     if (!session) { setHasVault(false); setVaultStatusLoading(false); return; }
@@ -43,13 +51,6 @@ const RefereeVault = () => {
       .finally(() => { if (active) setVaultStatusLoading(false); });
     return () => { active = false; };
   }, [session]);
-  const [unlocked, setUnlocked] = useState(false);
-  const [password, setPassword] = useState("");
-  const [vaultPassword, setVaultPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [referees, setReferees] = useState<Referee[]>([]);
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
 
   const resetFeedback = () => {
     setMessage("");
