@@ -14,6 +14,7 @@ const RefereeVault = lazy(() => import("./pages/RefereeVault"));
 const Settings = lazy(() => import("./pages/Settings"));
 const AuthPage = lazy(() => import("./pages/Auth"));
 const OwnerWorkspace = lazy(() => import("./pages/OwnerWorkspace"));
+const PlatformAdmin = lazy(() => import("./pages/PlatformAdmin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const App = () => (
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/cv/:slug" element={<CvVersionPage />} />
               <Route path="/share/:documentType/:slug" element={<ShareDocumentPage />} />
               <Route path="/owner" element={<ProtectedRoute><OwnerWorkspace /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute><PlatformAdmin /></ProtectedRoute>} />
               <Route path="/owner/referees" element={<ProtectedRoute><RefereeVault /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
