@@ -56,14 +56,13 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [referencePassword, setReferencePassword] = useState("");
   const [vaultReferees, setVaultReferees] = useState<Referee[] | null>(null);
   const [vaultExists, setVaultExists] = useState(false);
-  const [vaultStatusLoading, setVaultStatusLoading] = useState(false);
+  const [vaultStatusLoading, setVaultStatusLoading] = useState(true);
   const [vaultError, setVaultError] = useState("");
   const [selectedRefereeIds, setSelectedRefereeIds] = useState<Record<"cv" | "resume", string[]>>({ cv: [], resume: [] });
   const [includeReferees, setIncludeReferees] = useState<Record<"cv" | "resume", boolean>>({ cv: false, resume: false });
   useEffect(() => {
     let active = true;
-    if (!session || tab === "letter") { setVaultExists(false); return; }
-    setVaultStatusLoading(true);
+    if (!session || tab === "letter") return;
     hasRefereeVaultForSession(session)
       .then((exists) => { if (active) setVaultExists(exists); })
       .catch(() => { if (active) { setVaultExists(true); setVaultError("Your encrypted referee vault could not be checked. Please try again."); } })
