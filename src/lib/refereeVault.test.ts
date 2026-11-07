@@ -76,6 +76,7 @@ describe("encrypted cloud referee vault", () => {
   });
 
   it("decrypts the owner-scoped cloud payload using the vault password", async () => {
+    vi.clearAllMocks();
     const payloads: Array<Record<string, unknown>> = [];
     vi.mocked(requestSupabase)
       .mockImplementationOnce(async (_path, options) => { payloads.push(options?.body as Record<string, unknown>); return null as never; })
