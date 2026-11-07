@@ -1,8 +1,8 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const localOrigin = "http://127.0.0.1:4173";
 
-const watchBrowserFailures = (page: Parameters<Parameters<typeof test>[1]>[0]["page"]) => {
+const watchBrowserFailures = (page: Page) => {
   const pageErrors: string[] = [];
   const failedResponses: string[] = [];
 
