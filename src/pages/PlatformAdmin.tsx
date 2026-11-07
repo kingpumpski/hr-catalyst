@@ -52,7 +52,16 @@ const PlatformAdmin = () => {
     }
   }, []);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    let active = true;
+    callAdmin<{ users: AdminUser[] }>("list-users")
+      .then(result => { if (active) setUsers(result.users); })
+      .catch(reason => {
+        if (active) setError(reason instanceof Error ? reason.message : "Administrator access could not be verified.");
+      })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const invite = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -117,7 +126,7 @@ const PlatformAdmin = () => {
           {loading && <div className="flex items-center gap-2 py-10 text-sm text-muted-foreground"><LoaderCircle className="h-4 w-4 animate-spin" />Loading accounts…</div>}
           {!loading && !error && users.length === 0 && <p className="py-10 text-center text-sm text-muted-foreground">No accounts found.</p>}
           {!loading && users.length > 0 && <div className="mt-5 divide-y divide-border">{users.map(account => {
-            const suspended = Boolean(account.banned_until && Date.parse(account.banned_until) > Date.now());
+            const suspended = Boolean(account.banned_until);
             const busy = busyId === account.id;
             return <div key={account.id} className="flex flex-col gap-3 py-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
