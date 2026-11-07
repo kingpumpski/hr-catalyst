@@ -25,6 +25,14 @@ describe("referee vault account isolation", () => {
     expect(refereeVaultStorageKey()).toBe("hr-catalyst-referee-vault-v1");
   });
 
+  it("rejects tampered key-derivation work factors before running expensive crypto", async () => {
+    const stored = { salt: "AA==", iv: "AA==", ciphertext: "AA==", iterations: 2_000_000_000 };
+    vi.stubGlobal("localStorage", { getItem: vi.fn(() => JSON.stringify(stored)) });
+
+    await expect(unlockRefereeVault("password", "owner-a")).rejects.toThrow("Unable to unlock the referee vault");
+    vi.unstubAllGlobals();
+  });
+
   it("does not fall back to the anonymous vault when an owner has no vault", async () => {
     const getItem = vi.fn(() => null);
     vi.stubGlobal("localStorage", { getItem });
