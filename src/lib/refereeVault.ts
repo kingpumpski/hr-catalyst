@@ -31,6 +31,19 @@ const fromBase64 = (value: string) => {
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 };
 
+const safeLocalGet = (key: string): string | null => {
+  try { return typeof localStorage === "undefined" ? null : localStorage.getItem(key); }
+  catch { return null; }
+};
+const safeLocalSet = (key: string, value: string) => {
+  try { if (typeof localStorage !== "undefined") localStorage.setItem(key, value); }
+  catch { /* Cloud storage remains authoritative when local cache is unavailable. */ }
+};
+const safeLocalRemove = (key: string) => {
+  try { if (typeof localStorage !== "undefined") localStorage.removeItem(key); }
+  catch { /* The cloud deletion remains authoritative. */ }
+};
+
 const deriveKey = async (password: string, salt: Uint8Array<ArrayBuffer>, iterations = 120_000) => {
   const material = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
@@ -64,24 +77,24 @@ const cloudVaultPath = (userId: string) =>
 
 export const hasRefereeVault = (userId?: string) => {
   if (typeof window === "undefined") return false;
-  return Boolean(localStorage.getItem(refereeVaultStorageKey(userId)));
+  return Boolean(safeLocalGet(refereeVaultStorageKey(userId)));
 };
 
 export const saveRefereeVault = async (referees: Referee[], password: string, userId?: string) => {
   const stored = await encryptVault(referees, password);
-  localStorage.setItem(refereeVaultStorageKey(userId), JSON.stringify(stored));
+  safeLocalSet(refereeVaultStorageKey(userId), JSON.stringify(stored));
 };
 
 export const unlockRefereeVault = async (password: string, userId?: string): Promise<Referee[]> => {
-  const raw = localStorage.getItem(refereeVaultStorageKey(userId));
+  const raw = safeLocalGet(refereeVaultStorageKey(userId));
   if (!raw) return [];
   try { return await decryptVault(JSON.parse(raw) as StoredVault, password); }
   catch { throw new Error("Unable to unlock the referee vault. Check the password."); }
 };
 
 export const clearRefereeVault = (userId?: string) => {
-  localStorage.removeItem(refereeVaultStorageKey(userId));
-  if (!userId) localStorage.removeItem(STORAGE_KEY);
+  safeLocalRemove(refereeVaultStorageKey(userId));
+  if (!userId) safeLocalRemove(STORAGE_KEY);
 };
 
 /** Encrypted end-to-end before upload; the server stores ciphertext only. */
@@ -103,13 +116,13 @@ export const saveRefereeVaultForSession = async (referees: Referee[], password: 
     },
   );
   // Keep an encrypted device cache for resilience; it is never used across user IDs.
-  localStorage.setItem(refereeVaultStorageKey(session.user.id), JSON.stringify(stored));
+  safeLocalSet(refereeVaultStorageKey(session.user.id), JSON.stringify(stored));
 };
 
 export const unlockRefereeVaultForSession = async (password: string, session: AuthSession): Promise<Referee[]> => {
   const rows = await requestSupabase<VaultRow[]>(cloudVaultPath(session.user.id), { accessToken: session.access_token });
   const stored = rows[0] ?? (() => {
-    const raw = localStorage.getItem(refereeVaultStorageKey(session.user.id));
+    const raw = safeLocalGet(refereeVaultStorageKey(session.user.id));
     return raw ? JSON.parse(raw) as StoredVault : null;
   })();
   if (!stored) return [];
