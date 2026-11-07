@@ -43,8 +43,7 @@ const RefereeVault = () => {
 
   useEffect(() => {
     let active = true;
-    if (!session) { setHasVault(false); setVaultStatusLoading(false); return; }
-    setVaultStatusLoading(true);
+    if (!session) return;
     hasRefereeVaultForSession(session)
       .then((exists) => { if (active) setHasVault(exists); })
       .catch(() => { if (active) { setVaultStatusError(true); setError("The encrypted vault status could not be checked. Check your connection and try again."); } })
