@@ -19,9 +19,10 @@ const fixture: CvEditorData = {
 
 describe("EditableCvDocument ATS layout", () => {
   it("renders the edited content in a single-column document with predictable section order", () => {
-    const html = renderToStaticMarkup(<EditableCvDocument data={fixture} />);
+    const html = renderToStaticMarkup(<EditableCvDocument data={fixture} kind="cv" />);
     expect(html).toContain("Claims assessment");
     expect(html).toContain("Claims Officer");
+    expect(html).toContain("CURRICULUM VITAE");
     expect(html).toContain("Accra | Jan 2022 – Present");
     expect(html).not.toContain("cv-skill-grid");
     expect(html).not.toContain("cv-entry-header");
@@ -35,9 +36,19 @@ describe("EditableCvDocument ATS layout", () => {
   });
 
   it("omits empty sections rather than rendering empty headings", () => {
-    const html = renderToStaticMarkup(<EditableCvDocument data={{ ...fixture, skills: [], experience: [], education: [], highlights: [], leadership: [], professionalDevelopment: [], professionalStrengths: [], languages: [] }} />);
+    const html = renderToStaticMarkup(<EditableCvDocument data={{ ...fixture, skills: [], experience: [], education: [], highlights: [], leadership: [], professionalDevelopment: [], professionalStrengths: [], languages: [] }} kind="cv" />);
     expect(html).not.toContain("<h2>SKILLS</h2>");
     expect(html).not.toContain("<h2>EXPERIENCE</h2>");
     expect(html).toContain("SUMMARY");
+  });
+
+  it("renders a concise resume without secondary CV sections or unsupported content", () => {
+    const html = renderToStaticMarkup(<EditableCvDocument data={fixture} kind="resume" />);
+    expect(html).toContain("RESUME");
+    expect(html).toContain("Claims Officer");
+    expect(html).toContain("KEY ACHIEVEMENTS");
+    expect(html).not.toContain("LEADERSHIP &amp; VOLUNTEERING");
+    expect(html).not.toContain("PROFESSIONAL DEVELOPMENT");
+    expect(html).not.toContain("Graduated with honours");
   });
 });

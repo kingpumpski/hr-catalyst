@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Menu, Settings2, X } from "lucide-react";
+import { LockKeyhole, Menu, Settings2, X } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/AuthProvider";
@@ -153,6 +153,7 @@ const Navbar = () => {
               Settings
             </Link>
           )}
+          {user && <Link to="/owner/referees" className={`inline-flex items-center gap-1.5 rounded-md px-3 py-2 text-sm transition-smooth hover:bg-foreground/10 ${linkClass}`}><LockKeyhole className="h-4 w-4" aria-hidden="true" />Referee vault</Link>}
         </div>
 
         <div className="hidden lg:flex xl:hidden items-center gap-2">
@@ -192,6 +193,7 @@ const Navbar = () => {
               Settings
             </Link>
           )}
+          {user && <Link to="/owner/referees" onClick={() => setOpen(false)} className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-semibold text-foreground hover:bg-muted transition-smooth"><LockKeyhole className="h-4 w-4" aria-hidden="true" />Referee vault</Link>}
           {sections.map((s) => (
             <button type="button" key={s.id} onClick={() => go(s.id)} className={`block w-full text-left px-2 py-2 rounded-md text-sm hover:bg-muted transition-smooth ${visibleActiveSection === s.id ? "bg-muted font-semibold text-foreground" : "text-foreground"}`} aria-current={visibleActiveSection === s.id ? "location" : undefined}>{s.label}</button>
           ))}

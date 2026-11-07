@@ -15,7 +15,6 @@ const toggleItems = [
   { key: "showReferences", label: "Show references" },
   { key: "includeLinkedIn", label: "Include LinkedIn" },
   { key: "includeWhatsApp", label: "Include WhatsApp" },
-  { key: "resumeMode", label: "Prefer resume-style layout" },
 ] as const;
 
 const DocumentSettingsPanel = ({ onChange }: DocumentSettingsPanelProps) => {

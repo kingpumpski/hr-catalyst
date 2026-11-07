@@ -46,7 +46,7 @@ const CvLibrary = () => {
 
         <div className="mb-8">
           {/* <h1 className="text-foreground mb-3">CVs & Cover Letters</h1> */}
-          <h1 className="text-foreground mb-3">Rrcruiters Documents</h1>
+          <h1 className="text-foreground mb-3">Recruiter Documents</h1>
           <p className="text-muted-foreground text-lg max-w-2xl">
             Browse recruiter-ready CV, resume and cover-letter versions tailored to different career tracks.
           </p>

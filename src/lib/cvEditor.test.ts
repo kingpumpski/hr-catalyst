@@ -1,10 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { cvVersions } from "@/data/cvVersions";
 import {
   createCvEditorData,
   cvEditorStorageKey,
   migrateLegacyCvEditorData,
   rebaseCvEditorData,
+  loadCvEditorData,
 } from "@/lib/cvEditor";
 
 describe("CV editor data", () => {
@@ -25,6 +26,19 @@ describe("CV editor data", () => {
   it("uses a versioned, career-track-specific browser storage key", () => {
     expect(cvEditorStorageKey("claims-manager")).not.toBe(cvEditorStorageKey("accounting-finance"));
     expect(cvEditorStorageKey("claims-manager")).toContain(":v2:");
+    expect(cvEditorStorageKey("claims-manager", "owner-a")).not.toBe(cvEditorStorageKey("claims-manager", "owner-b"));
+  });
+
+  it("does not import anonymous drafts into an authenticated user's editor", () => {
+    const getItem = vi.fn(() => null);
+    vi.stubGlobal("window", { localStorage: { getItem, setItem: vi.fn(), removeItem: vi.fn() } });
+
+    const loaded = loadCvEditorData("claims-manager", cvVersions[0], "owner-a");
+
+    expect(getItem).toHaveBeenCalledTimes(1);
+    expect(getItem).toHaveBeenCalledWith(cvEditorStorageKey("claims-manager", "owner-a"));
+    expect(loaded.summary).toBe(cvVersions[0].summary);
+    vi.unstubAllGlobals();
   });
 
   it("refreshes source dates while preserving fields edited by the user", () => {
