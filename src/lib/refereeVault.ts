@@ -18,7 +18,7 @@ const ITERATIONS = 600_000;
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
-type StoredVault = { salt: string; iv: string; ciphertext: string };
+type StoredVault = { salt: string; iv: string; ciphertext: string; iterations?: number };
 type VaultRow = StoredVault & { user_id: string };
 
 const toBase64 = (bytes: Uint8Array) => {
@@ -31,10 +31,10 @@ const fromBase64 = (value: string) => {
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
 };
 
-const deriveKey = async (password: string, salt: Uint8Array<ArrayBuffer>) => {
+const deriveKey = async (password: string, salt: Uint8Array<ArrayBuffer>, iterations = 120_000) => {
   const material = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: ITERATIONS, hash: "SHA-256" },
+    { name: "PBKDF2", salt, iterations, hash: "SHA-256" },
     material,
     { name: "AES-GCM", length: 256 },
     false,
@@ -48,11 +48,11 @@ const encryptVault = async (referees: Referee[], password: string): Promise<Stor
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const key = await deriveKey(password, salt);
   const ciphertext = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoder.encode(JSON.stringify(referees)));
-  return { salt: toBase64(salt), iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(ciphertext)) };
+  return { salt: toBase64(salt), iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(ciphertext)), iterations: ITERATIONS };
 };
 
 const decryptVault = async (stored: StoredVault, password: string): Promise<Referee[]> => {
-  const key = await deriveKey(password, fromBase64(stored.salt));
+  const key = await deriveKey(password, fromBase64(stored.salt), stored.iterations ?? 120_000);
   const plaintext = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromBase64(stored.iv) }, key, fromBase64(stored.ciphertext));
   const parsed: unknown = JSON.parse(decoder.decode(plaintext));
   if (!Array.isArray(parsed)) throw new Error("The encrypted vault has an invalid format.");
@@ -60,7 +60,7 @@ const decryptVault = async (stored: StoredVault, password: string): Promise<Refe
 };
 
 const cloudVaultPath = (userId: string) =>
-  `/rest/v1/private_referee_vaults?select=salt,iv,ciphertext&user_id=eq.${encodeURIComponent(userId)}&limit=1`;
+  `/rest/v1/private_referee_vaults?select=salt,iv,ciphertext,iterations&user_id=eq.${encodeURIComponent(userId)}&limit=1`;
 
 export const hasRefereeVault = (userId?: string) => {
   if (typeof window === "undefined") return false;
