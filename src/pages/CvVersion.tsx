@@ -15,7 +15,7 @@ import CvEditorPanel from "@/components/CvEditorPanel";
 import EditableCvDocument from "@/components/EditableCvDocument";
 import { loadCvEditorData, saveCvEditorData, type CvEditorData } from "@/lib/cvEditor";
 import { useAuth } from "@/components/AuthProvider";
-import { hasRefereeVault, unlockRefereeVault, type Referee } from "@/lib/refereeVault";
+import { hasRefereeVaultForSession, unlockRefereeVaultForSession, type Referee } from "@/lib/refereeVault";
 import { loadDocumentSettings } from "@/lib/documentSettings";
 import { formatRefereesForDocument } from "@/lib/refereeDocument";
 import { buildCoverLetter } from "@/lib/coverLetter";
@@ -55,9 +55,22 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
   const [workspaceFeedback, setWorkspaceFeedback] = useState("");
   const [referencePassword, setReferencePassword] = useState("");
   const [vaultReferees, setVaultReferees] = useState<Referee[] | null>(null);
+  const [vaultExists, setVaultExists] = useState(false);
+  const [vaultStatusLoading, setVaultStatusLoading] = useState(false);
   const [vaultError, setVaultError] = useState("");
   const [selectedRefereeIds, setSelectedRefereeIds] = useState<Record<"cv" | "resume", string[]>>({ cv: [], resume: [] });
   const [includeReferees, setIncludeReferees] = useState<Record<"cv" | "resume", boolean>>({ cv: false, resume: false });
+  useEffect(() => {
+    let active = true;
+    if (!session || tab === "letter") { setVaultExists(false); return; }
+    setVaultStatusLoading(true);
+    hasRefereeVaultForSession(session)
+      .then((exists) => { if (active) setVaultExists(exists); })
+      .catch(() => { if (active) setVaultError("Your encrypted referee vault could not be checked. Please try again."); })
+      .finally(() => { if (active) setVaultStatusLoading(false); });
+    return () => { active = false; };
+  }, [session, tab]);
+
   const tabRefs = useRef<Partial<Record<DocumentTab, HTMLButtonElement | null>>>({});
   const storageOwnerRef = useRef(userId);
   useEffect(() => {
@@ -156,7 +169,8 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
     event.preventDefault();
     setVaultError("");
     try {
-      const unlockedReferees = await unlockRefereeVault(referencePassword, userId);
+      if (!session) throw new Error("Sign in again to unlock your referee vault.");
+      const unlockedReferees = await unlockRefereeVaultForSession(referencePassword, session);
       setVaultReferees(unlockedReferees);
       setReferencePassword("");
     } catch (error) {
@@ -233,8 +247,8 @@ const CvVersionContent = ({ version }: { version: CvVersion }) => {
           {tab !== "letter" && <CvEditorPanel value={editorData} onChange={setEditorData} />}
           {userId && tab !== "letter" && <section className="mb-8 rounded-lg border border-border bg-muted/20 p-4" aria-labelledby="reference-inclusion-title">
             <h2 id="reference-inclusion-title" className="text-sm font-semibold text-foreground">Optional references for this {documentLabels[tab]}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Referee details remain encrypted in your private local vault. Selected details are included only in this private preview and its downloads, never in public recruiter shares or published snapshots.</p>
-            {!hasRefereeVault(userId) && vaultReferees === null ? (
+            <p className="mt-1 text-sm text-muted-foreground">Referee details remain end-to-end encrypted in your private account vault. Selected details are included only in this private preview and its downloads, never in public recruiter shares or published snapshots.</p>
+            {vaultStatusLoading ? <p className="mt-4 text-sm text-muted-foreground" role="status">Checking private referee vault…</p> : !vaultExists && vaultReferees === null ? (
               <Button variant="outline" asChild className="mt-4"><Link to="/owner/referees">Create or manage referee vault</Link></Button>
             ) : vaultReferees === null ? (
               <form onSubmit={handleUnlockVault} className="mt-4 flex flex-wrap items-end gap-3">
